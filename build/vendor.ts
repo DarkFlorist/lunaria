@@ -9,7 +9,7 @@ const dependencyPaths = [
 	{ packageName: 'es-module-shims', subfolderToVendor: 'dist', entrypointFile: 'es-module-shims.js' },
 	{ packageName: 'preact', subfolderToVendor: 'dist', entrypointFile: 'preact.module.js' },
 	{ packageName: 'preact/jsx-runtime', subfolderToVendor: 'dist', entrypointFile: 'jsxRuntime.module.js' },
-	{ packageName: 'preact/hooks', subfolderToVendor: 'dist', entrypointFile: 'hooks.module.js' },
+	{ packageName: 'preact/hooks', subfolderToVendor: 'dist', entrypointFile: 'hooks.module.js' }, { packageName: 'ethers', subfolderToVendor: 'dist', entrypointFile: 'ethers.esm.js', }, { packageName: '@preact/signals-core', subfolderToVendor: 'dist', entrypointFile: 'signals-core.module.js', }, { packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' }
 ]
 
 async function vendorDependencies() {

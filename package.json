@@ -3,7 +3,6 @@
 	"repository": {},
 	"license": "Unlicense",
 	"devDependencies": {
-		"@types/node": "^18.8.3",
 		"@zoltu/typescript-transformer-append-js-extension": "1.0.1",
 		"tailwindcss": "^3.1.8",
 		"ttypescript": "1.5.13",

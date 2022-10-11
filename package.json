@@ -15,9 +15,8 @@
 		"preact": "10.8.1"
 	},
 	"scripts": {
-		"build": "npm run build:ts && npm run build:css",
-		"build:ts": "ttsc",
-		"build:css": "tailwindcss -i ./build/vendor.css -o ./app/css/index.css --minify",
+		"build": "ttsc",
+		"style": "tailwindcss -i ./tailwindcss.entry.css -o ./app/css/index.css",
 		"serve": "npx http-server ./app",
 		"vendor": "npm install && cd build && npm install && npm run vendor"
 	}

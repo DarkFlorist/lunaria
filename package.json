@@ -16,7 +16,7 @@
 	},
 	"scripts": {
 		"build": "ttsc",
-		"style": "tailwindcss -i ./tailwindcss.entry.css -o ./app/css/index.css",
+		"style": "tailwindcss -i ./app/css/tailwind.entry.css -o ./app/css/index.css",
 		"serve": "npx http-server ./app",
 		"vendor": "npm install && cd build && npm install && npm run vendor"
 	}

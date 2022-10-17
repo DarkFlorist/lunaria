@@ -1,3 +1,9 @@
+type ExternalProvider = import('ethers').providers.ExternalProvider;
+
 interface Window {
-	ethereum: import('ethers').providers.ExternalProvider;
+	ethereum: ExternalProvider;
+}
+
+interface EthereumProvider extends ExternalProvider {
+	on: (...args: any[]) => void;
 }

@@ -1,66 +1,126 @@
 import { signal } from '@preact/signals';
 import { ethers } from 'ethers';
-import { MINIMUM_SEND } from '../constants';
 
-const { ethereum } = window;
-const accounts = signal<string[] | undefined>(undefined);
+type Web3Provider = ethers.providers.Web3Provider;
+type Network = ethers.providers.Network;
+type TransactionResponse = ethers.providers.TransactionResponse;
 
-async function connectWallet() {
-	if (!ethereum) {
-		throw new Error('No Web3 wallet detected.');
+export type HexString = `0x${string}`;
+
+export type UnknownWallet = {
+	state: 'unknown';
+	initialize: () => void;
+};
+
+export type UnavailableWallet = {
+	state: 'unavailable';
+};
+
+export type DisconnectedWallet = {
+	state: 'disconnected';
+	provider: ethers.providers.Web3Provider;
+	connect: () => Promise<void>;
+};
+
+export type ConnectedWallet = {
+	state: 'connected';
+	provider: Web3Provider;
+	account: HexString;
+	network: Network;
+	getBalance: () => Promise<string>;
+	sendEth: (to: HexString, amount: string) => Promise<TransactionResponse>;
+	getNetwork: () => Promise<void>;
+};
+
+export type Wallet =
+	| UnknownWallet
+	| UnavailableWallet
+	| DisconnectedWallet
+	| ConnectedWallet;
+
+const ethereum = window.ethereum;
+const provider = signal<Web3Provider | undefined>(undefined);
+const state = signal<Wallet['state']>('unknown');
+const account = signal<HexString | undefined>(undefined);
+const network = signal<Network | undefined>(undefined);
+
+export default function useWallet(): Wallet {
+	switch (state.value) {
+		case 'unknown':
+			return {
+				state: 'unknown',
+				initialize: () => {
+					if (window.ethereum !== undefined) {
+						provider.value = new ethers.providers.Web3Provider(window.ethereum);
+						state.value = 'disconnected';
+						return;
+					}
+
+					state.value = 'unavailable';
+				},
+			};
+
+		case 'unavailable':
+			return {
+				state: 'unavailable',
+			};
+
+		case 'disconnected':
+			return {
+				state: 'disconnected',
+				provider: provider.value as Web3Provider,
+				connect: async () => {
+					const accounts = (await provider.value?.send(
+						'eth_requestAccounts',
+						[]
+					)) as HexString[];
+					account.value = accounts[0];
+					state.value = 'connected';
+
+					(ethereum as Ethereum).on(
+						'accountsChanged',
+						(newAccount: HexString[]) => {
+							account.value = newAccount[0];
+						}
+					);
+				},
+			};
+
+		case 'connected':
+			return {
+				state: 'connected',
+				provider: provider.value as Web3Provider,
+				account: account.value as HexString,
+				network: network.value as ethers.providers.Network,
+
+				getBalance: async () => {
+					const bigNumBalance = await (
+						provider.value as Web3Provider
+					).getBalance(account.value as HexString);
+					const balance = ethers.utils.formatEther(bigNumBalance);
+					return balance;
+				},
+
+				sendEth: async (to, amount) => {
+					if (!ethers.utils.isAddress(to)) {
+						throw new Error('Not a valid address.');
+					}
+
+					const provider = new ethers.providers.Web3Provider(ethereum);
+					const signer = provider.getSigner();
+					const value = ethers.utils.parseEther(amount);
+					const transaction = await signer.sendTransaction({ to, value });
+					return transaction;
+				},
+
+				getNetwork: async () => {
+					network.value = await provider.value?.getNetwork();
+
+					// reload page on network change
+					(ethereum as Ethereum).on('chainChanged', async () => {
+						window.location.reload();
+					});
+				},
+			};
 	}
-
-	const ethAccounts = await ethereum.request?.({
-		method: 'eth_requestAccounts',
-		params: [],
-	});
-
-	(ethereum as EthereumProvider).on(
-		'accountsChanged',
-		(newAccounts: string[]) => {
-			accounts.value = newAccounts;
-		}
-	);
-
-	accounts.value = ethAccounts;
-	return ethAccounts;
 }
-
-async function getBalance(address: string) {
-	if (!ethereum) {
-		throw new Error('No Web3 wallet detected.');
-	}
-	const provider = new ethers.providers.Web3Provider(ethereum);
-	return await provider.getBalance(address);
-}
-
-async function sendTransaction(to: string, amount: number) {
-	if (!ethereum) {
-		throw new Error('No Web3 wallet detected.');
-	}
-
-	if (!ethers.utils.isAddress(to)) {
-		throw new Error('Not a valid address.');
-	}
-
-	if (amount < MINIMUM_SEND) {
-		throw new Error('Cannot send below minimum value.');
-	}
-
-	const provider = new ethers.providers.Web3Provider(ethereum);
-	const signer = provider.getSigner();
-	const value = ethers.utils.parseEther(`${amount}`);
-	const transaction = await signer.sendTransaction({ to, value });
-	return transaction;
-}
-
-export default function useWallet() {
-	return {
-		accounts: accounts.value,
-		connectWallet,
-		sendTransaction,
-		getBalance,
-	};
-}
-
-export type WalletModel = ReturnType<typeof useWallet>;

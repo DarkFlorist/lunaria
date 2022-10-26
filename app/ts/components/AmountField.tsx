@@ -2,7 +2,10 @@ import { useSignal } from '@preact/signals';
 import { JSX } from 'preact';
 import { weave } from '../library/utilities';
 
-type Props = JSX.HTMLAttributes<HTMLInputElement> & {
+type Props = Pick<
+	JSX.HTMLAttributes<HTMLInputElement>,
+	'name' | 'value' | 'disabled' | 'onChange' | 'class'
+> & {
 	label: string;
 	onChange: (e: Event) => void;
 };
@@ -14,7 +17,6 @@ export const AmountField = ({
 	disabled,
 	onChange,
 	class: className,
-	...props
 }: Props) => {
 	const isValid = useSignal(true);
 
@@ -43,7 +45,6 @@ export const AmountField = ({
 						'relative flex px-3 h-10 appearance-none bg-transparent w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200',
 						className
 					)}
-					{...props}
 				/>
 			</div>
 			{!isValid.value && <div class='text-xs text-red-400'>Invalid amount</div>}

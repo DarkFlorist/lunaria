@@ -1,6 +1,5 @@
 import { useSignal } from '@preact/signals';
 import { JSX } from 'preact';
-import { MINIMUM_SEND } from '../constants';
 import { weave } from '../library/utilities';
 
 type Props = JSX.HTMLAttributes<HTMLInputElement> & {
@@ -33,12 +32,12 @@ export const AmountField = ({
 				<input
 					id={name}
 					name={name}
-					type='number'
 					value={value}
+					type='text'
+					inputMode='numeric'
+					pattern='^\d*.?\d*$'
 					onChange={handleChange}
 					disabled={disabled}
-					step='any'
-					min={MINIMUM_SEND}
 					required
 					class={weave(
 						'relative flex px-3 h-10 appearance-none bg-transparent w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200',
@@ -47,9 +46,7 @@ export const AmountField = ({
 					{...props}
 				/>
 			</div>
-			{!isValid.value && (
-				<div class='text-xs text-red-400'>Can't send below minimum.</div>
-			)}
+			{!isValid.value && <div class='text-xs text-red-400'>Invalid amount</div>}
 		</div>
 	);
 };

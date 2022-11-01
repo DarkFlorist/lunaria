@@ -1,12 +1,15 @@
 import { ethers } from 'ethers';
-import { createRef, JSX } from 'preact';
+import { createRef } from 'preact';
 import { useEffect, useMemo } from 'preact/hooks';
-import { shortAddress, weave } from '../library/utilities';
+import { HexString } from '../library/useWallet';
 
-type AddressFieldProps = JSX.HTMLAttributes<HTMLInputElement> & {
+type AddressFieldProps = {
+	name: string;
+	disabled?: boolean;
+	class?: string;
 	label: string;
-	value: string;
-	onChange?: (e: Event) => void;
+	value: HexString | string;
+	onChange: (address: HexString | string) => void;
 };
 
 export const AddressField = ({
@@ -26,7 +29,8 @@ export const AddressField = ({
 	}, [value]);
 
 	function handleChange(e: Event) {
-		onChange?.(e);
+		const target = e.target as HTMLInputElement;
+		onChange(target.value);
 	}
 
 	// set a custom input field validity
@@ -37,19 +41,10 @@ export const AddressField = ({
 
 	return (
 		<div class='flex flex-col gap-1'>
-			<label for={name} class='text-xs opacity-50'>
+			<label for={name} class='text-sm text-white/50'>
 				{label}
 			</label>
-			<div class='relative items-center rounded border border-white/20 group'>
-				<div
-					class={weave(
-						'absolute flex px-3 h-10 w-full items-center group-focus-within:hidden',
-						!isValidAddress && 'text-red-200',
-						disabled && 'bg-white/5 text-white/30'
-					)}
-				>
-					{shortAddress(value)}
-				</div>
+			<div class='relative items-center group'>
 				<input
 					ref={inputRef}
 					name={name}
@@ -58,10 +53,7 @@ export const AddressField = ({
 					readOnly={!onChange}
 					value={value}
 					onChange={handleChange}
-					class={weave(
-						'relative flex px-3 h-10 appearance-none bg-transparent w-full text-transparent outline-none focus:text-white focus:invalid:text-red-200',
-						className
-					)}
+					class='appearance-none relative flex px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'
 					{...props}
 				/>
 			</div>

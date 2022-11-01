@@ -1,9 +1,9 @@
 import { signal } from '@preact/signals';
 import { ethers } from 'ethers';
 
-type Web3Provider = ethers.providers.Web3Provider;
-type Network = ethers.providers.Network;
-type TransactionResponse = ethers.providers.TransactionResponse;
+export type Web3Provider = ethers.providers.Web3Provider;
+export type Network = ethers.providers.Network;
+export type TransactionResponse = ethers.providers.TransactionResponse;
 
 export type HexString = `0x${string}`;
 
@@ -80,6 +80,9 @@ export default function useWallet(): Wallet {
 					(ethereum as Ethereum).on(
 						'accountsChanged',
 						(newAccount: HexString[]) => {
+							if (!newAccount) {
+								state.value === 'disconnected';
+							}
 							account.value = newAccount[0];
 						}
 					);

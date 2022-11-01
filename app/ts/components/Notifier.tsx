@@ -1,7 +1,6 @@
 import { signal } from '@preact/signals';
-import { NOTIFY_DURATION } from '../constants';
-
 import { createPortal } from 'preact/compat';
+import { NOTIFY_DURATION } from '../constants';
 
 export const Notifier = () => {
 	const { messages, remove } = useNotify();

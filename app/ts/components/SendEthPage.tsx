@@ -1,26 +1,24 @@
+import { useSignal } from '@preact/signals';
+import { useAsyncState } from '../library/preact-utilities';
+import { parseAddress, CustomJsonRpcError } from '../library/utilities';
+import useWallet, {
+	HexString,
+	SendEthStatus,
+	TransactionResponse,
+} from '../library/useWallet';
+import Icon from './Icon';
 import Layout from './Layout';
-import useWallet, { HexString } from '../library/useWallet';
 import { EthBalance } from './EthBalance';
 import { Branding } from './Branding';
 import { Connect } from './Connect';
 import { SocialLinks } from './SocialLinks';
 import { ActiveNetwork } from './ActiveNetwork';
-import { HelpCenter, Info, Support, UserTips } from './SidebarWidgets';
-import { useEffect } from 'preact/hooks';
-import { AmountField } from './AmountField';
-import { useRoute } from './Router';
-import { useSignal } from '@preact/signals';
-import { AddressField } from './AddressField';
+import { Support, UserTips } from './SidebarWidgets';
 import { Button } from './Button';
+import { SendEthReport } from './SendEthReport';
+import { SendEthForm } from './SendEthForm';
 
 export const SendEthPage = () => {
-	const wallet = useWallet();
-
-	useEffect(() => {
-		if (wallet.state !== 'unknown') return;
-		wallet.initialize();
-	}, []);
-
 	return (
 		<Layout>
 			<Header />
@@ -31,91 +29,166 @@ export const SendEthPage = () => {
 	);
 };
 
-const Main = () => {
-	const { navigate } = useRoute();
+export type SendTransactionInput = {
+	amount: string;
+	to: string;
+};
 
-	const formData = useSignal({
+const Main = () => {
+	const wallet = useWallet();
+
+	const formData = useSignal<SendTransactionInput>({
 		amount: '',
 		to: '',
 	});
 
-	function handleAmountChange(amount: HexString | string) {
-		formData.value = { ...formData.value, amount };
+	function handleChange(data: Partial<SendTransactionInput>) {
+		formData.value = { ...formData.value, ...data };
 	}
 
-	function handleAddressChange(to: HexString | string) {
-		formData.value = { ...formData.value, to };
-	}
-
-	function handleSubmit(e: Event) {
-		e.preventDefault();
-		console.log('submit');
-	}
-
-	return (
-		<Layout.Main>
-			<div class='h-14 flex items-center justify-between bg-white/10 px-8 mb-8'>
-				<div class='text-lg font-bold'>Send ETH</div>
-				<button type='button' onClick={() => navigate('/')}>
-					Cancel
-				</button>
-			</div>
-
-			<form onSubmit={handleSubmit}>
-				<div class='lg:grid lg:grid-cols-[3fr_2fr] lg:gap-6 pl-8 pr-8 md:pr-0 mb-8'>
-					<div class='flex flex-col gap-6 mb-8'>
-						<AmountField
-							name='amount'
-							label='Send Amount'
-							value={formData.value.amount}
-							onChange={handleAmountChange}
-						/>
-						<AddressField
-							name='address'
-							label='Recipient Address'
-							value={formData.value.to}
-							onChange={handleAddressChange}
-						/>
-					</div>
-					<ReviewAndSubmit />
-				</div>
-			</form>
-		</Layout.Main>
-	);
-};
-
-const ReviewAndSubmit = () => {
-	const wallet = useWallet();
-
-	switch (wallet.state) {
+	switch (wallet.status) {
 		case 'unknown':
-		case 'unavailable':
+			// not much to see here, skipping render
+			return null;
 		case 'disconnected':
 			return (
-				<div class='py-4 px-6 border border-white/10 text-center lg:text-left'>
-					<div class='text-lg font-bold mb-3'>Important!</div>
-					<div class='text-sm mb-3 text-white/50'>
-						Connect a wallet to continue sending this transaction.
-					</div>
-				</div>
+				<Layout.Main>
+					<TitleField />
+					<SendEthForm
+						data={formData.value}
+						onChange={handleChange}
+						infoTitle='Review and Submit'
+					>
+						<div class='text-sm mb-3 text-white/50'>
+							Connect a wallet to continue sending this transaction.
+						</div>
+						<Button onClick={wallet.connect!} class='w-full py-3' type='button'>
+							Connect Wallet
+						</Button>
+					</SendEthForm>
+				</Layout.Main>
 			);
+
 		case 'connected':
 			return (
-				<div class='py-4 px-6 border border-white/10 text-center lg:text-left'>
-					<div class='text-lg font-bold mb-3'>Important!</div>
+				<Layout.Main>
+					<TitleField />
+					<DynamicSendEthForm
+						data={formData.value}
+						onChange={handleChange}
+						sendFn={wallet.sendEth!}
+						getStatusFn={wallet.getSendEthStatus!}
+					/>
+				</Layout.Main>
+			);
+	}
+};
+
+type DynamicSendEthFormProps = {
+	data: SendTransactionInput;
+	onChange: (data: Partial<SendTransactionInput>) => void;
+	sendFn: (to: HexString, amount: string) => Promise<TransactionResponse>;
+	getStatusFn: (transaction: TransactionResponse) => Promise<SendEthStatus>;
+};
+
+const DynamicSendEthForm = ({
+	data,
+	onChange,
+	sendFn,
+	getStatusFn,
+}: DynamicSendEthFormProps) => {
+	const [transaction, mutateTransactionFn, resetTransaction] =
+		useAsyncState<TransactionResponse>();
+
+	function handleSend(e: Event) {
+		e.preventDefault();
+		const address = parseAddress(data.to);
+		const to = data.amount;
+		mutateTransactionFn(async () => sendFn(address, to));
+	}
+
+	switch (transaction.state) {
+		case 'inactive': {
+			return (
+				<SendEthForm
+					data={data}
+					onChange={onChange}
+					onSubmit={handleSend}
+					infoTitle='Review and Submit'
+				>
 					<div class='text-sm mb-3 text-white/50'>
 						Your currently installed web3 wallet will ask you to confirm this
 						transaction after clicking the confirm button.
 					</div>
 					<div class='text-sm text-white/50 mb-3'>
-						Make sure to review the details!
+						Review the details carefully!
 					</div>
 					<Button class='w-full py-3' type='submit'>
 						Confirm Send
 					</Button>
-				</div>
+				</SendEthForm>
 			);
+		}
+
+		case 'pending': {
+			return (
+				<SendEthForm
+					data={data}
+					onChange={onChange}
+					infoTitle='Confirm Send'
+					disabled={true}
+				>
+					<div class='text-white/50 my-3'>
+						Complete this process by confirming the transaction on your
+						installed web3 wallet.
+					</div>
+					<div class='text-white/50 my-3'>
+						A confirmation window should automatically popup. Check your wallet
+						extension otherwise.
+					</div>
+					<div class='my-3 flex items-center justify-center lg:justify-start gap-2'>
+						Awaiting Confirmation <Icon.Loading />
+					</div>
+				</SendEthForm>
+			);
+		}
+
+		case 'rejected': {
+			const error = new CustomJsonRpcError(transaction.error);
+			return (
+				<SendEthForm data={data} onChange={onChange} infoTitle='Send Failed!'>
+					<div class='text-white/50 my-3'>
+						The transaction returned with an error code{' '}
+						<span class='text-white'>{error.code}</span>
+					</div>
+					<div class='text-white/50 my-3'>Do you want to retry?</div>
+					<Button class='w-full py-3' onClick={resetTransaction}>
+						Yes, Retry
+					</Button>
+				</SendEthForm>
+			);
+		}
+
+		case 'resolved': {
+			const getStatus = async () => await getStatusFn(transaction.value);
+			return (
+				<SendEthReport
+					transaction={transaction.value}
+					data={data}
+					getStatusFn={getStatus}
+					onExit={resetTransaction}
+				/>
+			);
+		}
 	}
+};
+
+const TitleField = () => {
+	return (
+		<div class='h-14 flex items-center justify-between bg-white/10 px-8 mb-8'>
+			<div class='text-lg font-bold'>Send ETH</div>
+		</div>
+	);
 };
 
 const Header = () => {
@@ -130,38 +203,14 @@ const Header = () => {
 };
 
 const Sidebar = () => {
-	const wallet = useWallet();
-
-	switch (wallet.state) {
-		case 'unknown':
-		case 'disconnected':
-		case 'unavailable':
-			return (
-				<Layout.Aside>
-					<HelpCenter />
-					<Support />
-				</Layout.Aside>
-			);
-		case 'connected':
-			return (
-				<Layout.Aside>
-					<Info
-						title='Network'
-						body={
-							<ActiveNetwork
-								network={wallet.network}
-								fetchFn={wallet.getNetwork}
-							/>
-						}
-					/>
-					<Info
-						title='Balance'
-						body={<EthBalance fetchFn={wallet.getBalance} />}
-					/>
-					<UserTips />
-				</Layout.Aside>
-			);
-	}
+	return (
+		<Layout.Aside>
+			<ActiveNetwork />
+			<EthBalance />
+			<UserTips />
+			<Support />
+		</Layout.Aside>
+	);
 };
 
 const Footer = () => {

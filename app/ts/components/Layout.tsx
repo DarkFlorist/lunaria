@@ -29,7 +29,7 @@ const Aside: FunctionalComponent = ({ children }) => {
 
 const Footer: FunctionalComponent = ({ children }) => {
 	return (
-		<div class='col-span-2 flex items-center justify-center px-8'>
+		<div class='h-16 col-span-2 flex items-center justify-center px-8'>
 			{children}
 		</div>
 	);

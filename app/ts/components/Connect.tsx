@@ -2,30 +2,16 @@ import { FunctionalComponent } from 'preact';
 import { useAsyncState } from '../library/preact-utilities';
 import useWallet from '../library/useWallet';
 import { Button } from './Button';
-import Icon from './Icon/index';
+import Icon from './Icon';
 
 export const Connect = () => {
 	const wallet = useWallet();
 
-	switch (wallet.state) {
+	switch (wallet.status) {
 		case 'unknown':
 			return null;
-		case 'unavailable':
-			return (
-				<Wrapper>
-					<div class='flex items-center gap-4'>
-						<div class='text-right'>
-							<div>No web3 wallet detected!</div>
-							<div class='text-sm text-white/50 leading-tight'>
-								If you just installed one, try refreshing the page
-							</div>
-						</div>
-						<Button onClick={() => window.location.reload()}>Refresh</Button>
-					</div>
-				</Wrapper>
-			);
 		case 'disconnected':
-			return <WalletConnect connectFn={wallet.connect} />;
+			return <WalletConnect connectFn={wallet.connect!} />;
 		case 'connected':
 			return (
 				<Wrapper>
@@ -34,7 +20,7 @@ export const Connect = () => {
 							<div class='text-sm text-white/50'>Your Wallet Address</div>
 							<div class='overflow-hidden text-ellipsis'>{wallet.account}</div>
 						</div>
-						<Button>Disconnect</Button>
+						<Button onClick={() => wallet.disconnect!()}>Disconnect</Button>
 					</div>
 				</Wrapper>
 			);

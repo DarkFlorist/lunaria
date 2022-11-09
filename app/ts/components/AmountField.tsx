@@ -34,12 +34,13 @@ export const AmountField = ({
 			</label>
 			<div class='relative items-center'>
 				<input
+					autoComplete='off'
 					id={name}
 					name={name}
-					value={value}
 					type='text'
 					inputMode='numeric'
-					pattern='^\d*.?\d*$'
+					pattern='^\d*\.?\d*$'
+					value={value}
 					onChange={handleChange}
 					disabled={disabled}
 					required

@@ -1,12 +1,19 @@
+import { useEffect } from 'preact/hooks';
 import { Route, Router } from './Router';
-import { HomePage } from './LandingPage';
 import { SendEthPage } from './SendEthPage';
+import useWallet from '../library/useWallet';
 
 export const App = () => {
+	const wallet = useWallet();
+
+	useEffect(() => {
+		if (wallet.status !== 'unknown') return;
+		wallet.initialize!();
+	}, []);
+
 	return (
 		<Router>
-			<Route path='/' component={HomePage} />
-			<Route path='/send-eth' component={SendEthPage} />
+			<Route path='/' component={SendEthPage} />
 		</Router>
 	);
 };

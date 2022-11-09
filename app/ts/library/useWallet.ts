@@ -1,129 +1,162 @@
 import { signal } from '@preact/signals';
 import { ethers } from 'ethers';
+import { localCache, parseAddress } from './utilities';
 
-export type Web3Provider = ethers.providers.Web3Provider;
-export type Network = ethers.providers.Network;
 export type TransactionResponse = ethers.providers.TransactionResponse;
+export type Network = ethers.providers.Network;
 
 export type HexString = `0x${string}`;
 
-export type UnknownWallet = {
-	state: 'unknown';
-	initialize: () => void;
-};
-
-export type UnavailableWallet = {
-	state: 'unavailable';
-};
-
-export type DisconnectedWallet = {
-	state: 'disconnected';
-	provider: ethers.providers.Web3Provider;
-	connect: () => Promise<void>;
-};
-
-export type ConnectedWallet = {
-	state: 'connected';
+export type Web3Helpers = {
+	ethereum: ExternalProvider | Ethereum;
 	provider: Web3Provider;
-	account: HexString;
-	network: Network;
-	getBalance: () => Promise<string>;
-	sendEth: (to: HexString, amount: string) => Promise<TransactionResponse>;
-	getNetwork: () => Promise<void>;
 };
 
-export type Wallet =
-	| UnknownWallet
-	| UnavailableWallet
-	| DisconnectedWallet
-	| ConnectedWallet;
+export type UnknownWallet = {
+	status: 'unknown';
+	initialize?: () => void;
+};
 
-const ethereum = window.ethereum;
-const provider = signal<Web3Provider | undefined>(undefined);
-const state = signal<Wallet['state']>('unknown');
-const account = signal<HexString | undefined>(undefined);
-const network = signal<Network | undefined>(undefined);
+export type DisconnectedWallet = Web3Helpers & {
+	status: 'disconnected';
+	connect?: () => Promise<void>;
+};
 
-export default function useWallet(): Wallet {
-	switch (state.value) {
-		case 'unknown':
-			return {
-				state: 'unknown',
-				initialize: () => {
-					if (window.ethereum !== undefined) {
-						provider.value = new ethers.providers.Web3Provider(window.ethereum);
-						state.value = 'disconnected';
-						return;
-					}
+export type SendEthResponse = {
+	hash: string;
+	to: string;
+	fee: string;
+};
 
-					state.value = 'unavailable';
-				},
-			};
+export type SendEthStatus = {
+	hash: string;
+	to: string;
+	fee: string;
+};
 
-		case 'unavailable':
-			return {
-				state: 'unavailable',
-			};
+export type ConnectedWallet = Web3Helpers & {
+	status: 'connected';
+	account: HexString;
+	disconnect?: () => void;
+	getBalance?: () => Promise<string>;
+	getNetwork?: () => Promise<Network>;
+	sendEth?: (to: HexString, amount: string) => Promise<TransactionResponse>;
+	getSendEthStatus?: (
+		transaction: TransactionResponse
+	) => Promise<SendEthStatus>;
+};
 
-		case 'disconnected':
-			return {
-				state: 'disconnected',
-				provider: provider.value as Web3Provider,
+export type UseWallet = UnknownWallet | DisconnectedWallet | ConnectedWallet;
+
+const wallet = signal<UseWallet>({ status: 'unknown' });
+
+export default function useWallet(): UseWallet {
+	switch (wallet.value.status) {
+		case 'disconnected': {
+			const { status, provider, ethereum } = wallet.value;
+			const autoConnect = localCache('reconnect-on-refresh');
+
+			const nextState: DisconnectedWallet = {
+				status,
+				provider,
+				ethereum,
 				connect: async () => {
-					const accounts = (await provider.value?.send(
-						'eth_requestAccounts',
-						[]
-					)) as HexString[];
-					account.value = accounts[0];
-					state.value = 'connected';
+					const accounts = await provider.send('eth_requestAccounts', []);
 
-					(ethereum as Ethereum).on(
-						'accountsChanged',
-						(newAccount: HexString[]) => {
-							if (!newAccount) {
-								state.value === 'disconnected';
-							}
-							account.value = newAccount[0];
-						}
-					);
+					autoConnect.value = true;
+
+					wallet.value = {
+						status: 'connected',
+						provider,
+						ethereum,
+						account: parseAddress(accounts[0]),
+					};
 				},
 			};
 
-		case 'connected':
-			return {
-				state: 'connected',
-				provider: provider.value as Web3Provider,
-				account: account.value as HexString,
-				network: network.value as ethers.providers.Network,
+			if (autoConnect.value) nextState.connect?.();
+
+			return nextState;
+		}
+
+		case 'connected': {
+			const { status, account, provider, ethereum } = wallet.value;
+			const autoConnect = localCache('reconnect-on-refresh');
+
+			const nextState: ConnectedWallet = {
+				status,
+				account,
+				ethereum,
+				provider,
+
+				disconnect: () => {
+					autoConnect.remove();
+					wallet.value = {
+						ethereum,
+						provider,
+						status: 'disconnected',
+					};
+				},
 
 				getBalance: async () => {
-					const bigNumBalance = await (
-						provider.value as Web3Provider
-					).getBalance(account.value as HexString);
+					const bigNumBalance = await provider.getBalance(account);
 					const balance = ethers.utils.formatEther(bigNumBalance);
 					return balance;
 				},
 
-				sendEth: async (to, amount) => {
-					if (!ethers.utils.isAddress(to)) {
-						throw new Error('Not a valid address.');
-					}
-
-					const provider = new ethers.providers.Web3Provider(ethereum);
-					const signer = provider.getSigner();
-					const value = ethers.utils.parseEther(amount);
-					const transaction = await signer.sendTransaction({ to, value });
-					return transaction;
-				},
-
 				getNetwork: async () => {
-					network.value = await provider.value?.getNetwork();
+					const network = await provider.getNetwork();
 
-					// reload page on network change
-					(ethereum as Ethereum).on('chainChanged', async () => {
+					(ethereum as Ethereum).on('chainChanged', () => {
 						window.location.reload();
 					});
+					return network;
+				},
+
+				sendEth: async (to, amount) => {
+					const signer = provider.getSigner();
+					const value = ethers.utils.parseEther(amount);
+					console.time('send_tranaction');
+					return await signer.sendTransaction({ to, value });
+				},
+
+				getSendEthStatus: async (transaction) => {
+					const { to, transactionHash, gasUsed, effectiveGasPrice, status } =
+						await transaction.wait();
+
+					const bigNumFee = effectiveGasPrice.mul(gasUsed);
+					const fee = ethers.utils.formatEther(bigNumFee);
+
+					if (status === 0) {
+						throw new Error('The transaction returned with an error');
+					}
+
+					return {
+						fee,
+						hash: transactionHash,
+						to: to,
+					};
 				},
 			};
+
+			return nextState;
+		}
+
+		case 'unknown':
+			return {
+				...wallet.value,
+				initialize: async () => {
+					console.count('initialized');
+					wallet.value = {
+						status: 'disconnected',
+						ethereum: window.ethereum,
+						provider: new ethers.providers.Web3Provider(window.ethereum),
+					};
+				},
+			};
+
+		default:
+			const unReachable: never = wallet.value;
+			throw new Error(`Unexpected type found ${unReachable}`);
 	}
 }

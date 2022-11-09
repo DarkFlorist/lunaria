@@ -116,7 +116,6 @@ export default function useWallet(): UseWallet {
 				sendEth: async (to, amount) => {
 					const signer = provider.getSigner();
 					const value = ethers.utils.parseEther(amount);
-					console.time('send_tranaction');
 					return await signer.sendTransaction({ to, value });
 				},
 
@@ -146,7 +145,6 @@ export default function useWallet(): UseWallet {
 			return {
 				...wallet.value,
 				initialize: async () => {
-					console.count('initialized');
 					wallet.value = {
 						status: 'disconnected',
 						ethereum: window.ethereum,

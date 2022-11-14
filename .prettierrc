@@ -1,5 +1,9 @@
 {
 	"singleQuote": true,
 	"jsxSingleQuote": true,
-	"useTabs": true
+	"useTabs": true,
+	"semi": false,
+	"proseWrap": "never",
+	"singleAttributePerLine": false,
+	"printWidth": 120
 }

@@ -1,17 +1,17 @@
-import { useWallet } from './WalletProvider';
+import { useWallet } from './WalletProvider'
 
 export const Balance = () => {
-	const { account, status, balance, checkBalance } = useWallet();
+	const { account, status, balance, checkBalance } = useWallet()
 
-	if (!account.value) return null;
+	if (!account.value) return null
 
-	if (status.value === 'BUSY') return <div>Balance: ...</div>;
+	if (status.value === 'BUSY') return <div>Balance: ...</div>
 
-	if (!balance.value) return <div>Balance:</div>;
+	if (!balance.value) return <div>Balance:</div>
 
 	return (
 		<div>
 			Balance: {balance} <button onClick={() => checkBalance()}>🔄</button>
 		</div>
-	);
-};
+	)
+}

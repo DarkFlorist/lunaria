@@ -1,4 +1,7 @@
-export function createOnChangeProxy<T extends object>(onChange: () => void, target: T): T {
+export function createOnChangeProxy<T extends object>(
+	onChange: () => void,
+	target: T
+): T {
 	for (const key in target) {
 		const item = target[key]
 		if (!isMutableObject(item)) continue
@@ -7,13 +10,18 @@ export function createOnChangeProxy<T extends object>(onChange: () => void, targ
 	return new Proxy<T>(target, createProxyHandler(onChange))
 }
 
-function createProxyHandler<T extends object>(onChange: () => void): ProxyHandler<T> {
+function createProxyHandler<T extends object>(
+	onChange: () => void
+): ProxyHandler<T> {
 	return {
 		set: (object, property, newValue): boolean => {
-			(object as any)[property] = (typeof newValue === 'object' ? createOnChangeProxy(onChange, newValue) : newValue)
+			;(object as any)[property] =
+				typeof newValue === 'object'
+					? createOnChangeProxy(onChange, newValue)
+					: newValue
 			onChange()
 			return true
-		}
+		},
 	}
 }
 

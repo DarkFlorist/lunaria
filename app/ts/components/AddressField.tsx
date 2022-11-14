@@ -30,7 +30,7 @@ export const AddressField = ({ label, name, disabled, value, onChange }: Address
 				pattern='^0x[0-9A-Fa-f]{40}$'
 				value={value}
 				onChange={handleChange}
-				disabled={disabled}
+				disabled={disabled !== undefined ? disabled : false}
 				required
 				class='appearance-none relative flex px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'
 			/>

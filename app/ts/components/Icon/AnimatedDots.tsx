@@ -1,4 +1,4 @@
-export default () => (
+export const AnimatedDots = () => (
 	<>
 		<svg
 			xmlns='http://www.w3.org/2000/svg'

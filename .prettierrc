@@ -3,5 +3,7 @@
 	"jsxSingleQuote": true,
 	"useTabs": true,
 	"semi": false,
-	"proseWrap": "never"
+	"proseWrap": "never",
+	"singleAttributePerLine": false,
+	"printWidth": 120
 }

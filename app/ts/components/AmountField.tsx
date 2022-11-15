@@ -2,44 +2,38 @@ import { useSignal } from '@preact/signals'
 import { weave } from '../library/utilities'
 
 type Props = {
+	label: string
 	name: string
 	value: string
-	disabled?: boolean
-	class?: string
-	label: string
 	onChange: (value: HexString | string) => void
+	class?: string
+	disabled?: boolean
+	required?: boolean
 }
 
-export const AmountField = ({ name, label, value, disabled, onChange, class: className }: Props) => {
+export const AmountField = ({ label, name, value, onChange, class: className, disabled = false, required = false }: Props) => {
 	const isValid = useSignal(true)
 
-	const handleChange = (e: Event) => {
+	function handleChange(e: Event) {
 		const target = e.target as HTMLInputElement
 		isValid.value = target.checkValidity()
 		onChange(target.value)
 	}
 
 	return (
-		<div class={weave('flex flex-col gap-1', className)}>
-			<label for={name} class='text-sm text-white/50'>
+		<div class={weave(baseClass.root, className)}>
+			<label for={name} class={baseClass.label}>
 				{label}
 			</label>
-			<div class='relative items-center'>
-				<input
-					autoComplete='off'
-					id={name}
-					name={name}
-					type='text'
-					inputMode='numeric'
-					pattern='^\d*\.?\d*$'
-					value={value}
-					onChange={handleChange}
-					disabled={disabled}
-					required
-					class='appearance-none relative flex px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'
-				/>
-			</div>
-			{!isValid.value && <div class='text-xs text-red-400'>Invalid amount</div>}
+			<input autoComplete='off' id={name} name={name} type='text' inputMode='numeric' pattern='^\d*\.?\d*$' value={value} onChange={handleChange} disabled={disabled} required={required} class={baseClass.input} />
+			{!isValid.value && <div class={baseClass.error}>Invalid amount</div>}
 		</div>
 	)
+}
+
+const baseClass = {
+	root: 'flex flex-col gap-1',
+	label: 'text-sm text-white/50',
+	input: 'appearance-none relative flex px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white',
+	error: 'text-xs text-red-400',
 }

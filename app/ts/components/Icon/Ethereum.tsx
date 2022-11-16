@@ -1,4 +1,4 @@
-export const IconEthereum = () => (
+export const Ethereum = () => (
 	<svg width='1em' height='1em' viewBox='0 0 98 98' fill='none' xmlns='http://www.w3.org/2000/svg'>
 		<g clip-path='url(#clip0_14_129)'>
 			<path d='M48.9912 0L48.3337 2.23329V67.0324L48.9912 67.6883L79.0696 49.9087L48.9912 0Z' fill='#633D71' />

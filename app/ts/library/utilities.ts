@@ -20,3 +20,40 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 			.join(' ')
 	)
 }
+
+/**
+ * Validate string is a valid address format
+ */
+
+export function assertIsAddress(address: string): asserts address is `0x${string}` {
+	if (!/^0x[0-9A-Fa-f]{40}$/.test(address)) throw new Error(`Invalid address ${address}`)
+}
+
+/**
+ * Localstorage cache
+ */
+
+export type LocalCache<T> = { value: T | null; remove: () => void }
+export function localCache<T>(id: string, defaultValue?: T): LocalCache<T> {
+	return {
+		get value() {
+			let storageItem = localStorage.getItem(id)
+
+			if (storageItem) {
+				return JSON.parse(storageItem)
+			}
+
+			if (defaultValue) {
+				const value = JSON.stringify(defaultValue)
+				localStorage.setItem(id, JSON.parse(value))
+				return value
+			}
+		},
+		set value(v) {
+			localStorage.setItem(id, JSON.stringify(v))
+		},
+		remove() {
+			localStorage.removeItem(id)
+		},
+	}
+}

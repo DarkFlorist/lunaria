@@ -1,6 +1,6 @@
 import * as Layout from './Layout'
-import { Button } from './Button'
 import * as Icon from './Icon/index'
+import { Connect } from './Connect'
 
 export const SendEthPage = () => {
 	return (
@@ -51,18 +51,6 @@ const Footer = () => {
 		</Layout.Footer>
 	)
 }
-
-const Connect = () => (
-	<div class='flex gap-4 items-center justify-center py-4 px-6 border border-dashed border-white/30 rounded md:border-0 min-w-0 max-w-xl md:max-w-none lg:max-w-none'>
-		<div class='flex gap-4 min-w-0'>
-			<div class='text-right min-w-0'>
-				<div class='text-sm text-white/50'>Your Wallet Address</div>
-				<div class='overflow-hidden text-ellipsis'>0x35d8d64e5b92c44efc89642667029a93dc888b7e</div>
-			</div>
-			<Button onClick={() => {}}>Disconnect</Button>
-		</div>
-	</div>
-)
 
 const Branding = () => (
 	<div class='flex flex-col justify-center items-start grow my-6'>

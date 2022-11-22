@@ -34,6 +34,7 @@ export type ConnectedWallet = {
 	provider: Web3Provider
 	ethereum: WindowEthereumProvider
 	disconnect: () => Promise<void>
+	getBalance: () => Promise<string>
 }
 
 export type UseWallet = NoWallet | DisconnectedWallet | ConnectedWallet
@@ -63,6 +64,7 @@ export default function useWallet(): UseWallet {
 					ethereum,
 					provider,
 					disconnect: () => new Promise(() => {}),
+					getBalance: () => new Promise(() => {}),
 				}
 			}
 
@@ -85,6 +87,12 @@ export default function useWallet(): UseWallet {
 				reconnect.remove()
 			}
 
+			async function getBalance() {
+				const bigNumBalance = await provider.getBalance(account)
+				const balance = ethers.utils.formatEther(bigNumBalance)
+				return balance
+			}
+
 			const switchAccount = (account: HexString) => {
 				wallet.value = Object.assign({}, wallet.value, { account })
 			}
@@ -98,7 +106,7 @@ export default function useWallet(): UseWallet {
 			// listen on chainId / network change event
 			ethereum.on('chainChanged', () => window.location.reload())
 
-			return { status, account, ethereum, provider, disconnect }
+			return { status, account, ethereum, provider, disconnect, getBalance }
 		}
 
 		case 'nowallet':

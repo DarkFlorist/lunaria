@@ -2,7 +2,7 @@ import { ComponentChildren } from 'preact'
 
 type LayoutComponentProps = { children: ComponentChildren }
 
-const Layout = ({ children }: LayoutComponentProps) => {
+export const Root = ({ children }: LayoutComponentProps) => {
 	return (
 		<div class='fixed bg-main inset-0'>
 			<div class='fixed inset-0 bg-polka'></div>
@@ -13,25 +13,18 @@ const Layout = ({ children }: LayoutComponentProps) => {
 	)
 }
 
-const Header = ({ children }: LayoutComponentProps) => {
+export const Header = ({ children }: LayoutComponentProps) => {
 	return <div class='col-span-2 px-8 clear'>{children}</div>
 }
 
-const Main = ({ children }: LayoutComponentProps) => {
+export const Main = ({ children }: LayoutComponentProps) => {
 	return <div class='col-span-2 md:col-span-1 overflow-y-scroll clear'>{children}</div>
 }
 
-const Aside = ({ children }: LayoutComponentProps) => {
+export const Aside = ({ children }: LayoutComponentProps) => {
 	return <div class='col-span-2 md:col-span-1 px-8'>{children}</div>
 }
 
-const Footer = ({ children }: LayoutComponentProps) => {
+export const Footer = ({ children }: LayoutComponentProps) => {
 	return <div class='h-16 col-span-2 flex items-center justify-center px-8'>{children}</div>
 }
-
-export default Object.assign(Layout, {
-	Header,
-	Main,
-	Aside,
-	Footer,
-})

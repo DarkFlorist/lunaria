@@ -10,6 +10,7 @@ declare global {
 }
 
 export type Web3Provider = ethers.providers.Web3Provider
+export type Network = ethers.providers.Network
 type WindowEthereumProvider = ethers.providers.ExternalProvider & {
 	on(eventName: string | symbol, listener: (...args: any[]) => void): void
 }
@@ -35,6 +36,7 @@ export type ConnectedWallet = {
 	ethereum: WindowEthereumProvider
 	disconnect: () => Promise<void>
 	getBalance: () => Promise<string>
+	getNetwork: () => Promise<Network>
 }
 
 export type UseWallet = NoWallet | DisconnectedWallet | ConnectedWallet
@@ -65,6 +67,7 @@ export default function useWallet(): UseWallet {
 					provider,
 					disconnect: () => new Promise(() => {}),
 					getBalance: () => new Promise(() => {}),
+					getNetwork: () => new Promise(() => {}),
 				}
 			}
 
@@ -76,7 +79,7 @@ export default function useWallet(): UseWallet {
 		case 'connected': {
 			const { status, account, provider, ethereum } = wallet.value
 
-			const disconnect = async () => {
+			async function disconnect() {
 				wallet.value = {
 					status: 'disconnected',
 					ethereum,
@@ -93,7 +96,11 @@ export default function useWallet(): UseWallet {
 				return balance
 			}
 
-			const switchAccount = (account: HexString) => {
+			async function getNetwork() {
+				return await provider.getNetwork()
+			}
+
+			function switchAccount(account: HexString) {
 				wallet.value = Object.assign({}, wallet.value, { account })
 			}
 
@@ -106,7 +113,7 @@ export default function useWallet(): UseWallet {
 			// listen on chainId / network change event
 			ethereum.on('chainChanged', () => window.location.reload())
 
-			return { status, account, ethereum, provider, disconnect, getBalance }
+			return { status, account, ethereum, provider, disconnect, getBalance, getNetwork }
 		}
 
 		case 'nowallet':

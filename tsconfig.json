@@ -16,8 +16,20 @@
 		"noImplicitThis": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
-		"lib": ["ES2021", "DOM"],
-		"plugins": [ { "transform": "@zoltu/typescript-transformer-append-js-extension/output/index.js", "after": true, } ]
+		"lib": [
+			"ES2021",
+			"DOM"
+		],
+		"plugins": [
+			{
+				"transform": "@zoltu/typescript-transformer-append-js-extension/output/index.js",
+				"after": true,
+			}
+		],
+		"typeRoots": [
+			"./node_modules/@types",
+			"./build/node_modules/@types",
+		]
 	},
 	"include": [
 		"./app/ts/**/*.ts",

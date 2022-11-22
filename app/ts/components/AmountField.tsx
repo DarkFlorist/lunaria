@@ -1,11 +1,11 @@
 import { useSignal } from '@preact/signals'
-import { weave } from '../library/utilities'
+import { removeNonStringsAndTrim } from '../library/utilities'
 
 type Props = {
 	label: string
 	name: string
 	value: string
-	onChange: (value: HexString | string) => void
+	onChange: (value: string) => void
 	class?: string
 	disabled?: boolean
 	required?: boolean
@@ -21,7 +21,7 @@ export const AmountField = ({ label, name, value, onChange, class: className, di
 	}
 
 	return (
-		<div class={weave(baseClass.root, className)}>
+		<div class={removeNonStringsAndTrim(baseClass.root, className)}>
 			<label for={name} class={baseClass.label}>
 				{label}
 			</label>

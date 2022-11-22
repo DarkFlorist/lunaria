@@ -1,11 +1,11 @@
 import { useSignal } from '@preact/signals'
-import { weave } from '../library/utilities'
+import { removeNonStringsAndTrim } from '../library/utilities'
 
 type AddressFieldProps = {
 	label: string
 	name: string
-	value: HexString | string
-	onChange: (address: HexString | string) => void
+	value: string
+	onChange: (address: string) => void
 	class?: string
 	disabled?: boolean
 	required?: boolean
@@ -21,7 +21,7 @@ export const AddressField = ({ label, name, value, onChange, class: className, d
 	}
 
 	return (
-		<div class={weave(baseClass.root, className)}>
+		<div class={removeNonStringsAndTrim(baseClass.root, className)}>
 			<label for={name} class={baseClass.label}>
 				{label}
 			</label>

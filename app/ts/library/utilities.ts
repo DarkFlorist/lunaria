@@ -9,7 +9,7 @@ export async function sleep(milliseconds: number) {
  * 	<div class={weave('button', isPrimary && 'button--primary')}>
  */
 
-export function weave(...strings: (string | boolean | undefined)[]) {
+export function removeNonStringsAndTrim(...strings: (string | boolean | undefined)[]) {
 	return (
 		strings
 			// remove non-string

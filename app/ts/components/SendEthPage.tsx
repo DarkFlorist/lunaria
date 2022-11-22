@@ -1,6 +1,7 @@
 import * as Layout from './Layout'
 import { Connect } from './Connect'
 import { EthBalance } from './EthBalance'
+import { ActiveNetwork } from './ActiveNetwork'
 
 export const SendEthPage = () => {
 	return (
@@ -90,12 +91,3 @@ const UserTips = () => {
 		</div>
 	)
 }
-
-const ActiveNetwork = () => (
-	<div class='flex flex-col items-center md:items-start gap-1 mb-6'>
-		<div class='uppercase text-white/50 text-xs md:text-sm'>network</div>
-		<div class='text-lg font-bold capitalize' title='0x5'>
-			Goerli
-		</div>
-	</div>
-)

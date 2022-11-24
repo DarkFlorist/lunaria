@@ -3,6 +3,9 @@ module.exports = {
 	theme: {},
 	plugins: [],
 	experimental: {
-		optimizeUniversalDefaults: true
-	}
-};
+		optimizeUniversalDefaults: true,
+	},
+	corePlugins: {
+		preflight: false,
+	},
+}

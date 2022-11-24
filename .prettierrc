@@ -5,5 +5,5 @@
 	"semi": false,
 	"proseWrap": "never",
 	"singleAttributePerLine": false,
-	"printWidth": 120
+	"printWidth": 999
 }

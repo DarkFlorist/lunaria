@@ -55,7 +55,7 @@ export function useRoute() {
 	const navigate = (pathname: string, replace?: boolean, skipRender?: boolean) => {
 		if (pathname === location.pathname) return
 
-		if (replace === true) {
+		if (replace) {
 			history.replaceState({ pathname, skipRender }, '', pathname)
 			return
 		}

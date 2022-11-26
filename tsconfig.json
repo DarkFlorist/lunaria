@@ -28,7 +28,7 @@
 		],
 		"typeRoots": [
 			"./node_modules/@types",
-			"./build/node_modules/@types",
+			"./typings",
 		]
 	},
 	"include": [

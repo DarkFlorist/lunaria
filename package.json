@@ -16,6 +16,7 @@
 	"scripts": {
 		"build": "ttsc",
 		"serve": "npx http-server ./app",
-		"vendor": "npm install && cd build && npm install && npm run vendor"
+		"vendor": "npm install && cd build && npm install && npm run vendor",
+		"styles": "cd twcss && npm run styles"
 	}
 }

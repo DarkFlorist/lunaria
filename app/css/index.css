@@ -718,7 +718,7 @@ video {
 	filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
-clear:after,
+.clear:after,
 .clear:before {
 	content: ' ';
 	display: table;
@@ -753,24 +753,6 @@ clear:after,
 	93.75%,
 	100% {
 		opacity: 0.2;
-	}
-}
-
-@keyframes bounce-x {
-	0%,
-	40%,
-	55%,
-	65%,
-	100% {
-		transform: translateX(0);
-	}
-
-	50% {
-		transform: translateX(-30%);
-	}
-
-	60% {
-		transform: translateX(-20%);
 	}
 }
 

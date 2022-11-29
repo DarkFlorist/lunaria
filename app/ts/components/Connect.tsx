@@ -12,18 +12,18 @@ export const Connect = () => {
 			return null
 
 		case 'disconnected':
-			return <WalletConnect connectFn={wallet.connect} />
+			return <ConnectCallToAction connectFn={wallet.connect} />
 
 		case 'connected':
 			return <WalletStatus account={wallet.account} onDisconnect={() => wallet.disconnect()} />
 	}
 }
 
-type WalletConnectProps = {
+type ConnectCallToActionProps = {
 	connectFn: () => Promise<void>
 }
 
-const WalletConnect = ({ connectFn }: WalletConnectProps) => {
+const ConnectCallToAction = ({ connectFn }: ConnectCallToActionProps) => {
 	const [accounts, queryFn, resetAccountsQuery] = useAsyncState<void>()
 
 	switch (accounts.state) {

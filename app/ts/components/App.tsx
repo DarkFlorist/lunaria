@@ -1,11 +1,10 @@
-import { Balance } from './Balance'
-import { Account } from './Account'
+import { Route, Router } from './Router'
+import { SendEthPage } from './SendEthPage'
 
 export function App() {
 	return (
-		<main>
-			<Account />
-			<Balance />
-		</main>
+		<Router>
+			<Route path='/' component={SendEthPage} />
+		</Router>
 	)
 }

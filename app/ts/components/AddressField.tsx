@@ -18,7 +18,7 @@ export const AddressField = ({ label, name, value, onChange, class: className, d
 	function handleChange(e: Event) {
 		const target = e.target as HTMLInputElement
 		const isAddressPatternValid = target.checkValidity()
-		isValid.value = !isAddressPatternValid ? isAddressPatternValid : ethers.utils.isAddress(target.value)
+		isValid.value = isAddressPatternValid && ethers.utils.isAddress(target.value)
 		onChange(target.value)
 	}
 

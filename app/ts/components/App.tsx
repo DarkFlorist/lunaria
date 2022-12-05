@@ -1,5 +1,5 @@
-import { Route, Router } from './Router'
-import { SendEthPage } from './SendEthPage'
+import { Route, Router } from './Router.js'
+import { SendEthPage } from './SendEthPage.js'
 
 export function App() {
 	return (

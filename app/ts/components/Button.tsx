@@ -1,5 +1,5 @@
 import { JSX } from 'preact/jsx-runtime'
-import { removeNonStringsAndTrim } from '../library/utilities'
+import { removeNonStringsAndTrim } from '../library/utilities.js'
 
 type ButtonProps = JSX.HTMLAttributes<HTMLButtonElement>
 

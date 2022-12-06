@@ -1,4 +1,4 @@
-import { useWallet } from './WalletProvider'
+import { useWallet } from './WalletProvider.js'
 
 export const Account = () => {
 	const { account, connectMetamask } = useWallet()

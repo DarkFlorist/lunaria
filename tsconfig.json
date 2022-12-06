@@ -20,12 +20,6 @@
 			"ES2021",
 			"DOM"
 		],
-		"plugins": [
-			{
-				"transform": "@zoltu/typescript-transformer-append-js-extension/output/index.js",
-				"after": true,
-			}
-		],
 		"typeRoots": [
 			"./node_modules/@types",
 			"./typings",

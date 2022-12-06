@@ -1,4 +1,4 @@
-import { useWallet } from './WalletProvider'
+import { useWallet } from './WalletProvider.js'
 
 export const Balance = () => {
 	const { account, status, balance, checkBalance } = useWallet()

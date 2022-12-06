@@ -1,6 +1,6 @@
 import { createContext, FunctionalComponent } from 'preact'
 import { useContext } from 'preact/hooks'
-import { createWalletStore } from '../store/wallet'
+import { createWalletStore } from '../store/wallet.js'
 
 export const WalletContext = createContext({} as ReturnType<typeof createWalletStore>)
 

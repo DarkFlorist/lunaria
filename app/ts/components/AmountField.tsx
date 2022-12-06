@@ -1,5 +1,5 @@
 import { useSignal } from '@preact/signals'
-import { removeNonStringsAndTrim } from '../library/utilities'
+import { removeNonStringsAndTrim } from '../library/utilities.js'
 
 type Props = {
 	label: string

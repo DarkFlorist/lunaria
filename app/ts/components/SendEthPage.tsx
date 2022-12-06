@@ -1,6 +1,6 @@
-import * as Layout from './Layout'
-import { Button } from './Button'
-import * as Icon from './Icon/index'
+import * as Layout from './Layout.js'
+import { Button } from './Button.js'
+import * as Icon from './Icon/index.js'
 
 export const SendEthPage = () => {
 	return (

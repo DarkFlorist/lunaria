@@ -1,6 +1,6 @@
 import { render } from 'preact'
-import { App } from './components/App'
-import { WalletProvider } from './components/WalletProvider'
+import { App } from './components/App.js'
+import { WalletProvider } from './components/WalletProvider.js'
 
 render(
 	<WalletProvider>

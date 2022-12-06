@@ -1,6 +1,6 @@
 import { useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
-import { removeNonStringsAndTrim } from '../library/utilities'
+import { removeNonStringsAndTrim } from '../library/utilities.js'
 
 type AddressFieldProps = {
 	label: string

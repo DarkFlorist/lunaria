@@ -25,7 +25,7 @@ export const AmountField = ({ label, name, value, onChange, class: className, di
 			<label for={name} class={baseClass.label}>
 				{label}
 			</label>
-			<input autoComplete='off' id={name} name={name} type='text' inputMode='numeric' pattern='^\d*\.?\d*$' value={value} onChange={handleChange} disabled={disabled} required={required} class={baseClass.input} />
+			<input autoComplete='off' id={name} name={name} type='text' inputMode='numeric' pattern='^[\d, ]*\.?\d*$' value={value} onChange={handleChange} disabled={disabled} required={required} class={baseClass.input} />
 			{!isValid.value && <div class={baseClass.error}>Invalid amount</div>}
 		</div>
 	)

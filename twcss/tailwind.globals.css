@@ -412,4 +412,20 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 	.animate-bounce-x {
 		animation: bounce-x 4s infinite;
 	}
+
+	@keyframes bounce-x {
+		0%,
+		40%,
+		55%,
+		65%,
+		100% {
+			transform: translateX(0);
+		}
+		50% {
+			transform: translateX(-30%);
+		}
+		60% {
+			transform: translateX(-20%);
+		}
+	}
 }

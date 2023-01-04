@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals'
 import { ethers } from 'ethers'
 import { isEthereumJsonRpcError, EthereumJsonRpcError } from '../library/exceptions.js'
-import { assertsExternalProvider, isEthereumObservable, isAddress } from '../library/utilities.js'
+import { assertsExternalProvider, isEthereumObservable } from '../library/utilities.js'
 
 type AccountBusy = {
 	status: 'busy'
@@ -59,5 +59,5 @@ async function connect() {
 
 const handleAccountChange = (newAccount: string[]) => {
 	if (store.value?.status !== 'connected') return
-	store.value = isAddress(newAccount[0]) ? { status: 'connected', address: newAccount[0] } : storeDefaults
+	store.value = ethers.utils.isAddress(newAccount[0]) ? { status: 'connected', address: newAccount[0] } : storeDefaults
 }

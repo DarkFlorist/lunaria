@@ -24,17 +24,6 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 }
 
 /**
- * Check string for valid address format
- */
-export function parseAddress(addressString: string): `0x${string}` {
-	return ethers.utils.getAddress(addressString) as `0x${string}`
-}
-
-export function isAddress(addressString: string): addressString is `0x${string}` {
-	return ethers.utils.isAddress(addressString)
-}
-
-/**
  * Describe a window ethereum object
  */
 type ExternalProvider = ethers.providers.ExternalProvider

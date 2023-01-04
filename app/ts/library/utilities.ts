@@ -26,12 +26,12 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 /**
  * Check string for valid address format
  */
-export function assertsAddress(string: string): asserts string is `0x${string}` {
-	if (!/^0x[0-9A-Fa-f]{40}$/.test(string)) throw new Error(`Invalid address ${string}`)
+export function parseAddress(addressString: string): `0x${string}` {
+	return ethers.utils.getAddress(addressString) as `0x${string}`
 }
 
-export function isAddress(string: string): string is `0x${string}` {
-	return /^0x[0-9A-Fa-f]{40}$/.test(string)
+export function isAddress(addressString: string): addressString is `0x${string}` {
+	return ethers.utils.isAddress(addressString)
 }
 
 /**

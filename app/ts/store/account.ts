@@ -1,7 +1,8 @@
 import { effect, signal } from '@preact/signals'
 import { ethers } from 'ethers'
 import { isEthereumJsonRpcError, EthereumJsonRpcError } from '../library/exceptions.js'
-import { assertsAddress, assertsExternalProvider, isEthereumObservable, isAddress } from '../library/utilities.js'
+import { assertsExternalProvider, isEthereumObservable, isAddress, parseAddress } from '../library/utilities.js'
+import { HexString } from '../types.js'
 
 type AccountBusy = {
 	status: 'busy'
@@ -9,7 +10,7 @@ type AccountBusy = {
 
 type AccountConnected = {
 	status: 'connected'
-	address: string
+	address: HexString
 }
 
 type AccountDisconnected = {
@@ -35,8 +36,8 @@ async function connect() {
 		const provider = new ethers.providers.Web3Provider(window.ethereum)
 		store.value = { status: 'busy' }
 		const accounts = await provider.send('eth_requestAccounts', [])
-		assertsAddress(accounts[0])
-		store.value = { status: 'connected', address: accounts[0] }
+		const address = parseAddress(accounts[0])
+		store.value = { status: 'connected', address }
 	} catch (exception) {
 		let error = new Error(`An unknown error was encountered ${exception}`)
 		if (exception instanceof Error) {

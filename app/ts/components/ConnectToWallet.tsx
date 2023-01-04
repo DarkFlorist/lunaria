@@ -1,5 +1,5 @@
 import { FunctionalComponent } from 'preact'
-import { MetaMaskRpcError } from '../library/exceptions.js'
+import { EthereumJsonRpcError } from '../library/exceptions.js'
 import { accountStore } from '../store/account.js'
 import { Button } from './Button.js'
 import * as Icon from './Icon/index.js'
@@ -45,14 +45,14 @@ export const ConnectToWallet = () => {
 			)
 
 		case 'rejected':
-			if (account.error instanceof MetaMaskRpcError) {
+			if (account.error instanceof EthereumJsonRpcError) {
 				return (
 					<Wrapper>
 						<div class='text-center md:text-right'>
-							<div class='font-bold'>Failed to connect to MetaMask!</div>
+							<div class='font-bold'>Failed to connect to wallet!</div>
 							<div class='text-sm text-white/50'>
 								<a class='flex items-center gap-1 italic' title={`${account.error.message} (${account.error.code})`}>
-									<span>Open MetaMask extension window for details</span>️ <Icon.Info />
+									<span>Open your wallet extension window for details</span>️ <Icon.Info />
 								</a>
 							</div>
 						</div>

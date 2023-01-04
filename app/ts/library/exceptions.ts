@@ -1,23 +1,25 @@
-export type MetaMaskRpcErrorSignature = {
+export type EthereumJsonRpcErrorSignature = {
 	code: number
-	stack: string
 	message: string
+	data?: any
 }
 
-export class MetaMaskRpcError extends Error {
-	constructor(data: MetaMaskRpcErrorSignature) {
-		super(data.message)
+export class EthereumJsonRpcError extends Error {
+	public code: number
+	public message: string
+	public data?: any
 
-		this.name = 'MetaMaskRpcError'
-		this.code = data.code
-		this.stack = data.stack
+	constructor(code: number, message: string, data?: any) {
+		super(message)
+		this.name = 'EthereumJsonRpcError'
+		this.code = code
+		this.message = message
+		this.data = data
 
-		Object.setPrototypeOf(this, MetaMaskRpcError.prototype)
+		Object.setPrototypeOf(this, EthereumJsonRpcError.prototype)
 	}
-
-	code: number
 }
 
-export function isMetaMaskRpcError(data: Object): data is MetaMaskRpcErrorSignature {
-	return 'code' in data && typeof data.code === 'number' && 'stack' in data && typeof data.stack === 'string' && 'message' in data && typeof data.message === 'string'
+export function isEthereumJsonRpcError(data: Object): data is EthereumJsonRpcErrorSignature {
+	return 'code' in data && typeof data.code === 'number' && 'message' in data && typeof data.message === 'string'
 }

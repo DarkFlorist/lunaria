@@ -1,6 +1,6 @@
 import { effect, signal } from '@preact/signals'
 import { ethers } from 'ethers'
-import { isMetaMaskRpcError, MetaMaskRpcError } from '../library/exceptions.js'
+import { isEthereumJsonRpcError, EthereumJsonRpcError } from '../library/exceptions.js'
 import { assertsAddress, assertsExternalProvider, isEthereumObservable, isAddress } from '../library/utilities.js'
 
 type AccountBusy = {
@@ -20,7 +20,7 @@ type AccountDisconnected = {
 
 type AccountConnectRejected = {
 	status: 'rejected'
-	error: MetaMaskRpcError | Error
+	error: EthereumJsonRpcError | Error
 }
 
 export type AccountStore = AccountBusy | AccountConnected | AccountDisconnected | AccountConnectRejected
@@ -46,8 +46,8 @@ async function connect() {
 			error = new Error(exception)
 		}
 		if (exception instanceof Object) {
-			if (isMetaMaskRpcError(exception)) {
-				error = new MetaMaskRpcError(exception)
+			if (isEthereumJsonRpcError(exception)) {
+				error = new EthereumJsonRpcError(exception.code, exception.message, exception.data)
 			}
 		}
 		store.value = { status: 'rejected', error }

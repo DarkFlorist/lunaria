@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as url from 'url';
+import * as url from 'url'
 import { promises as fs } from 'fs'
 import { recursiveDirectoryCopy } from '@zoltu/file-copier'
 
@@ -9,7 +9,11 @@ const dependencyPaths = [
 	{ packageName: 'es-module-shims', subfolderToVendor: 'dist', entrypointFile: 'es-module-shims.js' },
 	{ packageName: 'preact', subfolderToVendor: 'dist', entrypointFile: 'preact.module.js' },
 	{ packageName: 'preact/jsx-runtime', subfolderToVendor: 'dist', entrypointFile: 'jsxRuntime.module.js' },
-	{ packageName: 'preact/hooks', subfolderToVendor: 'dist', entrypointFile: 'hooks.module.js' }, { packageName: 'ethers', subfolderToVendor: 'dist', entrypointFile: 'ethers.esm.js', }, { packageName: '@preact/signals-core', subfolderToVendor: 'dist', entrypointFile: 'signals-core.module.js', }, { packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' }
+	{ packageName: 'preact/hooks', subfolderToVendor: 'dist', entrypointFile: 'hooks.module.js' },
+	{ packageName: 'ethers', subfolderToVendor: 'dist', entrypointFile: 'ethers.esm.js' },
+	{ packageName: '@preact/signals-core', subfolderToVendor: 'dist', entrypointFile: 'signals-core.module.js' },
+	{ packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' },
+	{ packageName: 'preact-router', subfolderToVendor: 'dist', entrypointFile: 'preact-router.module.js' },
 ]
 
 async function vendorDependencies() {
@@ -21,12 +25,14 @@ async function vendorDependencies() {
 
 	const indexHtmlPath = path.join(directoryOfThisFile, '..', 'app', 'index.html')
 	const oldIndexHtml = await fs.readFile(indexHtmlPath, 'utf8')
-	const importmap = dependencyPaths.reduce((importmap, { packageName, entrypointFile }) => {
-		importmap.imports[packageName] = `./${path.join('.', 'vendor', packageName, entrypointFile).replace(/\\/g, '/')}`
-		return importmap
-	}, { imports: {} as Record<string, string> })
-	const importmapJson = JSON.stringify(importmap, undefined, '\t')
-		.replace(/^/mg, '\t\t')
+	const importmap = dependencyPaths.reduce(
+		(importmap, { packageName, entrypointFile }) => {
+			importmap.imports[packageName] = `./${path.join('.', 'vendor', packageName, entrypointFile).replace(/\\/g, '/')}`
+			return importmap
+		},
+		{ imports: {} as Record<string, string> }
+	)
+	const importmapJson = JSON.stringify(importmap, undefined, '\t').replace(/^/gm, '\t\t')
 	const newIndexHtml = oldIndexHtml.replace(/<script type='importmap'>[\s\S]*?<\/script>/m, `<script type='importmap'>\n${importmapJson}\n\t</script>`)
 	await fs.writeFile(indexHtmlPath, newIndexHtml)
 }
@@ -44,7 +50,7 @@ async function rewriteSourceMapSourcePath(packageName: string, sourcePath: strin
 	await fs.writeFile(destinationPath, JSON.stringify(fileContents))
 }
 
-vendorDependencies().catch(error => {
+vendorDependencies().catch((error) => {
 	console.error(error)
 	debugger
 	process.exit(1)

@@ -1,8 +1,7 @@
-import { effect, signal } from '@preact/signals'
+import { signal } from '@preact/signals'
 import { ethers } from 'ethers'
 import { isEthereumJsonRpcError, EthereumJsonRpcError } from '../library/exceptions.js'
-import { assertsExternalProvider, isEthereumObservable, isAddress, parseAddress } from '../library/utilities.js'
-import { HexString } from '../types.js'
+import { assertsExternalProvider, isEthereumObservable, isAddress } from '../library/utilities.js'
 
 type AccountBusy = {
 	status: 'busy'
@@ -10,13 +9,12 @@ type AccountBusy = {
 
 type AccountConnected = {
 	status: 'connected'
-	address: HexString
+	address: string
 }
 
 type AccountDisconnected = {
 	status: 'disconnected'
 	connect: () => void
-	ensureConnected: () => void
 }
 
 type AccountConnectRejected = {
@@ -26,7 +24,7 @@ type AccountConnectRejected = {
 
 export type AccountStore = AccountBusy | AccountConnected | AccountDisconnected | AccountConnectRejected
 
-const storeDefaults = { status: 'disconnected', connect, ensureConnected } as const
+const storeDefaults = { status: 'disconnected', connect } as const
 const store = signal<AccountStore>(storeDefaults)
 export const accountStore = store
 
@@ -35,9 +33,13 @@ async function connect() {
 		assertsExternalProvider(window.ethereum)
 		const provider = new ethers.providers.Web3Provider(window.ethereum)
 		store.value = { status: 'busy' }
-		const accounts = await provider.send('eth_requestAccounts', [])
-		const address = parseAddress(accounts[0])
+		await provider.send('eth_requestAccounts', [])
+		const signer = provider.getSigner()
+		const address = await signer.getAddress()
 		store.value = { status: 'connected', address }
+		// watch for account changes
+		if (!isEthereumObservable(provider.provider)) return
+		provider.provider.on('accountsChanged', handleAccountChange)
 	} catch (exception) {
 		let error = new Error(`An unknown error was encountered ${exception}`)
 		if (exception instanceof Error) {
@@ -55,26 +57,7 @@ async function connect() {
 	}
 }
 
-async function ensureConnected() {
-	assertsExternalProvider(window.ethereum)
-	const provider = new ethers.providers.Web3Provider(window.ethereum)
-	store.value = { status: 'busy' }
-	const accounts = await provider.listAccounts()
-	store.value = isAddress(accounts[0]) ? { status: 'connected', address: accounts[0] } : storeDefaults
-}
-
 const handleAccountChange = (newAccount: string[]) => {
 	if (store.value?.status !== 'connected') return
 	store.value = isAddress(newAccount[0]) ? { status: 'connected', address: newAccount[0] } : storeDefaults
 }
-
-// watch for account changes when an account is connected
-const observeAccountStatusChanges = () => {
-	if (!isEthereumObservable(window.ethereum)) return
-	window.ethereum.on('accountsChanged', handleAccountChange)
-}
-
-effect(() => {
-	if (store.value.status !== 'connected') return
-	observeAccountStatusChanges()
-})

@@ -11,7 +11,7 @@ export const ConnectToWallet = () => {
 		case 'disconnected':
 			return (
 				<Wrapper>
-					<div class='leading-tight text-right'>Quickly get started by connecting your wallet</div>
+					<div class='leading-tight text-right'>Get started quickly by connecting your wallet</div>
 					<div class='transition animate-bounce-x'>
 						<Icon.ArrowRight />
 					</div>

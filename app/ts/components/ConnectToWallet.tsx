@@ -37,7 +37,7 @@ export const ConnectToWallet = () => {
 				<Wrapper>
 					<div class='flex gap-4 min-w-0'>
 						<div class='text-right min-w-0'>
-							<div class='text-sm text-white/50'>Your Wallet Address</div>
+							<div class='text-sm text-white/50'>Your Address</div>
 							<div class='overflow-hidden text-ellipsis'>{account.address}</div>
 						</div>
 					</div>

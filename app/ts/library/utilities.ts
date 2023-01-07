@@ -1,3 +1,5 @@
+import { ethers } from 'ethers'
+
 export async function sleep(milliseconds: number) {
 	await new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
@@ -19,4 +21,20 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 			// combine strings separated by spaces
 			.join(' ')
 	)
+}
+
+/**
+ * Describe a window ethereum object
+ */
+type ExternalProvider = ethers.providers.ExternalProvider
+export function assertsExternalProvider(ethereum: unknown): asserts ethereum is ExternalProvider {
+	if (ethereum === null || ethereum === undefined || typeof ethereum !== 'object') throw new Error('Ethereum object does not exist')
+}
+
+export type EthereumWithListeners = {
+	on(eventName: string | symbol, listener: (...args: any[]) => void): void
+}
+
+export function isEthereumObservable(ethereum: unknown): ethereum is EthereumWithListeners {
+	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
 }

@@ -9,9 +9,9 @@ const dependencyPaths = [
 	{ packageName: 'preact', subfolderToVendor: 'dist', entrypointFile: 'preact.module.js' },
 	{ packageName: 'preact/jsx-runtime', subfolderToVendor: 'dist', entrypointFile: 'jsxRuntime.module.js' },
 	{ packageName: 'preact/hooks', subfolderToVendor: 'dist', entrypointFile: 'hooks.module.js' },
-	{ packageName: 'ethers', subfolderToVendor: 'dist', entrypointFile: 'ethers.esm.js' },
-	{ packageName: '@preact/signals-core', subfolderToVendor: 'dist', entrypointFile: 'signals-core.module.js' },
-	{ packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' },
+	{ packageName: 'ethers', subfolderToVendor: 'dist', entrypointFile: 'ethers.esm.js', },
+	{ packageName: '@preact/signals-core', subfolderToVendor: 'dist', entrypointFile: 'signals-core.module.js', },
+	{ packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' }
 ]
 
 async function vendorDependencies() {
@@ -23,14 +23,12 @@ async function vendorDependencies() {
 
 	const indexHtmlPath = path.join(directoryOfThisFile, '..', 'app', 'index.html')
 	const oldIndexHtml = await fs.readFile(indexHtmlPath, 'utf8')
-	const importmap = dependencyPaths.reduce(
-		(importmap, { packageName, entrypointFile }) => {
-			importmap.imports[packageName] = `./${path.join('.', 'vendor', packageName, entrypointFile).replace(/\\/g, '/')}`
-			return importmap
-		},
-		{ imports: {} as Record<string, string> }
-	)
-	const importmapJson = JSON.stringify(importmap, undefined, '\t').replace(/^/gm, '\t\t')
+	const importmap = dependencyPaths.reduce((importmap, { packageName, entrypointFile }) => {
+		importmap.imports[packageName] = `./${path.join('.', 'vendor', packageName, entrypointFile).replace(/\\/g, '/')}`
+		return importmap
+	}, { imports: {} as Record<string, string> })
+	const importmapJson = JSON.stringify(importmap, undefined, '\t')
+		.replace(/^/mg, '\t\t')
 	const newIndexHtml = oldIndexHtml.replace(/<script type='importmap'>[\s\S]*?<\/script>/m, `<script type='importmap'>\n${importmapJson}\n\t</script>`)
 	await fs.writeFile(indexHtmlPath, newIndexHtml)
 }

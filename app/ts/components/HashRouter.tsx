@@ -20,7 +20,7 @@ export const Router = ({ children, onHashChange }: RouterProps) => {
 		return children.filter(isRouteComponent).find((child) => matchPattern(stripLeadingSlash(child.props.path), window.location.hash))
 	}
 
-	useOnHashChange((event: Event) => {
+	useHashChangeEffect((event: Event) => {
 		setActiveRoute(getActiveRoute())
 		onHashChange?.(event)
 	})
@@ -28,9 +28,8 @@ export const Router = ({ children, onHashChange }: RouterProps) => {
 	return <main>{activeRoute}</main>
 }
 
-function useOnHashChange(handler?: (event: Event) => void) {
+function useHashChangeEffect(handler: (event: Event) => void) {
 	useEffect(() => {
-		if (!handler || typeof handler !== 'function') return
 		window.addEventListener('hashchange', handler)
 		return () => window.removeEventListener('hashchange', handler)
 	}, [])

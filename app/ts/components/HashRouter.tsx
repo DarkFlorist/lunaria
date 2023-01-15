@@ -43,7 +43,7 @@ function useHashChangeEffect(handler: (event: Event) => void) {
 	}, [])
 }
 
-function isRouteComponent(child: object): child is VNode<Parameters<typeof Route>[0]> {
+function isRouteComponent(child: object): child is VNode<{ path: string }> {
 	return 'props' in child && typeof child.props === 'object' && child.props !== null && 'path' in child.props && typeof child.props.path === 'string'
 }
 

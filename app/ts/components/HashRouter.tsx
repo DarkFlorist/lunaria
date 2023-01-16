@@ -76,7 +76,7 @@ function matchPath(pattern: string, path: string): { [key: string]: string } | n
 	}
 
 	return patternParts.reduce((params, part, index) => {
-		if (part.startsWith(':') params[part.slice(1)] = pathParts[index]
+		if (part.startsWith(':')) params[part.slice(1)] = pathParts[index]
 		return params
 	}, {} as { [key: string]: string })
 }

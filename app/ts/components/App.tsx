@@ -1,6 +1,15 @@
+import { useEffect } from 'preact/hooks'
+import { accountStore } from '../store/account.js'
 import { Route, Router, useParams } from './HashRouter.js'
 
 export function App() {
+	const account = accountStore.value
+
+	useEffect(() => {
+		if (account.status !== 'disconnected') return
+		account.ensureConnected()
+	}, [])
+
 	return (
 		<Router>
 			<Route path='#send' component={Send} />

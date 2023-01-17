@@ -15,6 +15,7 @@ type AccountConnected = {
 type AccountDisconnected = {
 	status: 'disconnected'
 	connect: () => void
+	ensureConnected: () => void
 }
 
 type AccountConnectRejected = {
@@ -24,7 +25,7 @@ type AccountConnectRejected = {
 
 export type AccountStore = AccountBusy | AccountConnected | AccountDisconnected | AccountConnectRejected
 
-const storeDefaults = { status: 'disconnected', connect } as const
+const storeDefaults = { status: 'disconnected', connect, ensureConnected } as const
 const store = signal<AccountStore>(storeDefaults)
 export const accountStore = store
 
@@ -56,6 +57,20 @@ async function connect() {
 		store.value = { status: 'rejected', error }
 	}
 }
+
+async function ensureConnected() {
+ 	try {
+ 		assertsExternalProvider(window.ethereum)
+ 		const provider = new ethers.providers.Web3Provider(window.ethereum)
+ 		const signer = provider.getSigner()
+ 		store.value = { status: 'busy' }
+ 		const address = await signer.getAddress()
+ 		store.value = { status: 'connected', address }
+ 	} catch (exception) {
+ 		store.value = { status: 'disconnected', connect, ensureConnected }
+ 	}
+ }
+
 
 const handleAccountChange = (newAccount: string[]) => {
 	if (store.value?.status !== 'connected') return

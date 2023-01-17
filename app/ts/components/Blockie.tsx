@@ -7,6 +7,9 @@ interface BlockieProps {
 	borderRadius?: string
 }
 
+const defaultSize = 8
+const defaultScale = 4
+
 function generateIdenticon(options: BlockieProps, canvasRef: HTMLCanvasElement) {
 	// NOTE -- Majority of this code is referenced from: https://github.com/alexvandesande/blockies
 	// Mostly to ensure congruence to Ethereum Mist's Identicons
@@ -103,17 +106,15 @@ function generateIdenticon(options: BlockieProps, canvasRef: HTMLCanvasElement) 
 		}
 	}
 
-	const opts = options || {}
-	const size = opts.size || 8
-	const scale = opts.scale || 4
-	const seed = opts.seed || Math.floor(Math.random() * Math.pow(10, 16)).toString(16)
+	const scale = options.scale || defaultScale
+	const seed = options.seed
 
 	seedrand(seed)
 
-	const color = opts.color || createColor()
-	const bgcolor = opts.bgColor || createColor()
-	const spotcolor = opts.spotColor || createColor()
-	const imageData = createImageData(size)
+	const color = createColor()
+	const bgcolor = createColor()
+	const spotcolor = createColor()
+	const imageData = createImageData(defaultSize)
 	const canvas = setCanvas(canvasRef, imageData, color, scale, bgcolor, spotcolor)
 
 	return canvas
@@ -126,7 +127,7 @@ export default function Blockie(props: BlockieProps) {
 			generateIdenticon(props, canvasRef.current)
 		}
 	}, [props.seed])
-	const dimension = (props.size || 8) * (props.scale || 4)
+	const dimension = defaultSize * (props.scale || 4)
 	return (
 		<canvas
 			ref={canvasRef}

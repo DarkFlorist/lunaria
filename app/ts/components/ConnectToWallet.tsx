@@ -40,7 +40,7 @@ export const ConnectToWallet = () => {
 				<Wrapper>
 					<div class='grid md:grid-flow-col grid-cols-[minmax(min-content,max-content)_minmax(auto,max-content)] grid-rows-[minmax(min-content,max-content)] gap-x-4 items-center justify-center md:place-items-end'>
 						<div class='row-span-2 md:order-last'>
-							<Blockie size={10} borderRadius='0.25em' seed={account.address} />
+							<Blockie scale={5} seed={account.address} />
 						</div>
 						<div class='text-sm text-white/50'>Your Address</div>
 						<div class='overflow-hidden text-ellipsis'>

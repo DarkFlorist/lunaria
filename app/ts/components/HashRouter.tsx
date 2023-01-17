@@ -14,7 +14,7 @@ export type RouterProps = {
 	onHashChange?: (event: Event) => void
 }
 
-const activeRoute = signal<VNode<RouteProps> | undefined>(undefined)
+const activeRoute = signal<VNode<{ path: string }> | undefined>(undefined)
 
 export const Router = ({ children, onHashChange }: RouterProps) => {
 	function getActiveRoute() {

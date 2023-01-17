@@ -3,11 +3,7 @@ import { useRef, useEffect } from 'preact/hooks'
 
 interface BlockieProps {
 	seed: string
-	size?: number
 	scale?: number
-	color?: string
-	bgColor?: string
-	spotColor?: string
 	borderRadius?: string
 }
 

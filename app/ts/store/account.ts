@@ -26,7 +26,7 @@ type AccountConnectRejected = {
 export type AccountStore = AccountBusy | AccountConnected | AccountDisconnected | AccountConnectRejected
 
 const storeDefaults = { status: 'disconnected', connect, ensureConnected } as const
-const accountStore = signal<AccountStore>(storeDefaults)
+export const accountStore = signal<AccountStore>(storeDefaults)
 
 async function connect() {
 	try {

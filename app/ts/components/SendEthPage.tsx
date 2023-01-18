@@ -91,8 +91,8 @@ const Footer = () => {
 
 const Branding = () => (
 	<div class='flex flex-col justify-center items-start grow'>
-		<div class='text-3xl font-bold'>EasyWallet</div>
-		<div class='text-sm text-white/50'>Securing your crypto assets has never been easier</div>
+		<div class='text-3xl font-bold'>Lunaria</div>
+		<div class='text-sm text-white/50'>Manage your digital assets</div>
 	</div>
 )
 

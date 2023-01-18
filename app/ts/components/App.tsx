@@ -1,15 +1,9 @@
 import { useEffect } from 'preact/hooks'
-import { accountStore } from '../store/account.js'
 import { Route, Router, useParams } from './HashRouter.js'
 import { SendEthPage } from './SendEthPage.js'
 
 export function App() {
-	const account = accountStore.value
-
-	useEffect(() => {
-		if (account.status !== 'disconnected') return
-		account.ensureConnected()
-	}, [])
+	useSplashEffect()
 
 	return (
 		<Router>
@@ -31,4 +25,11 @@ const Transaction = () => {
 			</div>
 		</div>
 	)
+}
+
+function useSplashEffect() {
+	useEffect(() => {
+		const element = document.querySelector('.splash-screen')
+		element?.classList.add('splash-screen--off')
+	}, [])
 }

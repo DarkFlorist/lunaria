@@ -14,8 +14,8 @@ type AccountConnected = {
 
 type AccountDisconnected = {
 	status: 'disconnected'
-	connect: () => void
-	ensureConnected: () => void
+	connect: () => Promise<void>
+	ensureConnected: () => Promise<void>
 }
 
 type AccountConnectRejected = {

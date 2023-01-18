@@ -66,7 +66,7 @@ async function ensureConnected() {
  		const address = await signer.getAddress()
  		accountStore.value = { status: 'connected', address }
  	} catch (exception) {
- 		accountStore.value = { status: 'disconnected', connect, ensureConnected }
+		accountStore.value = storeDefaults
  	}
  }
 

@@ -14,7 +14,8 @@ type AccountConnected = {
 
 type AccountDisconnected = {
 	status: 'disconnected'
-	connect: () => void
+	connect: () => Promise<void>
+	ensureConnected: () => Promise<void>
 }
 
 type AccountConnectRejected = {
@@ -24,19 +25,18 @@ type AccountConnectRejected = {
 
 export type AccountStore = AccountBusy | AccountConnected | AccountDisconnected | AccountConnectRejected
 
-const storeDefaults = { status: 'disconnected', connect } as const
-const store = signal<AccountStore>(storeDefaults)
-export const accountStore = store
+const storeDefaults = { status: 'disconnected', connect, ensureConnected } as const
+export const accountStore = signal<AccountStore>(storeDefaults)
 
 async function connect() {
 	try {
 		assertsExternalProvider(window.ethereum)
 		const provider = new ethers.providers.Web3Provider(window.ethereum)
-		store.value = { status: 'busy' }
+		accountStore.value = { status: 'busy' }
 		await provider.send('eth_requestAccounts', [])
 		const signer = provider.getSigner()
 		const address = await signer.getAddress()
-		store.value = { status: 'connected', address }
+		accountStore.value = { status: 'connected', address }
 		// watch for account changes
 		if (!isEthereumObservable(provider.provider)) return
 		provider.provider.on('accountsChanged', handleAccountChange)
@@ -53,11 +53,25 @@ async function connect() {
 				error = new EthereumJsonRpcError(exception.code, exception.message, exception.data)
 			}
 		}
-		store.value = { status: 'rejected', error }
+		accountStore.value = { status: 'rejected', error }
 	}
 }
 
+async function ensureConnected() {
+ 	try {
+ 		assertsExternalProvider(window.ethereum)
+ 		const provider = new ethers.providers.Web3Provider(window.ethereum)
+ 		const signer = provider.getSigner()
+ 		accountStore.value = { status: 'busy' }
+ 		const address = await signer.getAddress()
+ 		accountStore.value = { status: 'connected', address }
+ 	} catch (exception) {
+		accountStore.value = storeDefaults
+ 	}
+ }
+
+
 const handleAccountChange = (newAccount: string[]) => {
-	if (store.value?.status !== 'connected') return
-	store.value = ethers.utils.isAddress(newAccount[0]) ? { status: 'connected', address: newAccount[0] } : storeDefaults
+	if (accountStore.value?.status !== 'connected') return
+	accountStore.value = ethers.utils.isAddress(newAccount[0]) ? { status: 'connected', address: newAccount[0] } : storeDefaults
 }

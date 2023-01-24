@@ -81,7 +81,6 @@ const Main = () => {
 	)
 }
 
-
 const SendForm = ({ children }: { children: ComponentChildren }) => {
 	const txn = sendTransactionStore
 	const account = accountStore

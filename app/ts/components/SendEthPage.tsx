@@ -161,16 +161,18 @@ const SendGuide = () => {
 			)
 		case 'signing':
 			return (
-				<div class='p-4'>
+				<div class='p-4 text-center xl:text-left'>
 					<div class='mb-2 font-bold'>Awaiting wallet confirmation...</div>
 					<div class='leading-tight text-white/50 text-sm'>At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.</div>
 				</div>
 			)
 		case 'signed':
-			return <div class='p-4'>
-				<div class='mb-2 font-bold'>Request Successfully Sent!</div>
-				<div class='leading-tight text-white/50 text-sm'>Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status.</div>
-			</div>
+			return (
+				<div class='p-4 text-center xl:text-left'>
+					<div class='mb-2 font-bold'>Request Successfully Sent!</div>
+					<div class='leading-tight text-white/50 text-sm'>Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status.</div>
+				</div>
+			)
 		case 'failed':
 			return (
 				<div class='p-4 text-center xl:text-left'>

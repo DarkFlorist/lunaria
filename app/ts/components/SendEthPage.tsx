@@ -156,7 +156,7 @@ const SendGuide = () => {
 			return (
 				<div class='p-4 text-center xl:text-left'>
 					<div class='mb-2'>What happens when I click send?</div>
-					<div class='leading-tight text-white/50 text-sm'>This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your requst to the chain.</div>
+					<div class='leading-tight text-white/50 text-sm'>This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.</div>
 				</div>
 			)
 		case 'signing':

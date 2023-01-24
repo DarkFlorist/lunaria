@@ -3,7 +3,7 @@ import { Route, Router, useParams } from './HashRouter.js'
 import { SendEthPage } from './SendEthPage.js'
 
 export function App() {
-	useSplashEffect()
+	executeSplashExit()
 
 	return (
 		<Router>
@@ -27,9 +27,13 @@ const Transaction = () => {
 	)
 }
 
-function useSplashEffect() {
+function executeSplashExit() {
 	useEffect(() => {
-		const element = document.querySelector('.splash-screen')
-		element?.classList.add('splash-screen--off')
+		const selectorClassName = '.splash-screen'
+		const selectorHiddenClassName = 'splash-screen--off'
+
+		const element = document.querySelector(selectorClassName)
+		if (!element || element.classList.contains(selectorHiddenClassName)) return;
+		element.classList.add(selectorHiddenClassName)
 	}, [])
 }

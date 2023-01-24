@@ -54,7 +54,7 @@ export type TransactionFailed = {
 
 export type TransactionStore = TransactionComposing | TransactionSigning | TransactionSigned | TransactionConfirming | TransactionConfirmed | TransactionFailed | TransactionIdle
 
-const storeDefaults: TransactionIdle = { status: 'idle', fetch, compose }
+const storeDefaults: TransactionIdle = { status: 'idle', fetch: fetchTransactionByHash, compose }
 const store = signal<TransactionStore>(storeDefaults)
 export const sendTransactionStore = store
 
@@ -70,7 +70,7 @@ async function send() {
 		const to = ethers.utils.getAddress(data.to)
 		store.value = { status: 'signing', data }
 		const transaction = await signer.sendTransaction({ to, value })
-		store.value = { status: 'signed', transaction, fetch, data }
+		store.value = { status: 'signed', transaction, fetch: fetchTransactionByHash, data }
 	} catch (exception) {
 		let error = new Error(`Unknown error (${exception})`)
 
@@ -84,7 +84,7 @@ async function send() {
 	}
 }
 
-async function fetch(hash: string) {
+async function fetchTransactionByHash(hash: string) {
 	if (store.value.status !== 'signed') return
 	const { data } = store.value
 	try {

@@ -89,15 +89,13 @@ const SendForm = ({ children }: { children: ComponentChildren }) => {
 		event.preventDefault()
 		switch (account.value.status) {
 			case 'disconnected':
-				account.value.connect()
-				break
+				return account.value.connect()
 			case 'connected': {
-				handleSubmitWhileConnected()
-				break
+				return handleSubmitWhileConnected()
 			}
 			case 'busy':
 			case 'rejected':
-				break
+				return
 			default:
 				assertUnreachable(account.value)
 		}

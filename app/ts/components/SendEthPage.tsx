@@ -201,9 +201,12 @@ const SendGuide = () => {
 					<div class='text-sm mt-2'>Check that your inputs are correct and click Send again.</div>
 				</div>
 			)
-		default:
-			// handle other states on transaction page
+		case 'confirmed':
+		case 'confirming':
+		case 'idle':
+			// handle confirmation views on transaction page
 			return null
+		default: assertUnreachable(txn.value)
 	}
 }
 
@@ -220,8 +223,13 @@ const SendActions = () => {
 					return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Send</button>
 				case 'signed':
 					return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>View Transaction</button>
-				default:
+				case 'confirmed':
+				case 'confirming':
+				case 'idle':
+				case 'signing':
+				case 'failed':
 					return <button type='submit' class='px-4 py-2 bg-white/10 text-white/20 w-full' disabled>Send</button>
+				default: assertUnreachable(txn.value)
 			}
 		case 'disconnected':
 			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Connect Wallet</button>

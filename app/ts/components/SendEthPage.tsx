@@ -7,6 +7,7 @@ import { ComponentChildren } from 'preact'
 import { sendTransactionStore, TransactionComposing, TransactionFailed, TransactionStore } from '../store/transaction.js'
 import { accountStore } from '../store/account.js'
 import { useEffect } from 'preact/hooks'
+import { assertUnreachable } from '../library/utilities.js'
 
 export const SendEthPage = () => {
 	return (
@@ -88,23 +89,42 @@ const SendForm = ({ children }: { children: ComponentChildren }) => {
 	function handleSubmit(event: Event) {
 		event.preventDefault()
 		switch (account.value.status) {
+			case 'disconnected':
+				account.value.connect()
+				break
+			case 'connected': {
+				handleSubmitWhileConnected()
+				break
+			}
 			case 'busy':
 			case 'rejected':
-				return false
-			case 'disconnected':
-				return account.value.connect()
-			case 'connected': {
-				switch (txn.value.status) {
-					case 'composing':
-						return txn.value.send()
-					case 'signed':
-						return location.href = `#tx/${txn.value.transaction.hash}`
-					case 'failed':
-						return txn.value.reset()
-					default:
-						return false
-				}
-			}
+				break
+			default:
+				assertUnreachable(account.value)
+		}
+	}
+
+	function handleSubmitWhileConnected() {
+		switch (txn.value.status) {
+			case 'composing':
+				txn.value.send()
+				break
+			case 'signed':
+				location.href = `#tx/${txn.value.transaction.hash}`
+				break
+			case 'failed':
+				txn.value.reset()
+				break
+			case 'idle':
+				txn.value.status
+				break
+			case 'idle':
+			case 'signing':
+			case 'confirmed':
+			case 'confirming':
+				break
+			default:
+				assertUnreachable(txn.value)
 		}
 	}
 

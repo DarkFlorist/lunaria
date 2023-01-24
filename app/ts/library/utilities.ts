@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 
 export async function sleep(milliseconds: number) {
-	await new Promise((resolve) => setTimeout(resolve, milliseconds))
+	await new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
 /**
@@ -17,7 +17,7 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 			// remove non-string
 			.filter(Boolean)
 			// remove leading and  trailing whitespaces
-			.map((i) => (i as string).trim())
+			.map(i => (i as string).trim())
 			// combine strings separated by spaces
 			.join(' ')
 	)
@@ -37,4 +37,8 @@ export type EthereumWithListeners = {
 
 export function isEthereumObservable(ethereum: unknown): ethereum is EthereumWithListeners {
 	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
+}
+
+export function assertUnreachable(value: never): never {
+	throw new Error(`Never gonna give you up (${value})`)
 }

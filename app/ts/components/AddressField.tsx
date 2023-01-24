@@ -1,5 +1,6 @@
 import { useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
+import { JSX } from 'preact/jsx-runtime'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
 
 type AddressFieldProps = {
@@ -15,8 +16,8 @@ type AddressFieldProps = {
 export const AddressField = ({ label, name, value, onChange, class: className, disabled = false, required = false }: AddressFieldProps) => {
 	const isValid = useSignal(true)
 
-	function handleChange(e: Event) {
-		const target = e.target as HTMLInputElement
+	function handleChange(e: JSX.TargetedEvent<HTMLInputElement>) {
+		const target = e.currentTarget
 		const isAddressPatternValid = target.checkValidity()
 		isValid.value = isAddressPatternValid && ethers.utils.isAddress(target.value)
 		onChange(target.value)
@@ -27,7 +28,7 @@ export const AddressField = ({ label, name, value, onChange, class: className, d
 			<label for={name} class={baseClass.label}>
 				{label}
 			</label>
-			<input autoComplete='off' id={name} name={name} type='text' pattern='^0x[0-9A-Fa-f]{40}$' value={value} onChange={handleChange} disabled={disabled} required={required} class={baseClass.input} />
+			<input autoComplete='off' id={name} name={name} type='text' pattern='^0x[0-9A-Fa-f]{40}$' value={value} onInput={handleChange} disabled={disabled} required={required} class={baseClass.input} />
 			{!isValid.value && <div class={baseClass.error}>Address is invalid</div>}{' '}
 		</div>
 	)

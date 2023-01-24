@@ -1,4 +1,5 @@
 import { useSignal } from '@preact/signals'
+import { JSX } from 'preact/jsx-runtime'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
 
 type Props = {
@@ -14,8 +15,8 @@ type Props = {
 export const AmountField = ({ label, name, value, onChange, class: className, disabled = false, required = false }: Props) => {
 	const isValid = useSignal(true)
 
-	function handleChange(e: Event) {
-		const target = e.target as HTMLInputElement
+	function handleChange(e: JSX.TargetedEvent<HTMLInputElement>) {
+		const target = e.currentTarget
 		isValid.value = target.checkValidity()
 		onChange(target.value)
 	}
@@ -25,7 +26,7 @@ export const AmountField = ({ label, name, value, onChange, class: className, di
 			<label for={name} class={baseClass.label}>
 				{label}
 			</label>
-			<input autoComplete='off' id={name} name={name} type='text' inputMode='numeric' pattern='^[\d, ]*\.?\d*$' value={value} onChange={handleChange} disabled={disabled} required={required} class={baseClass.input} />
+			<input autoComplete='off' id={name} name={name} type='text' inputMode='numeric' pattern='^[\d, ]*\.?\d*$' value={value} onInput={handleChange} disabled={disabled} required={required} class={baseClass.input} />
 			{!isValid.value && <div class={baseClass.error}>Invalid amount</div>}
 		</div>
 	)

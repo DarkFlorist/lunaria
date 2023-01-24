@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { assertsExternalProvider } from '../library/utilities.js'
 import { TransactionReceipt, TransactionResponse } from '../types.js'
 
-export type SendFnInput = {
+export type SendFunctionInput = {
 	amount: string
 	to: string
 }
@@ -16,40 +16,40 @@ export type TransactionIdle = {
 
 export type TransactionComposing = {
 	status: 'composing'
-	data: SendFnInput
+	data: SendFunctionInput
 	send: () => void
 }
 
 export type TransactionSigning = {
 	status: 'signing'
-	readonly data: SendFnInput
+	readonly data: SendFunctionInput
 }
 
 export type TransactionSigned = {
 	status: 'signed'
 	transaction: TransactionResponse
 	fetch: (hash: string) => void
-	readonly data: SendFnInput
+	readonly data: SendFunctionInput
 }
 
 export type TransactionConfirming = {
 	status: 'confirming'
 	transaction: TransactionResponse
-	readonly data: SendFnInput
+	readonly data: SendFunctionInput
 }
 
 export type TransactionConfirmed = {
 	status: 'confirmed'
 	transaction: TransactionResponse
 	receipt: TransactionReceipt
-	readonly data: SendFnInput
+	readonly data: SendFunctionInput
 }
 
 export type TransactionFailed = {
 	status: 'failed'
 	error: Error
 	reset: (clearData?: boolean) => void
-	data: SendFnInput
+	data: SendFunctionInput
 }
 
 export type TransactionStore = TransactionComposing | TransactionSigning | TransactionSigned | TransactionConfirming | TransactionConfirmed | TransactionFailed | TransactionIdle

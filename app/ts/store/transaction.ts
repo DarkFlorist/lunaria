@@ -76,7 +76,7 @@ async function send() {
 
 		if (exception instanceof Error) {
 			const parsedMessage = exception.message.replace(/ \(.*\)/, '')
-			const shortMessage = parsedMessage[0].toUpperCase() + parsedMessage.slice(1)
+			const shortMessage = `${parsedMessage[0].toUpperCase()}${parsedMessage.slice(1)}`
 			error = new Error(shortMessage)
 		}
 

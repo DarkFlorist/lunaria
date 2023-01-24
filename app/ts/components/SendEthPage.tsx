@@ -156,7 +156,7 @@ const SendAddressField = () => {
 	const txn = sendTransactionStore
 
 	function handleChange(to: string) {
-		if (!isEditInputAllowed(txn.value)) return;
+		if (!isEditInputAllowed(txn.value)) return
 		txn.value.data = { ...txn.value.data, to }
 		if (txn.value.status === 'failed') txn.value.reset()
 	}

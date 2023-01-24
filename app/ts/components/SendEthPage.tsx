@@ -141,7 +141,7 @@ const SendAmountField = () => {
 	const txn = sendTransactionStore
 
 	function handleChange(amount: string) {
-		if (!isEditInputAllowed(txn.value)) return;
+		if (!isEditInputAllowed(txn.value)) return
 		txn.value.data = { ...txn.value.data, amount }
 		if (txn.value.status === 'failed') txn.value.reset()
 	}

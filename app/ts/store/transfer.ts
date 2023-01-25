@@ -4,49 +4,68 @@ import { assertsExternalProvider, assertsTransactionHash } from '../library/util
 import { TransactionReceipt, TransactionResponse } from '../types.js'
 
 type TransactionRequest = {
-	to: `0x${string}`
+	to: `0x${string}` | string
 	amount: string
-	type: 'ETH' | 'LINK'
 }
 
 export type TransferTransaction =
 	| {
-			status: 'unsigned'
-			request: TransactionRequest
-			send: () => Promise<void>
+			status: 'idle'
+			fetchTransactionByHash: (hash: string) => Promise<void>
+			new: () => void
+	  }
+	| {
+			status: 'new'
+			transactionRequest: TransactionRequest
+			sendTransaction: () => Promise<void>
+			reset: () => void
 	  }
 	| {
 			status: 'signed'
-			request: Readonly<TransactionRequest>
 			transactionResponse: TransactionResponse
-			fetch: (hash: string) => Promise<void>
+			fetchTransactionReceipt: () => Promise<void>
+			reset: () => void
 	  }
 	| {
 			status: 'confirmed'
-			request: Readonly<TransactionRequest>
 			transactionResponse: TransactionResponse
 			transactionReceipt: TransactionReceipt
+			reset: () => void
 	  }
 
-const storeDefaults = { status: 'unsigned', request: { to: '0x', amount: '', type: 'ETH' }, send: initiateTransfer } as const
+const storeDefaults = { status: 'idle', fetchTransactionByHash, new: createNewTransfer } as const
 export const transferStore = signal<TransferTransaction>(storeDefaults)
 
-async function initiateTransfer() {
+async function sendTransaction() {
+	if (transferStore.value.status !== 'new') return
 	assertsExternalProvider(window.ethereum)
 	const provider = new ethers.providers.Web3Provider(window.ethereum)
 	const signer = provider.getSigner()
-	const value = ethers.utils.parseEther(transferStore.value.request.amount)
-	const to = ethers.utils.getAddress(transferStore.value.request.to)
+	const value = ethers.utils.parseEther(transferStore.value.transactionRequest.amount)
+	const to = ethers.utils.getAddress(transferStore.value.transactionRequest.to)
 	const transactionResponse = await signer.sendTransaction({ to, value })
-	transferStore.value = { ...transferStore.value, status: 'signed', fetch: (hash: string) => fetchTransactionByHash(hash), transactionResponse }
+	transferStore.value = { ...transferStore.value, status: 'signed', transactionResponse, fetchTransactionReceipt }
 }
 
 async function fetchTransactionByHash(hash: TransactionResponse['hash']) {
-	if (transferStore.value.status !== 'signed') return
+	if (transferStore.value.status !== 'idle') return
 	assertsTransactionHash(hash)
 	assertsExternalProvider(window.ethereum)
 	const provider = new ethers.providers.Web3Provider(window.ethereum)
-	const transaction = await provider.getTransaction(hash)
-	const transactionReceipt = await transaction.wait()
+	const transactionResponse = await provider.getTransaction(hash)
+	transferStore.value = { ...transferStore.value, status: 'signed', transactionResponse, fetchTransactionReceipt, reset }
+}
+
+async function fetchTransactionReceipt() {
+	if (transferStore.value.status !== 'signed') return
+	const transactionReceipt = await transferStore.value.transactionResponse.wait()
 	transferStore.value = { ...transferStore.value, status: 'confirmed', transactionReceipt }
+}
+
+function createNewTransfer() {
+	transferStore.value = { status: 'new', transactionRequest: { to: '', amount: '' }, sendTransaction, reset }
+}
+
+function reset() {
+	transferStore.value = storeDefaults
 }

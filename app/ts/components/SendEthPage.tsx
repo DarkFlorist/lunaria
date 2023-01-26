@@ -54,6 +54,7 @@ const Main = () => {
 
 		case 'signed':
 		case 'confirmed':
+			window.location.href = `#tx/${transfer.transactionResponse.hash}`
 			return null
 	}
 }

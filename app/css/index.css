@@ -1063,14 +1063,6 @@ video {
 	grid-area: footer;
 }
 
-.\[grid-template-areas\:_\"title\"_\"token\"_\"amount\"_\"address\"_\"tip\"_\"controls\"\] {
-	grid-template-areas: 'title' 'token' 'amount' 'address' 'tip' 'controls';
-}
-
-.\[grid-area\:title\] {
-	grid-area: title;
-}
-
 .\[grid-area\:token\] {
 	grid-area: token;
 }
@@ -1089,6 +1081,14 @@ video {
 
 .\[grid-area\:controls\] {
 	grid-area: controls;
+}
+
+.\[grid-template-areas\:_\"title\"_\"token\"_\"amount\"_\"address\"_\"tip\"_\"controls\"\] {
+	grid-template-areas: 'title' 'token' 'amount' 'address' 'tip' 'controls';
+}
+
+.\[grid-area\:title\] {
+	grid-area: title;
 }
 
 .placeholder\:text-white\/30::-moz-placeholder {

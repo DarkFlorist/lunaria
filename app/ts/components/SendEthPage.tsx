@@ -139,20 +139,19 @@ const TokenSelectField = () => {
 }
 
 const SendForm = ({ children }: { children: ComponentChildren }) => {
+	const transfer = transferStore.value
 	const [_transactionResponse, resolveTransactionResponse] = useTransactionResponse()
-	const handleSubmit = (event: Event) => {
-		event.preventDefault()
-		resolveTransactionResponse()
-	}
 
-	switch (transferStore.value.status) {
+	switch (transfer.status) {
 		case 'new':
-			return <form onSubmit={handleSubmit}>{children}</form>
+			return <form onSubmit={(event: Event) => { event.preventDefault(); resolveTransactionResponse() }}>{children}</form>
+		case 'signed':
+			return <form onSubmit={(event: Event) => { event.preventDefault(); location.href = `#tx/${transfer.transactionResponse.hash}` }}>{children}</form>
 		case 'confirmed':
 		case 'idle':
 		case 'signed':
 			return <>{children}</>
-		default: assertUnreachable(transferStore.value)
+		default: assertUnreachable(transfer)
 	}
 
 }

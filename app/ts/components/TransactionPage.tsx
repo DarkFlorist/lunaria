@@ -1,7 +1,7 @@
 import { useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
 import { JSX } from 'preact/jsx-runtime'
-import { transferStore } from '../store/transfer.js'
+import { transferStore, transferStoreDefaults } from '../store/transfer.js'
 import * as Layout from './Layout.js'
 
 export const TransactionPage = () => {
@@ -21,7 +21,7 @@ const Main = () => {
 
 	const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		transferStore.value.status !== 'idle' && transferStore.value.reset()
+		transferStore.value = transferStoreDefaults
 		window.location.href = `#tx/${hash.value}`
 	}
 

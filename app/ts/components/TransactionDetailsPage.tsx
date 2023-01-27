@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import * as Layout from './Layout.js'
 import { useParams } from './HashRouter.js'
 import { assertUnreachable, calculateGasFee, isTransactionHash } from '../library/utilities.js'
-import { transferStore } from '../store/transfer.js'
+import { assertTransferStatus, transferStore } from '../store/transfer.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import * as Icon from "./Icon/index.js"
 
@@ -33,8 +33,9 @@ const Main = () => {
 			return <TransactionDetailsSigned />
 		case 'confirmed':
 			return <TransactionDetailsConfirmed />
-		default:
-			return null
+		case 'new':
+			return null // render should be handled in send page
+		default: assertUnreachable(transfer.value)
 	}
 }
 
@@ -43,10 +44,12 @@ const TransactionDetailsIdle = () => {
 	const hash = extractTransactionHashFromParams()
 	const [transactionResponse, resolveTransactionResponse, resetTransactionResponse] = useAsyncState()
 
+	assertTransferStatus(transfer.status, 'idle')
+
 	const fetchTransactionResponse = () => {
 		resolveTransactionResponse(async () => {
-			if (!hash || transfer.status !== 'idle') return
-			await transfer.fetchTransactionByHash(hash)
+			if (!hash || transferStore.value.status !== 'idle') return
+			await transferStore.value.fetchTransactionByHash(hash)
 		})
 	}
 
@@ -115,7 +118,7 @@ const TransactionDetailsSigned = () => {
 		})
 	}
 
-	if (transfer.status !== 'signed') return null
+	assertTransferStatus(transfer.status, 'signed')
 
 	switch (transactionReceipt.state) {
 		case 'inactive':
@@ -172,7 +175,7 @@ const TransactionDetailsSigned = () => {
 const TransactionDetailsConfirmed = () => {
 	const transfer = transferStore.value
 
-	if (transfer.status !== 'confirmed') return null
+	assertTransferStatus(transfer.status, 'confirmed')
 
 	const transactionFee = calculateGasFee(transfer.transactionReceipt.effectiveGasPrice, transfer.transactionReceipt.gasUsed)
 

@@ -18,54 +18,53 @@ export type TransferTransaction =
 			status: 'new'
 			transactionRequest: TransactionRequest
 			sendTransaction: () => Promise<void>
-			reset: () => void
 	  }
 	| {
 			status: 'signed'
 			transactionResponse: TransactionResponse
 			fetchTransactionReceipt: () => Promise<void>
-			reset: () => void
 	  }
 	| {
 			status: 'confirmed'
 			transactionResponse: TransactionResponse
 			transactionReceipt: TransactionReceipt
-			reset: () => void
 	  }
 
-const storeDefaults = { status: 'idle', fetchTransactionByHash, new: createNewTransfer } as const
-export const transferStore = signal<TransferTransaction>(storeDefaults)
+export const transferStoreDefaults = { status: 'idle', fetchTransactionByHash, new: createNewTransfer } as const
+export const transferStore = signal<TransferTransaction>(transferStoreDefaults)
 
 async function sendTransaction() {
-	if (transferStore.value.status !== 'new') return
+	assertTransferStatus(transferStore.value.status, 'new')
 	assertsExternalProvider(window.ethereum)
 	const provider = new ethers.providers.Web3Provider(window.ethereum)
 	const signer = provider.getSigner()
 	const value = ethers.utils.parseEther(transferStore.value.transactionRequest.amount)
 	const to = ethers.utils.getAddress(transferStore.value.transactionRequest.to)
 	const transactionResponse = await signer.sendTransaction({ to, value })
-	transferStore.value = { ...transferStore.value, status: 'signed', transactionResponse, fetchTransactionReceipt }
+	transferStore.value = { status: 'signed', transactionResponse, fetchTransactionReceipt }
 }
 
 async function fetchTransactionByHash(hash: TransactionResponse['hash']) {
-	if (transferStore.value.status !== 'idle') return
 	assertsTransactionHash(hash)
 	assertsExternalProvider(window.ethereum)
 	const provider = new ethers.providers.Web3Provider(window.ethereum)
 	const transactionResponse = await provider.getTransaction(hash)
-	transferStore.value = { ...transferStore.value, status: 'signed', transactionResponse, fetchTransactionReceipt, reset }
+	if (!transactionResponse) throw new Error('Transaction does not exist in chain')
+	transferStore.value = { ...transferStore.value, status: 'signed', transactionResponse, fetchTransactionReceipt }
 }
 
 async function fetchTransactionReceipt() {
-	if (transferStore.value.status !== 'signed') return
+	assertTransferStatus(transferStore.value.status, 'signed')
+	assertsExternalProvider(window.ethereum)
 	const transactionReceipt = await transferStore.value.transactionResponse.wait()
+	if (!transactionReceipt) throw new Error('Unable to get transaction receipt')
 	transferStore.value = { ...transferStore.value, status: 'confirmed', transactionReceipt }
 }
 
 function createNewTransfer() {
-	transferStore.value = { status: 'new', transactionRequest: { to: '', amount: '' }, sendTransaction, reset }
+	transferStore.value = { status: 'new', transactionRequest: { to: '', amount: '' }, sendTransaction }
 }
 
-function reset() {
-	transferStore.value = storeDefaults
+export function assertTransferStatus<T extends TransferTransaction['status']>(status: string, requiredStatus: T): asserts status is T {
+	if (status !== requiredStatus) throw new Error(`Transfer status "${status}" should match ${requiredStatus}`)
 }

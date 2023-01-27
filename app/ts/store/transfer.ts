@@ -66,5 +66,5 @@ function createNewTransfer() {
 }
 
 export function assertTransferStatus<T extends TransferTransaction['status']>(status: string, requiredStatus: T): asserts status is T {
-	if (status !== requiredStatus) throw new Error(`Transfer status "${status}" should match ${requiredStatus}`)
+	if (status !== requiredStatus) throw new Error(`Transfer status "${status}" did not match required "${requiredStatus}"`)
 }

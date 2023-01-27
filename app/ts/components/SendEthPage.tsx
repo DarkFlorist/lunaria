@@ -4,15 +4,19 @@ import { AddressField } from './AddressField.js'
 import { AmountField } from './AmountField.js'
 import { accountStore } from '../store/account.js'
 import { assertUnreachable } from '../library/utilities.js'
-import { transferStore } from '../store/transfer.js'
+import { assertTransferStatus, transferStore } from '../store/transfer.js'
 import { useAsyncState } from '../library/preact-utilities.js'
+import { ethers } from 'ethers'
+import ErrorBoundary from './ErrorBoundary.js'
 
 export const SendEthPage = () => {
 	return (
 		<Layout.Page>
 			<Layout.Header />
 			<Layout.Body>
-				<Main />
+				<ErrorBoundary>
+					<Main />
+				</ErrorBoundary>
 			</Layout.Body>
 			<Layout.Footer />
 		</Layout.Page>
@@ -20,27 +24,24 @@ export const SendEthPage = () => {
 }
 
 const Main = () => {
-	const [transactionResponseAsync, resolveTransactionResponse] = useAsyncState()
-	const transfer = transferStore.value
-
-	switch (transfer.status) {
+	switch (transferStore.value.status) {
 		case 'idle':
-			transfer.new()
+			transferStore.value.new()
 			return null
 
 		case 'new':
+		case 'signed':
 			return (
-				<form onSubmit={(event: Event) => { event.preventDefault(); resolveTransactionResponse(transfer.sendTransaction) }}>
-					<MainLayout>
+				<SendForm>
+					<FormLayout>
 						<div class='[grid-area:token]'>
 							<TokenSelectField />
 						</div>
 						<div class='[grid-area:amount]'>
-							<AmountField value={transfer.transactionRequest.amount} onChange={(amount) => transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, amount } }} label='Amount' name='amount' disabled={transactionResponseAsync.state === 'pending'} />
+							<SendAmountField />
 						</div>
 						<div class='[grid-area:address]'>
-							<AddressField value={transfer.transactionRequest.to} onChange={(to) => transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, to } }
-							} label='Address' name='to' disabled={transactionResponseAsync.state === 'pending'} />
+							<SendToField />
 						</div>
 						<div class='[grid-area:tip] border border-dashed border-white/30'>
 							<SendGuide />
@@ -48,24 +49,13 @@ const Main = () => {
 						<div class='[grid-area:controls]'>
 							<SendActions />
 						</div>
-					</MainLayout>
-				</form>
+					</FormLayout>
+				</SendForm>
 			)
 
-		case 'signed':
 		case 'confirmed':
-			window.location.href = `#tx/${transfer.transactionResponse.hash}`
 			return null
 	}
-}
-
-const MainLayout = ({ children }: { children: ComponentChildren }) => {
-	return <div class='grid [grid-template-areas:_"title"_"token"_"amount"_"address"_"tip"_"controls"] grid-rows-[repeat(auto-fit,minmax(min-content,0))] gap-y-4 lg:[grid-template-areas:_"title_title"_"token_amount"_"address_address"_"tip_tip"_"controls_controls"] lg:gap-x-6 xl:[grid-template-areas:_"title_title_title"_"token_amount_tip"_"address_address_tip"_"controls_controls_tip"] lg:grid-cols-2 xl:grid-cols-3'>
-		<div class='[grid-area:title]'>
-			<div class='bg-white/10 text-xl font-bold px-6 py-2 -ml-6'>Send Funds</div>
-		</div>
-		{children}
-	</div>
 }
 
 const SendGuide = () => {
@@ -146,4 +136,85 @@ const TokenSelectField = () => {
 			<div class='cursor-pointer'>ETH</div>
 		</div>
 	</div>
+}
+
+const SendForm = ({ children }: { children: ComponentChildren }) => {
+	const [_transactionResponse, resolveTransactionResponse] = useTransactionResponse()
+	const handleSubmit = (event: Event) => {
+		event.preventDefault()
+		resolveTransactionResponse()
+	}
+
+	switch (transferStore.value.status) {
+		case 'new':
+			return <form onSubmit={handleSubmit}>{children}</form>
+		case 'confirmed':
+		case 'idle':
+		case 'signed':
+			return <>{children}</>
+		default: assertUnreachable(transferStore.value)
+	}
+
+}
+
+const SendAmountField = () => {
+	const transfer = transferStore.value
+	const [transactionResponse] = useTransactionResponse()
+
+	const handleChange = (amount: string) => {
+		if (transfer.status !== 'new') return // ignore input for other states
+		transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, amount } }
+	}
+
+	switch (transfer.status) {
+		case 'new':
+			return <AmountField value={transfer.transactionRequest.amount} onChange={handleChange} label='Amount' name='amount' disabled={transactionResponse.state === 'pending'} />
+		case 'signed':
+			return <AmountField value={ethers.utils.formatEther(transfer.transactionResponse.value!)} onChange={handleChange} label='Amount' name='amount' disabled />
+		case 'idle':
+		case 'confirmed':
+			return null
+		default: assertUnreachable(transfer)
+	}
+}
+
+const SendToField = () => {
+	const transfer = transferStore.value
+	const [transactionResponse] = useTransactionResponse()
+
+	const handleChange = (to: string) => {
+		if (transfer.status !== 'new') return // ignore input for other states
+		transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, to } }
+	}
+
+	switch (transfer.status) {
+		case 'new':
+			return <AddressField value={transfer.transactionRequest.to} onChange={handleChange} label='To' name='to' disabled={transactionResponse.state === 'pending'} />
+		case 'signed':
+			return <AddressField value={transfer.transactionResponse.to!} onChange={handleChange} label='To' name='to' disabled />
+		case 'idle':
+		case 'confirmed':
+			return null
+		default: assertUnreachable(transfer)
+	}
+}
+
+const FormLayout = ({ children }: { children: ComponentChildren }) => {
+	return <div class='grid [grid-template-areas:_"title"_"token"_"amount"_"address"_"tip"_"controls"] grid-rows-[repeat(auto-fit,minmax(min-content,0))] gap-y-4 lg:[grid-template-areas:_"title_title"_"token_amount"_"address_address"_"tip_tip"_"controls_controls"] lg:gap-x-6 xl:[grid-template-areas:_"title_title_title"_"token_amount_tip"_"address_address_tip"_"controls_controls_tip"] lg:grid-cols-2 xl:grid-cols-3'>
+		<div class='[grid-area:title]'>
+			<div class='bg-white/10 text-xl font-bold px-6 py-2 -ml-6'>Send Funds</div>
+		</div>
+		{children}
+	</div>
+}
+
+function useTransactionResponse() {
+	const [topic, resolve, reset] = useAsyncState()
+
+	const resolver = () => {
+		assertTransferStatus(transferStore.value.status, 'new')
+		resolve(transferStore.value.sendTransaction)
+	}
+
+	return [topic, resolver, reset] as const
 }

@@ -516,6 +516,11 @@ video {
 	margin-bottom: 1rem;
 }
 
+.my-3 {
+	margin-top: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
 .my-2 {
 	margin-top: 0.5rem;
 	margin-bottom: 0.5rem;
@@ -525,8 +530,12 @@ video {
 	margin-bottom: 0.5rem;
 }
 
-.mt-2 {
-	margin-top: 0.5rem;
+.mb-3 {
+	margin-bottom: 0.75rem;
+}
+
+.mt-3 {
+	margin-top: 0.75rem;
 }
 
 .-ml-6 {
@@ -731,6 +740,10 @@ video {
 	row-gap: 0.25rem;
 }
 
+.overflow-auto {
+	overflow: auto;
+}
+
 .overflow-hidden {
 	overflow: hidden;
 }
@@ -866,14 +879,14 @@ video {
 	padding-right: 2rem;
 }
 
-.py-1 {
-	padding-top: 0.25rem;
-	padding-bottom: 0.25rem;
-}
-
 .px-2 {
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
+}
+
+.py-1 {
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
 }
 
 .py-\[10\%\] {
@@ -1104,12 +1117,12 @@ video {
 	grid-area: controls;
 }
 
-.\[grid-template-areas\:_\"title\"_\"token\"_\"amount\"_\"address\"_\"tip\"_\"controls\"\] {
-	grid-template-areas: 'title' 'token' 'amount' 'address' 'tip' 'controls';
-}
-
 .\[grid-area\:title\] {
 	grid-area: title;
+}
+
+.\[grid-template-areas\:_\"title\"_\"token\"_\"amount\"_\"address\"_\"tip\"_\"controls\"\] {
+	grid-template-areas: 'title' 'token' 'amount' 'address' 'tip' 'controls';
 }
 
 .placeholder\:text-white\/30::-moz-placeholder {
@@ -1305,10 +1318,6 @@ video {
 
 	.xl\:grid-cols-\[repeat\(2\2c _minmax\(min-content\2c _1fr\)\)\] {
 		grid-template-columns: repeat(2, minmax(min-content, 1fr));
-	}
-
-	.xl\:justify-start {
-		justify-content: flex-start;
 	}
 
 	.xl\:border-l-4 {

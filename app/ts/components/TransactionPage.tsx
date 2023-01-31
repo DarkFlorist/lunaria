@@ -17,12 +17,12 @@ export const TransactionPage = () => {
 }
 
 const Main = () => {
-	const hash = useSignal('')
+	const hashFieldInput = useSignal<string>('')
 
 	const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		transferStore.value = transferStoreDefaults
-		window.location.href = `#tx/${hash.value}`
+		window.location.href = `#tx/${hashFieldInput.value}`
 	}
 
 	return (
@@ -31,8 +31,10 @@ const Main = () => {
 				<div class='text-2xl md:text-3xl font-bold'>Inspect Transaction</div>
 				<div class='text-white/50 text-sm mb-8'>View details of a submitted transaction, inspect fees, or event track progress status of your transfers.</div>
 				<form onSubmit={handleSubmit}>
-					<TransactionHashField onInput={(value) => hash.value = value} />
-					<button class='px-6 py-2 border mt-4 hover:bg-white/10' type='submit'>Inspect</button>
+					<TransactionHashField onInput={value => (hashFieldInput.value = value)} />
+					<button class='px-6 py-2 border mt-4 hover:bg-white/10' type='submit'>
+						Inspect
+					</button>
 				</form>
 			</div>
 		</div>
@@ -40,7 +42,6 @@ const Main = () => {
 }
 
 export const TransactionHashField = ({ onInput }: { onInput: (value: string) => void }) => {
-
 	function handleInput(e: JSX.TargetedEvent<HTMLInputElement>) {
 		const field = e.currentTarget
 		const validity = ethers.utils.hexDataLength(field.value) === 32 ? '' : 'Please enter a valid transaction hash'

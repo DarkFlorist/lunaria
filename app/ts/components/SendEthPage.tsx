@@ -4,10 +4,11 @@ import { AddressField } from './AddressField.js'
 import { AmountField } from './AmountField.js'
 import { accountStore } from '../store/account.js'
 import { assertUnreachable } from '../library/utilities.js'
-import { assertTransferStatus, transferStore } from '../store/transfer.js'
-import { useAsyncState } from '../library/preact-utilities.js'
+import { transferStore } from '../store/transfer.js'
 import { ethers } from 'ethers'
 import ErrorBoundary from './ErrorBoundary.js'
+import { useEffect } from 'preact/hooks'
+import { TransferProvider, useTransfer } from './TransferContext.js'
 
 export const SendEthPage = () => {
 	return (
@@ -24,79 +25,72 @@ export const SendEthPage = () => {
 }
 
 const Main = () => {
-	switch (transferStore.value.status) {
-		case 'idle':
-			transferStore.value.new()
-			return null
+	useEffect(() => {
+		// on mount, set the state to enable form composition
+		if (transferStore.value.status !== 'idle') return
+		transferStore.value.createNewTransfer()
+	}, [])
 
-		case 'new':
-		case 'signed':
-			return (
-				<SendForm>
-					<FormLayout>
-						<div class='[grid-area:token]'>
-							<TokenSelectField />
-						</div>
-						<div class='[grid-area:amount]'>
-							<SendAmountField />
-						</div>
-						<div class='[grid-area:address]'>
-							<SendToField />
-						</div>
-						<div class='[grid-area:tip] border border-dashed border-white/30'>
-							<SendGuide />
-						</div>
-						<div class='[grid-area:controls]'>
-							<SendActions />
-						</div>
-					</FormLayout>
-				</SendForm>
-			)
-
-		case 'confirmed':
-			return null
-	}
+	return (
+		<TransferProvider>
+			<SendForm>
+				<FormLayout>
+					<div class='[grid-area:token]'>
+						<TokenSelectField />
+					</div>
+					<div class='[grid-area:amount]'>
+						<SendAmountField />
+					</div>
+					<div class='[grid-area:address]'>
+						<SendToField />
+					</div>
+					<div class='[grid-area:tip] border border-dashed border-white/30'>
+						<SendGuide />
+					</div>
+					<div class='[grid-area:controls]'>
+						<SendActions />
+					</div>
+				</FormLayout>
+			</SendForm>
+		</TransferProvider>
+	)
 }
 
 const SendGuide = () => {
-	const transfer = transferStore.value
-	switch (transfer.status) {
-		// case 'new':
-		// 	return (
-		// 		<div class='p-4 text-center xl:text-left'>
-		// 			<div class='mb-2'>What happens when I click send?</div>
-		// 			<div class='leading-tight text-white/50 text-sm'>This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.</div>
-		// 		</div>
-		// 	)
-		// case 'signed':
-		// 	return (
-		// 		<div class='p-4 text-center xl:text-left'>
-		// 			<div class='mb-2 font-bold'>Awaiting wallet confirmation...</div>
-		// 			<div class='leading-tight text-white/50 text-sm'>At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.</div>
-		// 		</div>
-		// 	)
-		// case 'signed':
-		// 	return (
-		// 		<div class='p-4 text-center xl:text-left'>
-		// 			<div class='mb-2 font-bold'>Request Successfully Sent!</div>
-		// 			<div class='leading-tight text-white/50 text-sm'>Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status.</div>
-		// 		</div>
-		// 	)
-		// case 'confirmed':
-		// 	return (
-		// 		<div class='p-4 text-center xl:text-left'>
-		// 			<div class='mb-2 font-bold'>Wallet returned an error!</div>
-		// 			<div class='leading-tight xl:border-l-4 xl:border-l-white/30 px-3 py-1 flex items-center justify-center xl:justify-start text-white/50 text-sm'>{txn.value.error.message}</div>
-		// 			<div class='text-sm mt-2'>Check that your inputs are correct and click Send again.</div>
-		// 		</div>
-		// 	)
-		case 'signed':
-		case 'confirmed':
-		case 'new':
-		case 'idle':
-			// handle confirmation views on transaction page
-			return null
-		default: assertUnreachable(transfer)
+	const { asyncResponse } = useTransfer()
+	const [transactionResponse] = asyncResponse
+
+	switch (transactionResponse.state) {
+		case 'inactive':
+			return (
+				<div class='p-4 text-center xl:text-left'>
+					<div class='mb-2'>What happens when I click send?</div>
+					<div class='leading-tight text-white/50 text-sm'>This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.</div>
+				</div>
+			)
+		case 'pending':
+			return (
+				<div class='p-4 text-center xl:text-left'>
+					<div class='mb-2 font-bold'>Awaiting wallet confirmation...</div>
+					<div class='leading-tight text-white/50 text-sm'>At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.</div>
+				</div>
+			)
+		case 'resolved':
+			return (
+				<div class='p-4 text-center xl:text-left'>
+					<div class='mb-2 font-bold'>Request Successfully Sent!</div>
+					<div class='leading-tight text-white/50 text-sm'>Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status.</div>
+				</div>
+			)
+		case 'rejected':
+			return (
+				<div class='p-4 text-center xl:text-left'>
+					<div class='mb-2 font-bold'>Wallet returned an error!</div>
+					<div class='leading-tight xl:border-l-4 xl:border-l-white/30 px-3 py-1 flex items-center justify-center xl:justify-start text-white/50 text-sm'>{transactionResponse.error.message}</div>
+					<div class='text-sm mt-2'>Check that your inputs are correct and click Send again.</div>
+				</div>
+			)
+		default: assertUnreachable(transactionResponse)
 	}
 }
 
@@ -139,8 +133,8 @@ const TokenSelectField = () => {
 }
 
 const SendForm = ({ children }: { children: ComponentChildren }) => {
-	const transfer = transferStore.value
-	const [_transactionResponse, resolveTransactionResponse] = useTransactionResponse()
+	const { asyncResponse, store: transfer } = useTransfer()
+	const [_transactionResponse, resolveTransactionResponse] = asyncResponse
 
 	switch (transfer.status) {
 		case 'new':
@@ -157,8 +151,8 @@ const SendForm = ({ children }: { children: ComponentChildren }) => {
 }
 
 const SendAmountField = () => {
-	const transfer = transferStore.value
-	const [transactionResponse] = useTransactionResponse()
+	const { asyncResponse, store: transfer } = useTransfer()
+	const [transactionResponse] = asyncResponse
 
 	const handleChange = (amount: string) => {
 		if (transfer.status !== 'new') return // ignore input for other states
@@ -178,8 +172,8 @@ const SendAmountField = () => {
 }
 
 const SendToField = () => {
-	const transfer = transferStore.value
-	const [transactionResponse] = useTransactionResponse()
+	const { asyncResponse, store: transfer } = useTransfer()
+	const [transactionResponse] = asyncResponse
 
 	const handleChange = (to: string) => {
 		if (transfer.status !== 'new') return // ignore input for other states
@@ -205,15 +199,4 @@ const FormLayout = ({ children }: { children: ComponentChildren }) => {
 		</div>
 		{children}
 	</div>
-}
-
-function useTransactionResponse() {
-	const [topic, resolve, reset] = useAsyncState()
-
-	const resolver = () => {
-		assertTransferStatus(transferStore.value.status, 'new')
-		resolve(transferStore.value.sendTransaction)
-	}
-
-	return [topic, resolver, reset] as const
 }

@@ -12,7 +12,7 @@ export type TransferTransaction =
 	| {
 			status: 'idle'
 			fetchTransactionByHash: (hash: string) => Promise<void>
-			new: () => void
+			createNewTransfer: () => void
 	  }
 	| {
 			status: 'new'
@@ -30,7 +30,7 @@ export type TransferTransaction =
 			transactionReceipt: TransactionReceipt
 	  }
 
-export const transferStoreDefaults = { status: 'idle', fetchTransactionByHash, new: createNewTransfer } as const
+export const transferStoreDefaults = { status: 'idle', fetchTransactionByHash, createNewTransfer } as const
 export const transferStore = signal<TransferTransaction>(transferStoreDefaults)
 
 async function sendTransaction() {

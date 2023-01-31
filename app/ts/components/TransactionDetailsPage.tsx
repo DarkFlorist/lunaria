@@ -5,7 +5,7 @@ import { useParams } from './HashRouter.js'
 import { assertUnreachable, calculateGasFee, isTransactionHash } from '../library/utilities.js'
 import { assertTransferStatus, transferStore } from '../store/transfer.js'
 import { useAsyncState } from '../library/preact-utilities.js'
-import * as Icon from "./Icon/index.js"
+import * as Icon from './Icon/index.js'
 
 export const TransactionDetailsPage = () => {
 	return (
@@ -24,7 +24,7 @@ const Main = () => {
 	const transfer = transferStore
 	const hash = extractTransactionHashFromParams()
 
-	if (!hash) return <TransactionDetailsInvalid />
+	if (hash === null) return <TransactionDetailsInvalid />
 
 	switch (transfer.value.status) {
 		case 'idle':
@@ -35,7 +35,8 @@ const Main = () => {
 			return <TransactionDetailsConfirmed />
 		case 'new':
 			return null // render should be handled in send page
-		default: assertUnreachable(transfer.value)
+		default:
+			assertUnreachable(transfer.value)
 	}
 }
 
@@ -48,7 +49,7 @@ const TransactionDetailsIdle = () => {
 
 	const fetchTransactionResponse = () => {
 		resolveTransactionResponse(async () => {
-			if (!hash || transferStore.value.status !== 'idle') return
+			if (hash === null || transferStore.value.status !== 'idle') return
 			await transferStore.value.fetchTransactionByHash(hash)
 		})
 	}
@@ -81,7 +82,6 @@ const TransactionDetailsIdle = () => {
 						<div class='w-64 h-4 my-1 bg-white/30 animate-pulse rounded' />
 					</InfoLabel>
 				</div>
-
 			)
 		case 'rejected':
 			return (
@@ -93,7 +93,7 @@ const TransactionDetailsIdle = () => {
 							<Icon.Refresh />
 							<span>Retry</span>
 						</button>
-						<button class='hover:underline underline-offset-4 flex items-center gap-1' onClick={() => { }}>
+						<button class='hover:underline underline-offset-4 flex items-center gap-1' onClick={() => {}}>
 							<Icon.Copy />
 							<span>Copy Transaction Hash</span>
 						</button>
@@ -102,7 +102,8 @@ const TransactionDetailsIdle = () => {
 			)
 		case 'resolved':
 			return null
-		default: assertUnreachable(transactionResponse)
+		default:
+			assertUnreachable(transactionResponse)
 	}
 }
 
@@ -159,7 +160,7 @@ const TransactionDetailsSigned = () => {
 							<Icon.Refresh />
 							<span>Retry</span>
 						</button>
-						<button class='hover:underline underline-offset-4 flex items-center gap-1' onClick={() => { }}>
+						<button class='hover:underline underline-offset-4 flex items-center gap-1'>
 							<Icon.Copy />
 							<span>Copy Transaction Hash</span>
 						</button>
@@ -168,7 +169,8 @@ const TransactionDetailsSigned = () => {
 			)
 		case 'resolved':
 			return null
-		default: assertUnreachable(transactionReceipt)
+		default:
+			assertUnreachable(transactionReceipt)
 	}
 }
 

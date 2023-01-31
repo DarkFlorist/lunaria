@@ -62,26 +62,19 @@ const SendGuide = () => {
 
 	switch (transactionResponse.state) {
 		case 'inactive':
-			return (
-				<Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
-			)
+			return <Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
 		case 'pending':
-			return (
-				<Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
-			)
+			return <Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
 		case 'resolved':
-			return (
-				<Guide title='Request Successfully Sent!' content='Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it&apos;s status.' />
-			)
+			return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
 		case 'rejected':
-			return (
-				<Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transactionResponse.error.message} />
-			)
-		default: assertUnreachable(transactionResponse)
+			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transactionResponse.error.message} />
+		default:
+			assertUnreachable(transactionResponse)
 	}
 }
 
-const Guide = ({ title, quote, content }: { title: string; quote?: string, content: string }) => {
+const Guide = ({ title, quote, content }: { title: string; quote?: string; content: string }) => {
 	return (
 		<div class='p-4 text-center xl:text-left'>
 			<div class='mb-3 font-bold'>{title}</div>
@@ -100,7 +93,11 @@ const SendActions = () => {
 		case 'connected':
 			return <ActionsConnected />
 		case 'disconnected':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Connect Wallet</button>
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					Connect Wallet
+				</button>
+			)
 		case 'rejected':
 			return <div class='px-4 py-2 bg-red-400/10 border border-red-400/50 text-white/50 text-center cursor-not-allowed'>Unable to connect to wallet!</div>
 	}
@@ -110,13 +107,26 @@ const ActionsConnected = () => {
 	const transfer = transferStore.value
 	switch (transfer.status) {
 		case 'new':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Send</button>
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					Send
+				</button>
+			)
 		case 'signed':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>View Transaction</button>
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					View Transaction
+				</button>
+			)
 		case 'confirmed':
 		case 'idle':
-			return <button type='submit' class='px-4 py-2 bg-white/10 text-white/20 w-full' disabled>Loading...</button>
-		default: assertUnreachable(transfer)
+			return (
+				<button type='submit' class='px-4 py-2 bg-white/10 text-white/20 w-full' disabled>
+					Loading...
+				</button>
+			)
+		default:
+			assertUnreachable(transfer)
 	}
 }
 
@@ -137,16 +147,34 @@ const SendForm = ({ children }: { children: ComponentChildren }) => {
 
 	switch (transfer.status) {
 		case 'new':
-			return <form onSubmit={(event: Event) => { event.preventDefault(); resolveTransactionResponse() }}>{children}</form>
+			return (
+				<form
+					onSubmit={(event: Event) => {
+						event.preventDefault()
+						resolveTransactionResponse()
+					}}
+				>
+					{children}
+				</form>
+			)
 		case 'signed':
-			return <form onSubmit={(event: Event) => { event.preventDefault(); location.href = `#tx/${transfer.transactionResponse.hash}` }}>{children}</form>
+			return (
+				<form
+					onSubmit={(event: Event) => {
+						event.preventDefault()
+						location.href = `#tx/${transfer.transactionResponse.hash}`
+					}}
+				>
+					{children}
+				</form>
+			)
 		case 'confirmed':
 		case 'idle':
 		case 'signed':
 			return <>{children}</>
-		default: assertUnreachable(transfer)
+		default:
+			assertUnreachable(transfer)
 	}
-
 }
 
 const SendAmountField = () => {
@@ -166,7 +194,8 @@ const SendAmountField = () => {
 		case 'idle':
 		case 'confirmed':
 			return null
-		default: assertUnreachable(transfer)
+		default:
+			assertUnreachable(transfer)
 	}
 }
 
@@ -187,7 +216,8 @@ const SendToField = () => {
 		case 'idle':
 		case 'confirmed':
 			return null
-		default: assertUnreachable(transfer)
+		default:
+			assertUnreachable(transfer)
 	}
 }
 
@@ -198,7 +228,6 @@ const PageTitle = () => {
 		</div>
 	)
 }
-
 
 const FormLayout = ({ children }: { children: ComponentChildren }) => {
 	return (

@@ -1,5 +1,6 @@
 import { ComponentChildren, JSX } from 'preact'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
+import { ActiveNetwork } from './ActiveNetwork.js'
 import { ConnectToWallet } from './ConnectToWallet.js'
 import { EthBalance } from './EthBalance.js'
 
@@ -76,12 +77,3 @@ const Support = () => {
 		</div>
 	)
 }
-
-const ActiveNetwork = () => (
-	<div class='flex flex-col items-center justify-center md:items-start md:gap-1 mb-2'>
-		<div class='uppercase text-white/50 text-xs md:text-sm'>network</div>
-		<div class='text-lg font-bold capitalize' title='0x5'>
-			Goerli
-		</div>
-	</div>
-)

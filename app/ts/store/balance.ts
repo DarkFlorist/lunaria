@@ -1,5 +1,5 @@
 import { signal } from '@preact/signals'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { assertsExternalProvider } from '../library/utilities.js'
 import { accountStore } from './account.js'
 
@@ -19,7 +19,7 @@ type BalanceStore =
 	  }
 	| {
 			state: 'resolved'
-			balance: string
+			balance: BigNumber
 			lastChecked: Date
 			reset: () => void
 	  }
@@ -30,8 +30,7 @@ async function checkEthBalance() {
 		const provider = new ethers.providers.Web3Provider(window.ethereum)
 		if (accountStore.value.status !== 'connected') throw new Error('Not connected!')
 		balanceStore.value = { state: 'pending', reset }
-		const balanceBigNumber = await provider.getBalance(accountStore.value.address)
-		const balance = ethers.utils.formatEther(balanceBigNumber)
+		const balance = await provider.getBalance(accountStore.value.address)
 		balanceStore.value = { state: 'resolved', balance, lastChecked: new Date(), reset }
 	} catch (exception) {
 		let error = new Error(`Unhandled exception. ${exception}`)

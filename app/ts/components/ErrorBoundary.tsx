@@ -22,19 +22,17 @@ class ErrorBoundary extends Component<Props, State> {
 	}
 
 	render() {
-		if (this.state.hasError) {
-			return (
-				<div class='w-full my-[10%] flex justify-center'>
-					<div class='border border-red-400/20 bg-red-400/5 p-4 text-center max-w-lg'>
-						<div class='text-xl font-bold'>Uh oh, this is unexpected...</div>
-						<div class='text-white/50 text-sm my-4'>Not to worry. Drop by our disord channel and provide us with the hint below so we can help resolve your issue faster. Appreciate your support and look forward to seeing you there.</div>
-						<div class='border border-red-400/20 px-4 py-3 bg-black/10 text-white/80 text-sm'>{this.state.error.message}</div>
-					</div>
-				</div>
-			)
-		}
+		if (!this.state.hasError) return this.props.children
 
-		return this.props.children
+		return (
+			<div class='w-full my-[10%] flex justify-center'>
+				<div class='border border-red-400/20 bg-red-400/5 p-4 text-center max-w-lg'>
+					<div class='text-xl font-bold'>Uh oh, this is unexpected...</div>
+					<div class='text-white/50 text-sm my-4'>Not to worry. Drop by our disord channel and provide us with the hint below so we can help resolve your issue faster. Appreciate your support and look forward to seeing you there.</div>
+					<div class='border border-red-400/20 px-4 py-3 bg-black/10 text-white/80 text-sm'>{this.state.error.message}</div>
+				</div>
+			</div>
+		)
 	}
 }
 

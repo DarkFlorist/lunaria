@@ -4,7 +4,7 @@ import { AccountStore } from '../store/account'
 
 const AccountContext = createContext<AccountStore | undefined>(undefined)
 export const AccountProvider = ({ children, store }: { children: ComponentChildren; store: AccountStore }) => {
-	ensureConnected(store)
+	tryConnect(store)
 	executeSplashExit()
 
 	return <AccountContext.Provider value={store}>{children}</AccountContext.Provider>
@@ -16,10 +16,10 @@ export function useAccountStore() {
 	return context
 }
 
-function ensureConnected(accountStore: AccountStore) {
+function tryConnect(accountStore: AccountStore) {
 	useEffect(() => {
-		if (accountStore.value.isConnected === true) return
-		accountStore.value.reconnectMutation.dispatch()
+		if (accountStore.value.state !== 'disconnected') return
+		accountStore.value.connect(true)
 	}, [])
 }
 

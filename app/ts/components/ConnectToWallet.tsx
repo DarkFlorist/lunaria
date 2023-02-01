@@ -53,12 +53,14 @@ export const ConnectToWallet = () => {
 		case 'rejected':
 			if (account.error instanceof EthereumJsonRpcError) {
 				return (
-					<div class='text-center md:text-right'>
-						<div class='font-bold'>Failed to connect to wallet!</div>
-						<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${account.error.message} (${account.error.code})`}>
-							<span>Open your wallet extension window for details</span>️ <Icon.Info />
-						</a>
-					</div>
+					<Wrapper>
+						<div class='text-center md:text-right'>
+							<div class='font-bold'>Failed to connect to wallet!</div>
+							<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${account.error.message} (${account.error.code})`}>
+								<span>Open your wallet extension window for details</span>️ <Icon.Info />
+							</a>
+						</div>
+					</Wrapper>
 				)
 			}
 
@@ -76,5 +78,5 @@ export const ConnectToWallet = () => {
 }
 
 const Wrapper = ({ children }: { children: ComponentChildren }) => {
-	return <div class='flex items-center justify-center border border-dashed border-white/30 md:border-0 rounded min-h-[4rem] md:min-h-0 px-3 md:px-0'>{children}</div>
+	return <div class='flex items-center justify-center md:justify-end border border-dashed border-white/30 md:border-0 rounded min-h-[4rem] md:min-h-0 px-3 md:px-0'>{children}</div>
 }

@@ -42,3 +42,17 @@ export function isEthereumObservable(ethereum: unknown): ethereum is EthereumWit
 export function assertUnreachable(value: never): never {
 	throw new Error(`Never gonna give you up (${value})`)
 }
+
+export function isTransactionHash(hash: string): hash is `0x${string}` {
+	return ethers.utils.hexDataLength(hash) === 32
+}
+
+export function assertsTransactionHash(hash: string): asserts hash is `0x${string}` {
+	if (!isTransactionHash(hash)) throw new Error('Invalid transaction hash')
+}
+
+export const calculateGasFee = (effectiveGasPrice: ethers.BigNumber, gasUsed: ethers.BigNumber) => {
+	const gasFeeBigNum = effectiveGasPrice.mul(gasUsed)
+	const gasFee = ethers.utils.formatEther(gasFeeBigNum)
+	return gasFee
+}

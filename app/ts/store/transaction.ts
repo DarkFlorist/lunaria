@@ -1,109 +1,104 @@
-import { signal } from '@preact/signals'
+import { Signal, useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
+import { AsyncState, useAsyncState } from '../library/preact-utilities.js'
 import { assertsExternalProvider } from '../library/utilities.js'
 import { TransactionReceipt, TransactionResponse } from '../types.js'
 
-export type SendFunctionInput = {
-	amount: string
+type TransferFormData = Signal<{
 	to: string
+	amount: string
+}>
+
+type TransactionResponseAsync = {
+	signal: AsyncState<unknown>['value']
+	dispatch: () => void
+	reset: AsyncState<unknown>['reset']
 }
 
-export type TransactionIdle = {
-	status: 'idle'
-	fetch: (hash: string) => void
-	compose: () => void
+type TransactionReceiptAsync = {
+	signal: AsyncState<unknown>['value']
+	dispatch: () => void
+	reset: AsyncState<unknown>['reset']
 }
 
-export type TransactionComposing = {
-	status: 'composing'
-	data: SendFunctionInput
-	send: () => void
-}
+type Transfer =
+	| {
+			status: 'idle'
+			create: () => void
+			retrieve: (transactionHash: `0x${string}`) => void
+	  }
+	| {
+			status: 'new'
+			formData: TransferFormData
+			response: TransactionResponseAsync
+	  }
+	| {
+			status: 'signed'
+			transactionHash: `0x${string}`
+			receipt: TransactionReceiptAsync
+	  }
+	| {
+			status: 'confirmed'
+			transaction: TransactionResponse
+			receipt: TransactionReceipt
+	  }
 
-export type TransactionSigning = {
-	status: 'signing'
-	readonly data: SendFunctionInput
-}
+type TransferStore = Signal<Transfer>
+export function createTransactionStore(): TransferStore {
+	const formData = useSignal({ to: '', amount: '' })
+	const { value, waitFor, reset } = useAsyncState()
 
-export type TransactionSigned = {
-	status: 'signed'
-	transaction: TransactionResponse
-	fetch: (hash: string) => void
-	readonly data: SendFunctionInput
-}
-
-export type TransactionConfirming = {
-	status: 'confirming'
-	transaction: TransactionResponse
-	readonly data: SendFunctionInput
-}
-
-export type TransactionConfirmed = {
-	status: 'confirmed'
-	transaction: TransactionResponse
-	receipt: TransactionReceipt
-	readonly data: SendFunctionInput
-}
-
-export type TransactionFailed = {
-	status: 'failed'
-	error: Error
-	reset: (clearData?: boolean) => void
-	data: SendFunctionInput
-}
-
-export type TransactionStore = TransactionComposing | TransactionSigning | TransactionSigned | TransactionConfirming | TransactionConfirmed | TransactionFailed | TransactionIdle
-
-const storeDefaults: TransactionIdle = { status: 'idle', fetch: fetchTransactionByHash, compose }
-const store = signal<TransactionStore>(storeDefaults)
-export const sendTransactionStore = store
-
-async function send() {
-	if (store.value.status !== 'composing') return
-	const { data } = store.value
-
-	try {
-		assertsExternalProvider(window.ethereum)
-		const provider = new ethers.providers.Web3Provider(window.ethereum)
-		const signer = provider.getSigner()
-		const value = ethers.utils.parseEther(data.amount)
-		const to = ethers.utils.getAddress(data.to)
-		store.value = { status: 'signing', data }
-		const transaction = await signer.sendTransaction({ to, value })
-		store.value = { status: 'signed', transaction, fetch: fetchTransactionByHash, data }
-	} catch (exception) {
-		let error = new Error(`Unknown error (${exception})`)
-
-		if (exception instanceof Error) {
-			const parsedMessage = exception.message.replace(/ \(.*\)/, '')
-			const shortMessage = `${parsedMessage[0].toUpperCase()}${parsedMessage.slice(1)}`
-			error = new Error(shortMessage)
-		}
-
-		store.value = { status: 'failed', error, data, reset }
+	const response = {
+		signal: value,
+		dispatch: () => {
+			waitFor(async () => {
+				assertsExternalProvider(window.ethereum)
+				const provider = new ethers.providers.Web3Provider(window.ethereum)
+				const signer = provider.getSigner()
+				const value = ethers.utils.parseEther(formData.value.amount)
+				const to = ethers.utils.getAddress(formData.value.to)
+				const transactionResponse = await signer.sendTransaction({ to, value })
+				assertsTransactionHash(transactionResponse.hash)
+				transferStore.value = { status: 'signed', transactionHash: transactionResponse.hash, receipt }
+			})
+		},
+		reset,
 	}
-}
 
-async function fetchTransactionByHash(hash: string) {
-	if (store.value.status !== 'signed') return
-	const { data } = store.value
-	try {
-		assertsExternalProvider(window.ethereum)
-		const provider = new ethers.providers.Web3Provider(window.ethereum)
-		const transaction = await provider.getTransaction(hash)
-		store.value = { status: 'confirming', transaction, data }
-		const receipt = await transaction.wait()
-		store.value = { status: 'confirmed', transaction, receipt, data }
-	} catch (error) {
-		console.log(error)
+	const receipt = {
+		signal: value,
+		dispatch: () => {
+			if (transferStore.value.status !== 'signed') throw new Error('Cannot retrieve receipt without a signed transaction')
+			const hash = transferStore.value.transactionHash
+			waitFor(async () => {
+				assertsExternalProvider(window.ethereum)
+				const provider = new ethers.providers.Web3Provider(window.ethereum)
+				const transaction = await provider.getTransaction(hash)
+				const receipt = await transaction.wait()
+				transferStore.value = { status: 'confirmed', receipt, transaction }
+			})
+		},
+		reset,
 	}
+
+	const create = () => {
+		transferStore.value = { status: 'new', formData, response }
+	}
+
+	const retrieve = (transactionHash: `0x${string}`) => {
+		assertsTransactionHash(transactionHash)
+		transferStore.value = { status: 'signed', receipt, transactionHash }
+	}
+
+	const accountDefaults = { status: 'idle', create, retrieve } as const
+	const transferStore = useSignal<Transfer>(accountDefaults)
+	return transferStore
 }
 
-function reset(clearData?: boolean) {
-	if (store.value.status !== 'failed') return
-	store.value = clearData ? storeDefaults : { status: 'composing', data: store.value.data, send }
+export function isTransactionHash(hash: string): hash is `0x${string}` {
+	return ethers.utils.hexDataLength(hash) === 32
 }
 
-function compose() {
-	store.value = { status: 'composing', data: { to: '', amount: '' }, send }
+export function assertsTransactionHash(hash: string): asserts hash is `0x${string}` {
+	if (!isTransactionHash(hash)) throw new Error('Invalid transaction hash')
 }

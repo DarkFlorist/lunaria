@@ -5,7 +5,7 @@ import { AsyncState, useAsyncState } from '../library/preact-utilities.js'
 import { assertsExternalProvider } from '../library/utilities.js'
 
 type ConnectAsync = {
-	value: AsyncState<unknown>['value']
+	signal: AsyncState<unknown>['value']
 	dispatch: () => void
 	reset: AsyncState<unknown>['reset']
 }
@@ -37,7 +37,7 @@ export function createAccountStore(): AccountStore {
 	}
 
 	const connect = {
-		value,
+		signal: value,
 		dispatch: () => {
 			waitFor(async () => {
 				assertsExternalProvider(window.ethereum)

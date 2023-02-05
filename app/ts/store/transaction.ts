@@ -9,13 +9,7 @@ type TransferFormData = Signal<{
 	amount: string
 }>
 
-type TransactionResponseAsync = {
-	signal: AsyncState<unknown>['value']
-	dispatch: () => void
-	reset: AsyncState<unknown>['reset']
-}
-
-type TransactionReceiptAsync = {
+type DefinedAsyncState = {
 	signal: AsyncState<unknown>['value']
 	dispatch: () => void
 	reset: AsyncState<unknown>['reset']
@@ -23,30 +17,25 @@ type TransactionReceiptAsync = {
 
 type Transfer =
 	| {
-			status: 'idle'
-			create: () => void
-			retrieve: (transactionHash: `0x${string}`) => void
-	  }
-	| {
-			status: 'new'
+			state: 'new'
 			formData: TransferFormData
-			response: TransactionResponseAsync
+			response: DefinedAsyncState
 	  }
 	| {
-			status: 'signed'
-			transactionHash: `0x${string}`
-			receipt: TransactionReceiptAsync
+			state: 'signed'
+			receipt: DefinedAsyncState
 	  }
 	| {
-			status: 'confirmed'
-			transaction: TransactionResponse
-			receipt: TransactionReceipt
+			state: 'confirmed'
+			transactionResponse: TransactionResponse
+			transactionReceipt: TransactionReceipt
 	  }
 
 type TransferStore = Signal<Transfer>
-export function createTransactionStore(): TransferStore {
-	const formData = useSignal({ to: '', amount: '' })
-	const { value, waitFor, reset } = useAsyncState()
+export function createTransactionStore(transactionHash?: string): TransferStore {
+	const defaultFormData = { to: '', amount: '' }
+	const formData = useSignal(defaultFormData)
+	const { value, waitFor, reset: resetAsyncState } = useAsyncState()
 
 	const response = {
 		signal: value,
@@ -59,39 +48,34 @@ export function createTransactionStore(): TransferStore {
 				const to = ethers.utils.getAddress(formData.value.to)
 				const transactionResponse = await signer.sendTransaction({ to, value })
 				assertsTransactionHash(transactionResponse.hash)
-				transferStore.value = { status: 'signed', transactionHash: transactionResponse.hash, receipt }
+				transferStore.value = { state: 'signed', receipt }
 			})
 		},
-		reset,
+		reset: () => {
+			formData.value = defaultFormData
+			resetAsyncState()
+		},
 	}
 
 	const receipt = {
 		signal: value,
 		dispatch: () => {
-			if (transferStore.value.status !== 'signed') throw new Error('Cannot retrieve receipt without a signed transaction')
-			const hash = transferStore.value.transactionHash
+			if (!transactionHash) throw new Error('Cannot retrieve receipt without a signed transaction')
+			// const hash = transferStore.value.transactionHash
 			waitFor(async () => {
 				assertsExternalProvider(window.ethereum)
 				const provider = new ethers.providers.Web3Provider(window.ethereum)
-				const transaction = await provider.getTransaction(hash)
-				const receipt = await transaction.wait()
-				transferStore.value = { status: 'confirmed', receipt, transaction }
+				const transactionResponse = await provider.getTransaction(transactionHash)
+				const transactionReceipt = await transactionResponse.wait()
+				transferStore.value = { state: 'confirmed', transactionReceipt, transactionResponse }
 			})
 		},
 		reset,
 	}
 
-	const create = () => {
-		transferStore.value = { status: 'new', formData, response }
-	}
+	const transferDefaults = transactionHash ? ({ state: 'signed', receipt } as const) : ({ state: 'new', formData, response } as const)
 
-	const retrieve = (transactionHash: `0x${string}`) => {
-		assertsTransactionHash(transactionHash)
-		transferStore.value = { status: 'signed', receipt, transactionHash }
-	}
-
-	const accountDefaults = { status: 'idle', create, retrieve } as const
-	const transferStore = useSignal<Transfer>(accountDefaults)
+	const transferStore = useSignal<Transfer>(transferDefaults)
 	return transferStore
 }
 

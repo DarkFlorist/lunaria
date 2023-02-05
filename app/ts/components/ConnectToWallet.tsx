@@ -1,42 +1,40 @@
-import { Signal } from '@preact/signals'
 import { ComponentChildren } from 'preact'
 import { EthereumJsonRpcError } from '../library/exceptions.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
-import { AccountStore } from '../store/account.js'
+import { useAccountStore } from './AccountContext.js'
 import Blockie from './Blockie.js'
 import { Button } from './Button.js'
 import * as Icon from './Icon/index.js'
 
-type Props = {
-	accountStore: AccountStore
-}
-export const ConnectToWallet = ({ accountStore }: Props) => {
-	switch (accountStore.value.status) {
+export const ConnectToWallet = () => {
+	const account = useAccountStore().value
+
+	switch (account.status) {
 		case 'disconnected':
-			return <ConnectToWalletDisconnected connectSignal={accountStore.value.connect.signal} dispatchConnect={accountStore.value.connect.dispatch} />
+			return <ConnectToWalletDisconnected connectState={account.connect.signal.value.state} connect={account.connect.dispatch} />
 
 		case 'connected':
 			return (
 				<Wrapper>
 					<div class='grid md:grid-flow-col grid-cols-[minmax(min-content,max-content)_minmax(auto,max-content)] grid-rows-[minmax(min-content,max-content)] gap-x-4 items-center justify-center md:place-items-end'>
 						<div class='row-span-2 md:order-last'>
-							<Blockie scale={5} seed={accountStore.value.address} />
+							<Blockie scale={5} seed={account.address} />
 						</div>
 						<div class='text-sm text-white/50'>Your Address</div>
 						<div class='overflow-hidden text-ellipsis'>
-							<span>{accountStore.value.address}</span>
+							<span>{account.address}</span>
 						</div>
 					</div>
 				</Wrapper>
 			)
 
 		case 'failed':
-			if (accountStore.value.error instanceof EthereumJsonRpcError) {
+			if (account.error instanceof EthereumJsonRpcError) {
 				return (
 					<Wrapper>
 						<div class='text-center md:text-right'>
 							<div class='font-bold'>Failed to connect to wallet!</div>
-							<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${accountStore.value.error.message} (${accountStore.value.error.code})`}>
+							<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${account.error.message} (${account.error.code})`}>
 								<span>Open your wallet extension window for details</span>️ <Icon.Info />
 							</a>
 						</div>
@@ -62,12 +60,12 @@ const Wrapper = ({ children }: { children: ComponentChildren }) => {
 }
 
 type DisconnectedProps = {
-	connectSignal: Signal<AsyncProperty<unknown>>
-	dispatchConnect: () => void
+	connectState: AsyncProperty<unknown>['state']
+	connect: () => void
 }
 
-const ConnectToWalletDisconnected = ({ connectSignal, dispatchConnect }: DisconnectedProps) => {
-	switch (connectSignal.value.state) {
+const ConnectToWalletDisconnected = ({ connectState, connect }: DisconnectedProps) => {
+	switch (connectState) {
 		case 'inactive':
 			return (
 				<Wrapper>
@@ -76,7 +74,7 @@ const ConnectToWalletDisconnected = ({ connectSignal, dispatchConnect }: Disconn
 						<div class='transition animate-bounce-x'>
 							<Icon.ArrowRight />
 						</div>
-						<Button class='whitespace-nowrap' onClick={() => dispatchConnect()}>
+						<Button class='whitespace-nowrap' onClick={() => connect()}>
 							Connect Wallet
 						</Button>
 					</div>

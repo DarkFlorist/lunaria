@@ -1,62 +1,42 @@
+import { Signal } from '@preact/signals'
 import { ComponentChildren } from 'preact'
 import { EthereumJsonRpcError } from '../library/exceptions.js'
-import { accountStore } from '../store/account.js'
+import { AsyncProperty } from '../library/preact-utilities.js'
+import { AccountStore } from '../store/account.js'
 import Blockie from './Blockie.js'
 import { Button } from './Button.js'
 import * as Icon from './Icon/index.js'
 
-export const ConnectToWallet = () => {
-	const account = accountStore.value
-
-	switch (account.status) {
+type Props = {
+	accountStore: AccountStore
+}
+export const ConnectToWallet = ({ accountStore }: Props) => {
+	switch (accountStore.value.status) {
 		case 'disconnected':
-			return (
-				<Wrapper>
-					<div class='grid grid-cols-[minmax(auto,max-content)_minmax(auto,max-content)_minmax(auto,max-content)] gap-3 items-center justify-center'>
-						<div class='leading-tight text-right'>Get started quickly by connecting your wallet</div>
-						<div class='transition animate-bounce-x'>
-							<Icon.ArrowRight />
-						</div>
-						<Button class='whitespace-nowrap' onClick={() => account.connect()}>
-							Connect Wallet
-						</Button>
-					</div>
-				</Wrapper>
-			)
-
-		case 'busy':
-			return (
-				<Wrapper>
-					<div class='grid md:grid-flow-col grid-cols-[minmax(min-content,max-content)_minmax(min-content,max-content)] grid-rows-[minmax(min-content,max-content)] gap-x-4 items-center justify-center md:place-items-end'>
-						<div class='h-10 w-10 animate-pulse bg-white/50 rounded row-span-2 md:order-last' />
-						<div class='h-3 w-24 animate-pulse bg-white/50 rounded-sm my-1' />
-						<div class='h-4 w-full min-w-[11rem] max-w-sm animate-pulse bg-white/50 rounded-sm my-1' />
-					</div>
-				</Wrapper>
-			)
+			return <ConnectToWalletDisconnected connectSignal={accountStore.value.connect.signal} dispatchConnect={accountStore.value.connect.dispatch} />
 
 		case 'connected':
 			return (
 				<Wrapper>
 					<div class='grid md:grid-flow-col grid-cols-[minmax(min-content,max-content)_minmax(auto,max-content)] grid-rows-[minmax(min-content,max-content)] gap-x-4 items-center justify-center md:place-items-end'>
 						<div class='row-span-2 md:order-last'>
-							<Blockie scale={5} seed={account.address} />
+							<Blockie scale={5} seed={accountStore.value.address} />
 						</div>
 						<div class='text-sm text-white/50'>Your Address</div>
 						<div class='overflow-hidden text-ellipsis'>
-							<span>{account.address}</span>
+							<span>{accountStore.value.address}</span>
 						</div>
 					</div>
 				</Wrapper>
 			)
 
-		case 'rejected':
-			if (account.error instanceof EthereumJsonRpcError) {
+		case 'failed':
+			if (accountStore.value.error instanceof EthereumJsonRpcError) {
 				return (
 					<Wrapper>
 						<div class='text-center md:text-right'>
 							<div class='font-bold'>Failed to connect to wallet!</div>
-							<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${account.error.message} (${account.error.code})`}>
+							<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${accountStore.value.error.message} (${accountStore.value.error.code})`}>
 								<span>Open your wallet extension window for details</span>️ <Icon.Info />
 							</a>
 						</div>
@@ -79,4 +59,40 @@ export const ConnectToWallet = () => {
 
 const Wrapper = ({ children }: { children: ComponentChildren }) => {
 	return <div class='flex items-center justify-center md:justify-end border border-dashed border-white/30 md:border-0 rounded min-h-[4rem] md:min-h-0 px-3 md:px-0'>{children}</div>
+}
+
+type DisconnectedProps = {
+	connectSignal: Signal<AsyncProperty<unknown>>
+	dispatchConnect: () => void
+}
+
+const ConnectToWalletDisconnected = ({ connectSignal, dispatchConnect }: DisconnectedProps) => {
+	switch (connectSignal.value.state) {
+		case 'inactive':
+			return (
+				<Wrapper>
+					<div class='grid grid-cols-[minmax(auto,max-content)_minmax(auto,max-content)_minmax(auto,max-content)] gap-3 items-center justify-center'>
+						<div class='leading-tight text-right'>Get started quickly by connecting your wallet</div>
+						<div class='transition animate-bounce-x'>
+							<Icon.ArrowRight />
+						</div>
+						<Button class='whitespace-nowrap' onClick={() => dispatchConnect()}>
+							Connect Wallet
+						</Button>
+					</div>
+				</Wrapper>
+			)
+		case 'pending':
+			return (
+				<Wrapper>
+					<div class='grid md:grid-flow-col grid-cols-[minmax(min-content,max-content)_minmax(min-content,max-content)] grid-rows-[minmax(min-content,max-content)] gap-x-4 items-center justify-center md:place-items-end'>
+						<div class='h-10 w-10 animate-pulse bg-white/50 rounded row-span-2 md:order-last' />
+						<div class='h-3 w-24 animate-pulse bg-white/50 rounded-sm my-1' />
+						<div class='h-4 w-full min-w-[11rem] max-w-sm animate-pulse bg-white/50 rounded-sm my-1' />
+					</div>
+				</Wrapper>
+			)
+		default:
+			return null
+	}
 }

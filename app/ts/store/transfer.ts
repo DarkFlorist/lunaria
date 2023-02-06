@@ -48,7 +48,6 @@ export function createTransferStore(transactionHash?: string): TransferStore {
 	const response = {
 		signal: responseState.value,
 		dispatch: () => {
-			console.log('dispatch called')
 			responseState.waitFor(async () => {
 				assertsExternalProvider(window.ethereum)
 				const provider = new ethers.providers.Web3Provider(window.ethereum)

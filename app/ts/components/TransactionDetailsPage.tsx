@@ -46,7 +46,7 @@ const Main = () => {
 
 	return (
 		<Grid>
-			<GridItem title='Transaction Hash:' class='lg:col-span-2'>
+			<GridItem title='Transaction Hash:' class='xl:col-span-full'>
 				<TransactionHash transport={transaction.transactionResponseQuery.transport} />
 			</GridItem>
 			<GridItem title='From:'>

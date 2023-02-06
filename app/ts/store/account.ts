@@ -9,11 +9,17 @@ export type ConnectMutation = {
 	reset: () => void
 }
 
+export type ReconnectMutation = {
+	transport: Signal<AsyncProperty<unknown>>
+	dispatch: () => void
+	reset: () => void
+}
+
 type Account =
 	| {
 			isConnected: false
 			connectMutation: ConnectMutation
-			reconnectMutation: ConnectMutation
+			reconnectMutation: ReconnectMutation
 	  }
 	| {
 			isConnected: true
@@ -23,19 +29,24 @@ type Account =
 export type AccountStore = ReturnType<typeof createAccountStore>
 export function createAccountStore() {
 	const { value: asyncValue, waitFor, reset } = useAsyncState<string>()
+	const reconnect = useAsyncState()
 
 	const reconnectMutation = {
-		transport: asyncValue,
-		dispatch: () =>
-			waitFor(async () => {
-				assertsExternalProvider(window.ethereum)
-				const provider = new ethers.providers.Web3Provider(window.ethereum)
-				const signer = provider.getSigner()
-				const address = await signer.getAddress()
-				accountStore.value = { isConnected: true, address }
-				return address
-			}),
-		reset,
+		transport: reconnect.value,
+		dispatch: () => {
+			reconnect.waitFor(async () => {
+				try {
+					assertsExternalProvider(window.ethereum)
+					const provider = new ethers.providers.Web3Provider(window.ethereum)
+					const signer = provider.getSigner()
+					const address = await signer.getAddress()
+					accountStore.value = { isConnected: true, address }
+				} catch {
+					accountStore.value = accountDefaults
+				}
+			})
+		},
+		reset: reconnect.reset,
 	}
 
 	const connectMutation = {

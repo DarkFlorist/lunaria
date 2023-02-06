@@ -6,8 +6,6 @@ import { assertUnreachable } from '../library/utilities.js'
 import ErrorBoundary from './ErrorBoundary.js'
 import { TransferProvider, useTransferStore } from './TransferContext.js'
 import { useAccountStore } from './AccountContext.js'
-import { AsyncProperty } from '../library/preact-utilities.js'
-import { TransactionResponse } from '../types.js'
 import { ethers } from 'ethers'
 import { createTransferStore } from '../store/transfer.js'
 
@@ -28,28 +26,9 @@ export const SendEthPage = () => {
 }
 
 const Main = () => {
-	const transfer = useTransferStore().value
-
-	const handleSubmit = (event: Event) => {
-		event.preventDefault()
-
-		switch (transfer.state) {
-			case 'new':
-				transfer.response.dispatch()
-				return
-			case 'signed':
-				location.href = `#tx/${transfer.transactionResponse?.hash}`
-				return
-			case 'confirmed':
-				return
-			default:
-				assertUnreachable(transfer)
-		}
-	}
-
 	return (
 		<ErrorBoundary>
-			<form onSubmit={handleSubmit}>
+			<SendForm>
 				<FormLayout>
 					<div class='[grid-area:token]'>
 						<TokenSelectField />
@@ -67,26 +46,50 @@ const Main = () => {
 						<FormActions />
 					</div>
 				</FormLayout>
-			</form>
+			</SendForm>
 		</ErrorBoundary>
 	)
 }
 
+const SendForm = ({ children }: { children: ComponentChildren }) => {
+	const accountStore = useAccountStore()
+	const transfer = useTransferStore()
+
+	const handleSubmit = (event: Event) => {
+		event.preventDefault()
+
+		if (!accountStore.value.isConnected) {
+			accountStore.value.connectMutation.dispatch()
+			return
+		}
+
+		if (!transfer.value.isSigned) {
+			transfer.value.transactionResponseQuery.dispatch()
+			return
+		}
+
+		window.location.href = `#tx/${transfer.value.transactionResponse.hash}`
+		return
+	}
+
+	return <form onSubmit={handleSubmit}>{children}</form>
+}
+
 const SendGuide = () => {
-	const transfer = useTransferStore().value
+	const transferStore = useTransferStore()
 
-	if (transfer.state !== 'new') return null
+	if (transferStore.value.isSigned) return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
 
-	const transaction = transfer.response.signal
+	const transaction = transferStore.value.transactionResponseQuery.transport
 	switch (transaction.value.state) {
 		case 'inactive':
 			return <Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
 		case 'pending':
 			return <Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
-		case 'resolved':
-			return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
 		case 'rejected':
 			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transaction.value.error.message} />
+		case 'resolved':
+			return null
 		default:
 			assertUnreachable(transaction.value)
 	}
@@ -103,23 +106,11 @@ const Guide = ({ title, quote, content }: { title: string; quote?: string; conte
 }
 
 const FormActions = () => {
-	const account = useAccountStore().value
+	const accountStore = useAccountStore()
 
-	switch (account.status) {
-		case 'connected':
-			return <FormActionButton />
-		case 'disconnected':
-			return <ConnectWalletButton />
-		case 'failed':
-			return <div class='px-4 py-2 bg-red-400/10 border border-red-400/50 text-white/50 text-center cursor-not-allowed'>Unable to connect to wallet!</div>
-	}
-}
+	if (accountStore.value.isConnected) return <FormActionButton />
 
-const ConnectWalletButton = () => {
-	const account = useAccountStore().value
-	if (account.status !== 'disconnected') throw new Error('ConnectWalletButton')
-
-	switch (account.connect.signal.value.state) {
+	switch (accountStore.value.connectMutation.transport.value.state) {
 		case 'inactive':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
@@ -133,32 +124,24 @@ const ConnectWalletButton = () => {
 				</button>
 			)
 		case 'rejected':
+			return <div class='px-4 py-2 bg-red-400/10 border border-red-400/50 text-white/50 text-center cursor-not-allowed'>Unable to connect to wallet!</div>
 		case 'resolved':
 			return null
 	}
 }
 
 const FormActionButton = () => {
-	const transfer = useTransferStore().value
+	const transferStore = useTransferStore()
 
-	switch (transfer.state) {
-		case 'new':
-			return <SendButton transferState={transfer.response.signal.value.state} />
-		case 'signed':
-			return (
-				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
-					<span>View Transaction</span>
-				</button>
-			)
-		case 'confirmed':
-			return null
-		default:
-			assertUnreachable(transfer)
+	if (transferStore.value.isSigned) {
+		return (
+			<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+				<span>View Transaction</span>
+			</button>
+		)
 	}
-}
 
-const SendButton = ({ transferState }: { transferState: AsyncProperty<TransactionResponse>['state'] }) => {
-	switch (transferState) {
+	switch (transferStore.value.transactionResponseQuery.transport.value.state) {
 		case 'inactive':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
@@ -173,7 +156,7 @@ const SendButton = ({ transferState }: { transferState: AsyncProperty<Transactio
 			)
 		case 'rejected':
 			return (
-				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
 					<span>Something went wrong...</span>
 				</button>
 			)
@@ -194,33 +177,27 @@ const TokenSelectField = () => {
 }
 
 const SendAmountField = () => {
-	const transfer = useTransferStore().value
+	const transferStore = useTransferStore()
 
-	switch (transfer.state) {
-		case 'new':
-			return <AmountField value={transfer.formData.value.amount} onChange={amount => (transfer.formData.value = { ...transfer.formData.value, amount })} label='Amount' name='amount' disabled={transfer.response.signal.value.state === 'pending'} required />
-		case 'signed': {
-			const fieldValue = transfer.transactionResponse?.value ? ethers.utils.formatEther(transfer.transactionResponse?.value) : ''
-			return <AmountField value={fieldValue} onChange={() => {}} label='Amount' name='amount' disabled />
-		}
-		case 'confirmed':
-			return null
+	if (transferStore.value.isSigned) {
+		const fieldValue = ethers.utils.formatEther(transferStore.value.transactionResponse.value)
+		return <AmountField value={fieldValue} onChange={() => {}} label='Amount' name='amount' disabled />
 	}
+
+	const formData = transferStore.value.formData
+	return <AmountField value={formData.value.amount} onChange={amount => (formData.value = { ...formData.value, amount })} label='Amount' name='amount' disabled={transferStore.value.transactionResponseQuery.transport.value.state === 'pending'} required />
 }
 
 const SendToField = () => {
-	const transfer = useTransferStore().value
+	const transferStore = useTransferStore()
 
-	switch (transfer.state) {
-		case 'new':
-			return <AddressField value={transfer.formData.value.to} onChange={to => (transfer.formData.value = { ...transfer.formData.value, to })} label='To' name='to' disabled={transfer.response.signal.value.state === 'pending'} required />
-		case 'signed': {
-			const fieldValue = transfer.transactionResponse?.to ? ethers.utils.formatEther(transfer.transactionResponse?.to) : ''
-			return <AddressField value={fieldValue} onChange={() => {}} label='To' name='to' disabled />
-		}
-		case 'confirmed':
-			return null
+	if (transferStore.value.isSigned) {
+		const fieldValue = transferStore.value.transactionResponse.to!
+		return <AddressField value={fieldValue} onChange={() => {}} label='To' name='to' disabled />
 	}
+
+	const formData = transferStore.value.formData
+	return <AddressField value={formData.value.to} onChange={to => (formData.value = { ...formData.value, to })} label='To' name='to' disabled={transferStore.value.transactionResponseQuery.transport.value.state === 'pending'} required />
 }
 
 const PageTitle = () => {

@@ -8,6 +8,7 @@ import { TransferProvider, useTransferStore } from './TransferContext.js'
 import { useAccountStore } from './AccountContext.js'
 import { ethers } from 'ethers'
 import { createTransferStore } from '../store/transfer.js'
+import { isEthereumJsonRpcError } from '../library/exceptions.js'
 
 export const SendEthPage = () => {
 	const transferStore = createTransferStore()
@@ -86,8 +87,10 @@ const SendGuide = () => {
 			return <Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
 		case 'pending':
 			return <Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
-		case 'rejected':
-			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transaction.value.error.message} />
+		case 'rejected': {
+			let errorMessage = isEthereumJsonRpcError(transaction.value.error) ? transaction.value.error.error.message : transaction.value.error.message
+			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={errorMessage} />
+		}
 		case 'resolved':
 			return null
 		default:
@@ -150,14 +153,14 @@ const FormActionButton = () => {
 			)
 		case 'pending':
 			return (
-				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full disabled:text-white/50 disabled:border-white/30 disabled:cursor-not-allowed disabled:hover:bg-transparent' disabled>
 					<span>Sending...</span>
 				</button>
 			)
 		case 'rejected':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
-					<span>Something went wrong...</span>
+					<span>Retry?</span>
 				</button>
 			)
 		case 'resolved':
@@ -210,7 +213,7 @@ const PageTitle = () => {
 
 const FormLayout = ({ children }: { children: ComponentChildren }) => {
 	return (
-		<div class='grid [grid-template-areas:_"title"_"token"_"amount"_"address"_"tip"_"controls"] grid-rows-[repeat(auto-fit,minmax(min-content,0))] gap-y-4 lg:[grid-template-areas:_"title_title"_"token_amount"_"address_address"_"tip_tip"_"controls_controls"] lg:gap-x-6 xl:[grid-template-areas:_"title_title_title"_"token_amount_tip"_"address_address_tip"_"controls_controls_tip"] lg:grid-cols-2 xl:grid-cols-3'>
+		<div class='grid [grid-template-areas:_"title"_"token"_"amount"_"address"_"tip"_"controls"] grid-rows-[repeat(auto-fit,minmax(min-content,0))] gap-y-4 lg:[grid-template-areas:_"title_title"_"token_amount"_"address_address"_"tip_tip"_"controls_controls"] lg:gap-x-6 xl:[grid-template-areas:_"title_title_title"_"token_amount_tip"_"address_address_tip"_"controls_controls_tip"_"._._tip"] lg:grid-cols-2 xl:grid-cols-3'>
 			<PageTitle />
 			{children}
 		</div>

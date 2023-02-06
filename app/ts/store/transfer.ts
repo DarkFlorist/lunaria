@@ -24,8 +24,8 @@ type Transfer =
 			transactionResponse: TransactionResponse
 	  }
 
-export type TransferStore = Signal<Transfer>
-export function createTransferStore(): TransferStore {
+export type TransferStore = ReturnType<typeof createTransferStore>
+export function createTransferStore() {
 	const defaultFormData = { to: '', amount: '' }
 	const formData = useSignal(defaultFormData)
 	const response = useAsyncState<TransactionResponse>()

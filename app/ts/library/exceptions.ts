@@ -1,7 +1,9 @@
 export type EthereumJsonRpcErrorSignature = {
-	code: number
-	message: string
-	data?: any
+	error: {
+		code: number
+		message: string
+		data?: any
+	}
 }
 
 export class EthereumJsonRpcError extends Error {
@@ -20,6 +22,6 @@ export class EthereumJsonRpcError extends Error {
 	}
 }
 
-export function isEthereumJsonRpcError(data: Object): data is EthereumJsonRpcErrorSignature {
-	return 'code' in data && typeof data.code === 'number' && 'message' in data && typeof data.message === 'string'
+export function isEthereumJsonRpcError(error: unknown): error is EthereumJsonRpcErrorSignature {
+	return error instanceof Object && 'error' in error && error.error instanceof Object && 'code' in error.error && typeof error.error.code === 'number' && 'message' in error.error && typeof error.error.message === 'string'
 }

@@ -1117,12 +1117,24 @@ video {
 	--tw-ring-color: rgb(255 255 255 / var(--tw-ring-opacity));
 }
 
+.disabled\:cursor-not-allowed:disabled {
+	cursor: not-allowed;
+}
+
+.disabled\:border-white\/30:disabled {
+	border-color: rgb(255 255 255 / 0.3);
+}
+
 .disabled\:bg-white\/5:disabled {
 	background-color: rgb(255 255 255 / 0.05);
 }
 
 .disabled\:text-white\/30:disabled {
 	color: rgb(255 255 255 / 0.3);
+}
+
+.disabled\:text-white\/50:disabled {
+	color: rgb(255 255 255 / 0.5);
 }
 
 .disabled\:opacity-30:disabled {
@@ -1259,7 +1271,7 @@ video {
 		text-align: left;
 	}
 
-	.xl\:\[grid-template-areas\:_\"title_title_title\"_\"token_amount_tip\"_\"address_address_tip\"_\"controls_controls_tip\"\] {
-		grid-template-areas: 'title title title' 'token amount tip' 'address address tip' 'controls controls tip';
+	.xl\:\[grid-template-areas\:_\"title_title_title\"_\"token_amount_tip\"_\"address_address_tip\"_\"controls_controls_tip\"_\"\._\._tip\"\] {
+		grid-template-areas: 'title title title' 'token amount tip' 'address address tip' 'controls controls tip' '. . tip';
 	}
 }

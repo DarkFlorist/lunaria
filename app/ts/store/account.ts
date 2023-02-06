@@ -1,49 +1,45 @@
-import { Signal, useSignal } from '@preact/signals'
+import { effect, Signal, useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
-import { EthereumJsonRpcError } from '../library/exceptions.js'
-import { AsyncState, useAsyncState } from '../library/preact-utilities.js'
-import { assertsExternalProvider } from '../library/utilities.js'
+import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { assertsExternalProvider, isEthereumObservable } from '../library/utilities.js'
 
-type ConnectAsync = {
-	signal: AsyncState<unknown>['value']
+export type ConnectMutation = {
+	transport: Signal<AsyncProperty<string>>
 	dispatch: () => void
-	reset: AsyncState<unknown>['reset']
+	reset: () => void
 }
 
 type Account =
 	| {
-			status: 'connected'
+			isConnected: false
+			connectMutation: ConnectMutation
+			reconnectMutation: ConnectMutation
+	  }
+	| {
+			isConnected: true
 			address: string
 	  }
-	| {
-			status: 'disconnected'
-			connect: ConnectAsync
-			reconnect: ConnectAsync
-	  }
-	| {
-			status: 'failed'
-			error: EthereumJsonRpcError | Error
-	  }
 
-export type AccountStore = Signal<Account>
-export function createAccountStore(): AccountStore {
-	const { value, waitFor, reset } = useAsyncState()
+export type AccountStore = ReturnType<typeof createAccountStore>
+export function createAccountStore() {
+	const { value: asyncValue, waitFor, reset } = useAsyncState<string>()
 
-	const reconnect = {
-		signal: value,
+	const reconnectMutation = {
+		transport: asyncValue,
 		dispatch: () =>
 			waitFor(async () => {
 				assertsExternalProvider(window.ethereum)
 				const provider = new ethers.providers.Web3Provider(window.ethereum)
 				const signer = provider.getSigner()
 				const address = await signer.getAddress()
-				accountStore.value = { status: 'connected', address }
+				accountStore.value = { isConnected: true, address }
+				return address
 			}),
 		reset,
 	}
 
-	const connect = {
-		signal: value,
+	const connectMutation = {
+		transport: asyncValue,
 		dispatch: () => {
 			waitFor(async () => {
 				assertsExternalProvider(window.ethereum)
@@ -51,13 +47,32 @@ export function createAccountStore(): AccountStore {
 				await provider.send('eth_requestAccounts', [])
 				const signer = provider.getSigner()
 				const address = await signer.getAddress()
-				accountStore.value = { status: 'connected', address }
+				accountStore.value = { isConnected: true, address }
+				return address
 			})
 		},
 		reset,
 	}
 
-	const accountDefaults = { status: 'disconnected', connect, reconnect } as const
+	const accountDefaults = { isConnected: false as const, connectMutation, reconnectMutation }
 	const accountStore = useSignal<Account>(accountDefaults)
+
+	const handleAccountChange = (newAccount: string[]) => {
+		if (ethers.utils.isAddress(newAccount[0])) {
+			accountStore.value = { isConnected: true, address: newAccount[0] }
+			return
+		}
+
+		reset()
+		accountStore.value = accountDefaults
+	}
+
+	effect(() => {
+		assertsExternalProvider(window.ethereum)
+		const provider = new ethers.providers.Web3Provider(window.ethereum)
+		if (!isEthereumObservable(provider.provider)) return
+		provider.provider.on('accountsChanged', handleAccountChange)
+	})
+
 	return accountStore
 }

@@ -2,38 +2,54 @@ import { ComponentChildren } from 'preact'
 import * as Layout from './Layout.js'
 import { AddressField } from './AddressField.js'
 import { AmountField } from './AmountField.js'
-import { accountStore } from '../store/account.js'
 import { assertUnreachable } from '../library/utilities.js'
-import { transferStore } from '../store/transfer.js'
-import { ethers } from 'ethers'
 import ErrorBoundary from './ErrorBoundary.js'
-import { useEffect } from 'preact/hooks'
-import { TransferProvider, useTransfer } from './TransferContext.js'
+import { TransferProvider, useTransferStore } from './TransferContext.js'
+import { useAccountStore } from './AccountContext.js'
+import { AsyncProperty } from '../library/preact-utilities.js'
+import { TransactionResponse } from '../types.js'
+import { ethers } from 'ethers'
+import { createTransferStore } from '../store/transfer.js'
 
 export const SendEthPage = () => {
+	const transferStore = createTransferStore()
+
 	return (
-		<Layout.Page>
-			<Layout.Header />
-			<Layout.Body>
-				<ErrorBoundary>
+		<TransferProvider store={transferStore}>
+			<Layout.Page>
+				<Layout.Header />
+				<Layout.Body>
 					<Main />
-				</ErrorBoundary>
-			</Layout.Body>
-			<Layout.Footer />
-		</Layout.Page>
+				</Layout.Body>
+				<Layout.Footer />
+			</Layout.Page>
+		</TransferProvider>
 	)
 }
 
 const Main = () => {
-	useEffect(() => {
-		// on mount, set the state to enable form composition
-		if (transferStore.value.status !== 'idle') return
-		transferStore.value.createNewTransfer()
-	}, [])
+	const transfer = useTransferStore().value
+
+	const handleSubmit = (event: Event) => {
+		event.preventDefault()
+
+		switch (transfer.state) {
+			case 'new':
+				transfer.response.dispatch()
+				return
+			case 'signed':
+				location.href = `#tx/${transfer.transactionResponse?.hash}`
+				return
+			case 'confirmed':
+				return
+			default:
+				assertUnreachable(transfer)
+		}
+	}
 
 	return (
-		<TransferProvider>
-			<SendForm>
+		<ErrorBoundary>
+			<form onSubmit={handleSubmit}>
 				<FormLayout>
 					<div class='[grid-area:token]'>
 						<TokenSelectField />
@@ -48,40 +64,35 @@ const Main = () => {
 						<SendGuide />
 					</div>
 					<div class='[grid-area:controls]'>
-						<SendActions />
+						<FormActions />
 					</div>
 				</FormLayout>
-			</SendForm>
-		</TransferProvider>
+			</form>
+		</ErrorBoundary>
 	)
 }
 
 const SendGuide = () => {
-	const { asyncResponse } = useTransfer()
-	const [transactionResponse] = asyncResponse
+	const transfer = useTransferStore().value
 
-	switch (transactionResponse.state) {
+	if (transfer.state !== 'new') return null
+
+	const transaction = transfer.response.signal
+	switch (transaction.value.state) {
 		case 'inactive':
-			return (
-				<Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
-			)
+			return <Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
 		case 'pending':
-			return (
-				<Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
-			)
+			return <Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
 		case 'resolved':
-			return (
-				<Guide title='Request Successfully Sent!' content='Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it&apos;s status.' />
-			)
+			return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
 		case 'rejected':
-			return (
-				<Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transactionResponse.error.message} />
-			)
-		default: assertUnreachable(transactionResponse)
+			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transaction.value.error.message} />
+		default:
+			assertUnreachable(transaction.value)
 	}
 }
 
-const Guide = ({ title, quote, content }: { title: string; quote?: string, content: string }) => {
+const Guide = ({ title, quote, content }: { title: string; quote?: string; content: string }) => {
 	return (
 		<div class='p-4 text-center xl:text-left'>
 			<div class='mb-3 font-bold'>{title}</div>
@@ -91,32 +102,83 @@ const Guide = ({ title, quote, content }: { title: string; quote?: string, conte
 	)
 }
 
-const SendActions = () => {
-	const account = accountStore
+const FormActions = () => {
+	const account = useAccountStore().value
 
-	switch (account.value.status) {
-		case 'busy':
-			return <div class='px-4 py-2 hover:bg-white/10 border w-full'>Connecting...</div>
+	switch (account.status) {
 		case 'connected':
-			return <ActionsConnected />
+			return <FormActionButton />
 		case 'disconnected':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Connect Wallet</button>
-		case 'rejected':
+			return <ConnectWalletButton />
+		case 'failed':
 			return <div class='px-4 py-2 bg-red-400/10 border border-red-400/50 text-white/50 text-center cursor-not-allowed'>Unable to connect to wallet!</div>
 	}
 }
 
-const ActionsConnected = () => {
-	const transfer = transferStore.value
-	switch (transfer.status) {
+const ConnectWalletButton = () => {
+	const account = useAccountStore().value
+	if (account.status !== 'disconnected') throw new Error('ConnectWalletButton')
+
+	switch (account.connect.signal.value.state) {
+		case 'inactive':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>Connect Wallet</span>
+				</button>
+			)
+		case 'pending':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
+					<span>Connecting... </span>
+				</button>
+			)
+		case 'rejected':
+		case 'resolved':
+			return null
+	}
+}
+
+const FormActionButton = () => {
+	const transfer = useTransferStore().value
+
+	switch (transfer.state) {
 		case 'new':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Send</button>
+			return <SendButton transferState={transfer.response.signal.value.state} />
 		case 'signed':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>View Transaction</button>
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>View Transaction</span>
+				</button>
+			)
 		case 'confirmed':
-		case 'idle':
-			return <button type='submit' class='px-4 py-2 bg-white/10 text-white/20 w-full' disabled>Loading...</button>
-		default: assertUnreachable(transfer)
+			return null
+		default:
+			assertUnreachable(transfer)
+	}
+}
+
+const SendButton = ({ transferState }: { transferState: AsyncProperty<TransactionResponse>['state'] }) => {
+	switch (transferState) {
+		case 'inactive':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>Send</span>
+				</button>
+			)
+		case 'pending':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
+					<span>Sending...</span>
+				</button>
+			)
+		case 'rejected':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
+					<span>Something went wrong...</span>
+				</button>
+			)
+		case 'resolved':
+			return null
 	}
 }
 
@@ -131,63 +193,33 @@ const TokenSelectField = () => {
 	)
 }
 
-const SendForm = ({ children }: { children: ComponentChildren }) => {
-	const { asyncResponse, store: transfer } = useTransfer()
-	const [_transactionResponse, resolveTransactionResponse] = asyncResponse
-
-	switch (transfer.status) {
-		case 'new':
-			return <form onSubmit={(event: Event) => { event.preventDefault(); resolveTransactionResponse() }}>{children}</form>
-		case 'signed':
-			return <form onSubmit={(event: Event) => { event.preventDefault(); location.href = `#tx/${transfer.transactionResponse.hash}` }}>{children}</form>
-		case 'confirmed':
-		case 'idle':
-		case 'signed':
-			return <>{children}</>
-		default: assertUnreachable(transfer)
-	}
-
-}
-
 const SendAmountField = () => {
-	const { asyncResponse, store: transfer } = useTransfer()
-	const [transactionResponse] = asyncResponse
+	const transfer = useTransferStore().value
 
-	const handleChange = (amount: string) => {
-		if (transfer.status !== 'new') return // ignore input for other states
-		transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, amount } }
-	}
-
-	switch (transfer.status) {
+	switch (transfer.state) {
 		case 'new':
-			return <AmountField value={transfer.transactionRequest.amount} onChange={handleChange} label='Amount' name='amount' disabled={transactionResponse.state === 'pending'} required />
-		case 'signed':
-			return <AmountField value={ethers.utils.formatEther(transfer.transactionResponse.value!)} onChange={handleChange} label='Amount' name='amount' disabled />
-		case 'idle':
+			return <AmountField value={transfer.formData.value.amount} onChange={amount => (transfer.formData.value = { ...transfer.formData.value, amount })} label='Amount' name='amount' disabled={transfer.response.signal.value.state === 'pending'} required />
+		case 'signed': {
+			const fieldValue = transfer.transactionResponse?.value ? ethers.utils.formatEther(transfer.transactionResponse?.value) : ''
+			return <AmountField value={fieldValue} onChange={() => {}} label='Amount' name='amount' disabled />
+		}
 		case 'confirmed':
 			return null
-		default: assertUnreachable(transfer)
 	}
 }
 
 const SendToField = () => {
-	const { asyncResponse, store: transfer } = useTransfer()
-	const [transactionResponse] = asyncResponse
+	const transfer = useTransferStore().value
 
-	const handleChange = (to: string) => {
-		if (transfer.status !== 'new') return // ignore input for other states
-		transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, to } }
-	}
-
-	switch (transfer.status) {
+	switch (transfer.state) {
 		case 'new':
-			return <AddressField value={transfer.transactionRequest.to} onChange={handleChange} label='To' name='to' disabled={transactionResponse.state === 'pending'} required />
-		case 'signed':
-			return <AddressField value={transfer.transactionResponse.to!} onChange={handleChange} label='To' name='to' disabled />
-		case 'idle':
+			return <AddressField value={transfer.formData.value.to} onChange={to => (transfer.formData.value = { ...transfer.formData.value, to })} label='To' name='to' disabled={transfer.response.signal.value.state === 'pending'} required />
+		case 'signed': {
+			const fieldValue = transfer.transactionResponse?.to ? ethers.utils.formatEther(transfer.transactionResponse?.to) : ''
+			return <AddressField value={fieldValue} onChange={() => {}} label='To' name='to' disabled />
+		}
 		case 'confirmed':
 			return null
-		default: assertUnreachable(transfer)
 	}
 }
 
@@ -198,7 +230,6 @@ const PageTitle = () => {
 		</div>
 	)
 }
-
 
 const FormLayout = ({ children }: { children: ComponentChildren }) => {
 	return (

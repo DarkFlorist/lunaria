@@ -1,210 +1,140 @@
-import { ComponentChildren } from 'preact'
+import { JSX } from 'preact'
+import { useCallback, useEffect } from 'preact/hooks'
+import { Signal } from '@preact/signals'
 import { ethers } from 'ethers'
 import * as Layout from './Layout.js'
 import { useParams } from './HashRouter.js'
-import { assertUnreachable, calculateGasFee, isTransactionHash } from '../library/utilities.js'
-import { assertTransferStatus, transferStore } from '../store/transfer.js'
-import { useAsyncState } from '../library/preact-utilities.js'
-import * as Icon from './Icon/index.js'
+import { calculateGasFee, isTransactionHash, removeNonStringsAndTrim } from '../library/utilities.js'
+import { AsyncProperty } from '../library/preact-utilities.js'
+import { TransactionReceipt, TransactionResponse } from '../types.js'
+import { createTransactionStore } from '../store/transaction.js'
+import { TransactionProvider, useTransactionStore } from './TransactionContext.js'
 
 export const TransactionDetailsPage = () => {
+	const transactionStore = createTransactionStore()
+
 	return (
-		<Layout.Page>
-			<Layout.Header />
-			<Layout.Body>
-				<PageTitle />
-				<Main />
-			</Layout.Body>
-			<Layout.Footer />
-		</Layout.Page>
+		<TransactionProvider store={transactionStore}>
+			<Layout.Page>
+				<Layout.Header />
+				<Layout.Body>
+					<PageTitle />
+					<Main />
+				</Layout.Body>
+				<Layout.Footer />
+			</Layout.Page>
+		</TransactionProvider>
 	)
 }
 
 const Main = () => {
-	const transfer = transferStore
-	const hash = extractTransactionHashFromParams()
+	const transaction = useTransactionStore().value
+	const transactionHashFromUrl = extractTransactionHashFromParams()
 
-	if (hash === null) return <TransactionDetailsInvalid />
+	const initialize = useCallback(() => {
+		if (transactionHashFromUrl === null) return
+		if (transaction.transactionHash !== undefined) return
+		transaction.setTransactionHash(transactionHashFromUrl)
+	}, [transactionHashFromUrl])
 
-	switch (transfer.value.status) {
-		case 'idle':
-			return <TransactionDetailsIdle />
-		case 'signed':
-			return <TransactionDetailsSigned />
-		case 'confirmed':
-			return <TransactionDetailsConfirmed />
-		case 'new':
-			return null // render should be handled in send page
-		default:
-			assertUnreachable(transfer.value)
-	}
-}
+	useEffect(() => {
+		initialize()
+	}, [])
 
-const TransactionDetailsIdle = () => {
-	const transfer = transferStore.value
-	const hash = extractTransactionHashFromParams()
-	const [transactionResponse, resolveTransactionResponse, resetTransactionResponse] = useAsyncState()
-
-	assertTransferStatus(transfer.status, 'idle')
-
-	const fetchTransactionResponse = () => {
-		resolveTransactionResponse(async () => {
-			if (hash === null || transferStore.value.status !== 'idle') return
-			await transferStore.value.fetchTransactionByHash(hash)
-		})
-	}
-
-	switch (transactionResponse.state) {
-		case 'inactive':
-			fetchTransactionResponse()
-			return null
-		case 'pending':
-			return (
-				<div class='grid grid-cols-1 xl:grid-cols-[repeat(2,_minmax(min-content,_1fr))] gap-x-6'>
-					<div class='border-b border-dashed border-white/10 py-2 xl:col-span-full'>
-						<div class='text-white/50 text-sm'>Transaction Hash:</div>
-						<div class='w-full max-w-[40rem] h-4 my-1 bg-white/30 animate-pulse rounded' />
-					</div>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>From:</div>
-						<div class='w-96 h-4 my-1 bg-white/30 animate-pulse rounded' />
-					</InfoLabel>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>To:</div>
-						<div class='w-96 h-4 my-1 bg-white/30 animate-pulse rounded' />
-					</InfoLabel>
-					<InfoLabel>
-						<div class='text-white/30 text-sm'>Amount:</div>
-						<div class='w-64 h-4 my-1 bg-white/30 animate-pulse rounded' />
-					</InfoLabel>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>Transacton Fee:</div>
-						<div class='w-64 h-4 my-1 bg-white/30 animate-pulse rounded' />
-					</InfoLabel>
-				</div>
-			)
-		case 'rejected':
-			return (
-				<div class='border border-dashed border-red-400/30 bg-red-400/5 p-4 text-center'>
-					<div>An issue was encounterd while obtaining transaction details.</div>
-					<div class='px-2 py-1 text-sm text-white/50 my-2'>{transactionResponse.error.message}</div>
-					<div class='flex flex-wrap justify-center gap-y-1 gap-x-6'>
-						<button class='hover:underline underline-offset-4 flex items-center gap-1' onClick={() => resetTransactionResponse()}>
-							<Icon.Refresh />
-							<span>Retry</span>
-						</button>
-						<button class='hover:underline underline-offset-4 flex items-center gap-1' onClick={() => {}}>
-							<Icon.Copy />
-							<span>Copy Transaction Hash</span>
-						</button>
-					</div>
-				</div>
-			)
-		case 'resolved':
-			return null
-		default:
-			assertUnreachable(transactionResponse)
-	}
-}
-
-const TransactionDetailsSigned = () => {
-	const transfer = transferStore.value
-	const [transactionReceipt, resolveTransactionReceipt, resetTransactionReceipt] = useAsyncState()
-
-	const fetchTransactionReceipt = () => {
-		resetTransactionReceipt()
-		resolveTransactionReceipt(async () => {
-			if (transfer.status !== 'signed') return
-			await transfer.fetchTransactionReceipt()
-		})
-	}
-
-	assertTransferStatus(transfer.status, 'signed')
-
-	switch (transactionReceipt.state) {
-		case 'inactive':
-			fetchTransactionReceipt()
-			return null
-		case 'pending':
-			return (
-				<div class='grid grid-cols-1 xl:grid-cols-[repeat(2,_minmax(min-content,_1fr))] gap-x-6'>
-					<div class='border-b border-dashed border-white/10 py-2 xl:col-span-full'>
-						<div class='text-white/50 text-sm'>Transaction Hash:</div>
-						<div class='overflow-scroll no-scrollbar'>{transfer.transactionResponse.hash}</div>
-					</div>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>From:</div>
-						<div>{transfer.transactionResponse.from}</div>
-					</InfoLabel>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>To:</div>
-						<div>{transfer.transactionResponse.to}</div>
-					</InfoLabel>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>Amount:</div>
-						<div>{ethers.utils.formatEther(transfer.transactionResponse.value)} Ether</div>
-					</InfoLabel>
-					<InfoLabel>
-						<div class='text-white/50 text-sm'>Transacton Fee:</div>
-						<div class='w-64 h-4 my-1 bg-white/30 animate-pulse rounded' />
-					</InfoLabel>
-				</div>
-			)
-		case 'rejected':
-			return (
-				<div class='border border-dashed border-red-400/30 bg-red-400/5 p-4 text-center'>
-					<div>An issue was encounterd while obtaining transaction details.</div>
-					<div class='px-2 py-1 text-sm text-white/50 my-2'>{transactionReceipt.error.message}</div>
-					<div class='flex flex-wrap justify-center gap-y-1 gap-x-6'>
-						<button class='hover:underline underline-offset-4 flex items-center gap-1' onClick={() => resetTransactionReceipt()}>
-							<Icon.Refresh />
-							<span>Retry</span>
-						</button>
-						<button class='hover:underline underline-offset-4 flex items-center gap-1'>
-							<Icon.Copy />
-							<span>Copy Transaction Hash</span>
-						</button>
-					</div>
-				</div>
-			)
-		case 'resolved':
-			return null
-		default:
-			assertUnreachable(transactionReceipt)
-	}
-}
-
-const TransactionDetailsConfirmed = () => {
-	const transfer = transferStore.value
-
-	assertTransferStatus(transfer.status, 'confirmed')
-
-	const transactionFee = calculateGasFee(transfer.transactionReceipt.effectiveGasPrice, transfer.transactionReceipt.gasUsed)
+	if (transactionHashFromUrl === null) return <TransactionDetailsInvalid />
+	if (transaction.transactionHash === undefined) return <TransactionDetailsInvalid />
 
 	return (
-		<div class='grid grid-cols-1 xl:grid-cols-[repeat(2,_minmax(min-content,_1fr))] gap-x-6'>
-			<div class='border-b border-dashed border-white/10 py-2 xl:col-span-full'>
-				<div class='text-white/50 text-sm'>Transaction Hash:</div>
-				<div class='overflow-scroll no-scrollbar'>{transfer.transactionResponse.hash}</div>
-			</div>
-			<InfoLabel>
-				<div class='text-white/50 text-sm'>From:</div>
-				<div>{transfer.transactionResponse.from}</div>
-			</InfoLabel>
-			<InfoLabel>
-				<div class='text-white/50 text-sm'>To:</div>
-				<div>{transfer.transactionResponse.to}</div>
-			</InfoLabel>
-			<InfoLabel>
-				<div class='text-white/50 text-sm'>Amount:</div>
-				<div>{ethers.utils.formatEther(transfer.transactionResponse.value)} Ether</div>
-			</InfoLabel>
-			<InfoLabel>
-				<div class='text-white/50 text-sm'>Transacton Fee:</div>
-				<div>{transactionFee} Ether</div>
-			</InfoLabel>
-		</div>
+		<Grid>
+			<GridItem title='Transaction Hash:' class='lg:col-span-2'>
+				<TransactionHash transport={transaction.transactionResponseQuery.transport} />
+			</GridItem>
+			<GridItem title='From:'>
+				<TransactionFrom transport={transaction.transactionResponseQuery.transport} />
+			</GridItem>
+			<GridItem title='To:'>
+				<TransactionTo transport={transaction.transactionResponseQuery.transport} />
+			</GridItem>
+			<GridItem title='Amount:'>
+				<TransactionAmount transport={transaction.transactionResponseQuery.transport} />
+			</GridItem>
+			<GridItem title='Transaction Fee:'>
+				<TransactionFee transport={transaction.transactionReceiptQuery.transport} />
+			</GridItem>
+		</Grid>
 	)
+}
+
+const TransactionHash = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
+	const response = transport.value
+	switch (response.state) {
+		case 'inactive':
+			return <InfoValue text='' />
+		case 'rejected':
+			return <InfoValue text='Failed to retrieve transaction hash.' />
+		case 'pending':
+			return <InfoSkeleton />
+		case 'resolved':
+			return <InfoValue text={response.value.hash} />
+	}
+}
+
+const TransactionFrom = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
+	const response = transport.value
+	switch (response.state) {
+		case 'inactive':
+			return <InfoValue text='' />
+		case 'rejected':
+			return <InfoValue text='Failed to retrieve source address (from).' />
+		case 'pending':
+			return <InfoSkeleton />
+		case 'resolved':
+			return <InfoValue text={response.value.from} />
+	}
+}
+
+const TransactionTo = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
+	const response = transport.value
+	switch (response.state) {
+		case 'inactive':
+			return <InfoValue text='' />
+		case 'rejected':
+			return <InfoValue text='Failed to retrieve destination address (to).' />
+		case 'pending':
+			return <InfoSkeleton />
+		case 'resolved':
+			return <InfoValue text={response.value.to!} />
+	}
+}
+
+const TransactionAmount = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
+	const response = transport.value
+	switch (response.state) {
+		case 'inactive':
+			return <InfoValue text='' />
+		case 'rejected':
+			return <InfoValue text='Failed to retrieve amount.' />
+		case 'pending':
+			return <InfoSkeleton />
+		case 'resolved':
+			return <InfoValue text={`${ethers.utils.formatEther(response.value.value)} Ether`} />
+	}
+}
+
+const TransactionFee = ({ transport }: { transport: Signal<AsyncProperty<TransactionReceipt>> }) => {
+	const response = transport.value
+	switch (response.state) {
+		case 'inactive':
+			return <InfoValue text='' />
+		case 'rejected':
+			return <InfoValue text='Failed to retrieve receipt.' />
+		case 'pending':
+			return <InfoSkeleton />
+		case 'resolved': {
+			const transactionFee = calculateGasFee(response.value.effectiveGasPrice, response.value.gasUsed)
+			return <InfoValue text={`${transactionFee} Ether`} />
+		}
+	}
 }
 
 const TransactionDetailsInvalid = () => {
@@ -215,9 +145,29 @@ const PageTitle = () => {
 	return <div class='bg-white/10 text-xl font-bold px-6 py-2 -ml-6 mb-4'>Transaction Details</div>
 }
 
-const InfoLabel = ({ children }: { children: ComponentChildren }) => <div class='border-b border-dashed border-white/10 py-2'>{children}</div>
+const InfoSkeleton = ({ class: className = 'w-full' }: { class?: string }) => {
+	const classNames = removeNonStringsAndTrim('h-4 my-1 bg-white/30 animate-pulse rounded', className)
+	return <div class={classNames} />
+}
+const InfoValue = ({ text }: { text: string }) => {
+	return <div class='overflow-scroll no-scrollbar'>{text}</div>
+}
 
 function extractTransactionHashFromParams() {
 	const params = useParams()
 	return params && 'transaction_hash' in params && isTransactionHash(params.transaction_hash) ? params.transaction_hash : null
+}
+
+const Grid = ({ children }: JSX.HTMLAttributes<HTMLDivElement>) => {
+	return <div class='grid grid-cols-1 xl:grid-cols-[repeat(2,_minmax(min-content,_1fr))] gap-x-6'>{children}</div>
+}
+
+const GridItem = ({ title, children, class: className }: JSX.HTMLAttributes<HTMLDivElement> & { title: string }) => {
+	const classNames = removeNonStringsAndTrim('border-b border-dashed border-white/10 py-2', className)
+	return (
+		<div class={classNames}>
+			<div class='text-white/50 text-sm'>{title}</div>
+			{children}
+		</div>
+	)
 }

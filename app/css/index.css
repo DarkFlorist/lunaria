@@ -539,6 +539,18 @@ video {
 	height: 4rem;
 }
 
+.h-5 {
+	height: 1.25rem;
+}
+
+.h-6 {
+	height: 1.5rem;
+}
+
+.h-3\.5 {
+	height: 0.875rem;
+}
+
 .h-full {
 	height: 100%;
 }

@@ -9,6 +9,7 @@ import { AsyncProperty } from '../library/preact-utilities.js'
 import { TransactionReceipt, TransactionResponse } from '../types.js'
 import { createTransactionStore } from '../store/transaction.js'
 import { TransactionProvider, useTransactionStore } from './TransactionContext.js'
+import { TextSkeleton } from './TextSkeleton.js'
 
 export const TransactionDetailsPage = () => {
 	const transactionStore = createTransactionStore()
@@ -46,36 +47,43 @@ const Main = () => {
 
 	return (
 		<Grid>
-			<GridItem title='Transaction Hash:' class='xl:col-span-full'>
+			<GridItem class='xl:col-span-full'>
 				<TransactionHash transport={transaction.transactionResponseQuery.transport} />
 			</GridItem>
-			<GridItem title='From:'>
+			<GridItem>
 				<TransactionFrom transport={transaction.transactionResponseQuery.transport} />
 			</GridItem>
-			<GridItem title='To:'>
+			<GridItem>
 				<TransactionTo transport={transaction.transactionResponseQuery.transport} />
 			</GridItem>
-			<GridItem title='Amount:'>
+			<GridItem>
 				<TransactionAmount transport={transaction.transactionResponseQuery.transport} />
 			</GridItem>
-			<GridItem title='Transaction Fee:'>
+			<GridItem>
 				<TransactionFee transport={transaction.transactionReceiptQuery.transport} />
 			</GridItem>
 		</Grid>
 	)
 }
 
+const TransactionHashField = ({ text }: { text: string }) => <ReadOnlyField label='Transaction Hash:' value={text} />
 const TransactionHash = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
 	const response = transport.value
+
 	switch (response.state) {
 		case 'inactive':
-			return <InfoValue text='' />
+			return <TransactionHashField text='' />
 		case 'rejected':
-			return <InfoValue text='Failed to retrieve transaction hash.' />
+			return <TransactionHashField text='Failed to retrieve transaction hash.' />
 		case 'pending':
-			return <InfoSkeleton />
+			return (
+				<>
+					<TextSkeleton textSize='sm' length={16} />
+					<TextSkeleton length={64} />
+				</>
+			)
 		case 'resolved':
-			return <InfoValue text={response.value.hash} />
+			return <TransactionHashField text={response.value.hash} />
 	}
 }
 
@@ -83,13 +91,18 @@ const TransactionFrom = ({ transport }: { transport: Signal<AsyncProperty<Transa
 	const response = transport.value
 	switch (response.state) {
 		case 'inactive':
-			return <InfoValue text='' />
+			return <ReadOnlyField label='From:' value='' />
 		case 'rejected':
-			return <InfoValue text='Failed to retrieve source address (from).' />
+			return <ReadOnlyField label='From:' value='Failed to retrieve source address (from).' />
 		case 'pending':
-			return <InfoSkeleton />
+			return (
+				<>
+					<TextSkeleton textSize='sm' length={10} />
+					<TextSkeleton length={40} />
+				</>
+			)
 		case 'resolved':
-			return <InfoValue text={response.value.from} />
+			return <ReadOnlyField label='From:' value={response.value.from} />
 	}
 }
 
@@ -97,13 +110,18 @@ const TransactionTo = ({ transport }: { transport: Signal<AsyncProperty<Transact
 	const response = transport.value
 	switch (response.state) {
 		case 'inactive':
-			return <InfoValue text='' />
+			return <ReadOnlyField label='To:' value='' />
 		case 'rejected':
-			return <InfoValue text='Failed to retrieve destination address (to).' />
+			return <ReadOnlyField label='To:' value='Failed to retrieve destination address (to).' />
 		case 'pending':
-			return <InfoSkeleton />
+			return (
+				<>
+					<TextSkeleton textSize='sm' length={10} />
+					<TextSkeleton length={40} />
+				</>
+			)
 		case 'resolved':
-			return <InfoValue text={response.value.to!} />
+			return <ReadOnlyField label='To:' value={response.value.to!} />
 	}
 }
 
@@ -111,13 +129,18 @@ const TransactionAmount = ({ transport }: { transport: Signal<AsyncProperty<Tran
 	const response = transport.value
 	switch (response.state) {
 		case 'inactive':
-			return <InfoValue text='' />
+			return <ReadOnlyField label='Amount:' value='' />
 		case 'rejected':
-			return <InfoValue text='Failed to retrieve amount.' />
+			return <ReadOnlyField label='Amount:' value='Failed to retrieve amount.' />
 		case 'pending':
-			return <InfoSkeleton />
+			return (
+				<>
+					<TextSkeleton textSize='sm' length={12} />
+					<TextSkeleton length={20} />
+				</>
+			)
 		case 'resolved':
-			return <InfoValue text={`${ethers.utils.formatEther(response.value.value)} Ether`} />
+			return <ReadOnlyField label='Amount:' value={`${ethers.utils.formatEther(response.value.value)} Ether`} />
 	}
 }
 
@@ -125,14 +148,19 @@ const TransactionFee = ({ transport }: { transport: Signal<AsyncProperty<Transac
 	const response = transport.value
 	switch (response.state) {
 		case 'inactive':
-			return <InfoValue text='' />
+			return <ReadOnlyField label='Transaction Fee:' value='' />
 		case 'rejected':
-			return <InfoValue text='Failed to retrieve receipt.' />
+			return <ReadOnlyField label='Transaction Fee:' value='Failed to retrieve receipt.' />
 		case 'pending':
-			return <InfoSkeleton />
+			return (
+				<>
+					<TextSkeleton textSize='sm' length={14} />
+					<TextSkeleton length={32} />
+				</>
+			)
 		case 'resolved': {
 			const transactionFee = calculateGasFee(response.value.effectiveGasPrice, response.value.gasUsed)
-			return <InfoValue text={`${transactionFee} Ether`} />
+			return <ReadOnlyField label='Transaction Fee:' value={`${transactionFee} Ether`} />
 		}
 	}
 }
@@ -145,12 +173,13 @@ const PageTitle = () => {
 	return <div class='bg-white/10 text-xl font-bold px-6 py-2 -ml-6 mb-4'>Transaction Details</div>
 }
 
-const InfoSkeleton = ({ class: className = 'w-full' }: { class?: string }) => {
-	const classNames = removeNonStringsAndTrim('h-4 my-1 bg-white/30 animate-pulse rounded', className)
-	return <div class={classNames} />
-}
-const InfoValue = ({ text }: { text: string }) => {
-	return <div class='overflow-scroll no-scrollbar'>{text}</div>
+const ReadOnlyField = ({ label, value }: { label: string; value: string }) => {
+	return (
+		<>
+			<div class='text-white/50 text-sm'>{label}</div>
+			<div class='overflow-scroll no-scrollbar'>{value}</div>
+		</>
+	)
 }
 
 function extractTransactionHashFromParams() {
@@ -162,12 +191,7 @@ const Grid = ({ children }: JSX.HTMLAttributes<HTMLDivElement>) => {
 	return <div class='grid grid-cols-1 xl:grid-cols-[repeat(2,_minmax(min-content,_1fr))] gap-x-6'>{children}</div>
 }
 
-const GridItem = ({ title, children, class: className }: JSX.HTMLAttributes<HTMLDivElement> & { title: string }) => {
+const GridItem = ({ children, class: className }: JSX.HTMLAttributes<HTMLDivElement>) => {
 	const classNames = removeNonStringsAndTrim('border-b border-dashed border-white/10 py-2', className)
-	return (
-		<div class={classNames}>
-			<div class='text-white/50 text-sm'>{title}</div>
-			{children}
-		</div>
-	)
+	return <div class={classNames}>{children}</div>
 }

@@ -25,10 +25,9 @@ function ensureConnected(accountStore: AccountStore) {
 
 function executeSplashExit() {
 	useEffect(() => {
-		const selectorClassName = '.splash-screen'
 		const selectorHiddenClassName = 'splash-screen--off'
 
-		const element = document.querySelector(selectorClassName)
+		const element = document.querySelector('.splash-screen')
 		if (element === null || element.classList.contains(selectorHiddenClassName)) return
 		element.classList.add(selectorHiddenClassName)
 	}, [])

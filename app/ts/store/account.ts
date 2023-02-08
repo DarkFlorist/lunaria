@@ -51,16 +51,15 @@ export function createAccountStore() {
 
 	const connectMutation = {
 		transport: asyncValue,
-		dispatch: () => {
-			waitFor(async () => {
-				assertsExternalProvider(window.ethereum)
-				const provider = new ethers.providers.Web3Provider(window.ethereum)
-				await provider.send('eth_requestAccounts', [])
-				const signer = provider.getSigner()
-				const address = await signer.getAddress()
-				accountStore.value = { isConnected: true, address }
-				return address
-			})
+		dispatch: () => waitFor(async () => {
+			assertsExternalProvider(window.ethereum)
+			const provider = new ethers.providers.Web3Provider(window.ethereum)
+			await provider.send('eth_requestAccounts', [])
+			const signer = provider.getSigner()
+			const address = await signer.getAddress()
+			accountStore.value = { isConnected: true, address }
+			return address
+		)
 		},
 		reset,
 	}

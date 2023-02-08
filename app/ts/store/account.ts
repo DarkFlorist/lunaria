@@ -59,8 +59,7 @@ export function createAccountStore() {
 			const address = await signer.getAddress()
 			accountStore.value = { isConnected: true, address }
 			return address
-		)
-		},
+		}),
 		reset,
 	}
 

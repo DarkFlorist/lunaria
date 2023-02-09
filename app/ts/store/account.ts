@@ -1,20 +1,8 @@
 import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
 import { ConnectAttemptError } from '../library/exceptions.js'
-import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { useAsyncState } from '../library/preact-utilities.js'
 import { assertsExternalProvider, assertUnreachable, isEthereumObservable } from '../library/utilities.js'
-
-export type ConnectMutation = {
-	transport: Signal<AsyncProperty<string>>
-	dispatch: () => void
-	reset: () => void
-}
-
-export type ReconnectMutation = {
-	transport: Signal<AsyncProperty<unknown>>
-	dispatch: () => void
-	reset: () => void
-}
 
 type Account =
 	| {
@@ -34,7 +22,7 @@ type Account =
 			error: Error
 	  }
 
-export type AccountStore = ReturnType<typeof createAccountStore>
+export type AccountStore = Signal<Account>
 export function createAccountStore() {
 	const { value: query, waitFor, reset } = useAsyncState<string>()
 

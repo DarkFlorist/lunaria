@@ -9,20 +9,24 @@ import { useAccountStore } from './AccountContext.js'
 import { ethers } from 'ethers'
 import { createTransferStore } from '../store/transfer.js'
 import { isEthereumJsonRpcError } from '../library/exceptions.js'
+import { BalanceProvider, createBalanceStore } from '../context/BalanceContext.js'
 
 export const SendEthPage = () => {
 	const transferStore = createTransferStore()
+	const balanceStore = createBalanceStore()
 
 	return (
-		<TransferProvider store={transferStore}>
-			<Layout.Page>
-				<Layout.Header />
-				<Layout.Body>
-					<Main />
-				</Layout.Body>
-				<Layout.Footer />
-			</Layout.Page>
-		</TransferProvider>
+		<BalanceProvider store={balanceStore}>
+			<TransferProvider store={transferStore}>
+				<Layout.Page>
+					<Layout.Header />
+					<Layout.Body>
+						<Main />
+					</Layout.Body>
+					<Layout.Footer />
+				</Layout.Page>
+			</TransferProvider>
+		</BalanceProvider>
 	)
 }
 

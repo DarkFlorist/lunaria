@@ -1,7 +1,7 @@
 import { ComponentChildren, JSX } from 'preact'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
 import { ConnectToWallet } from './ConnectToWallet.js'
-import * as Icon from './Icon/index.js'
+import { EthBalance } from './EthBalance.js'
 
 type LayoutComponentProps = JSX.HTMLAttributes<HTMLDivElement> & { children: ComponentChildren }
 
@@ -76,18 +76,6 @@ const Support = () => {
 		</div>
 	)
 }
-
-const EthBalance = () => (
-	<div class='flex flex-col items-center justify-center md:items-start md:gap-1 mb-2'>
-		<div class='uppercase text-white/50 text-xs md:text-sm'>balance (ETH)</div>
-		<div class='flex items-center gap-2'>
-			<div class='text-lg font-bold capitalize'>100.0159 ETH</div>
-			<button type='button' class='focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white rounded' title='Refresh' onClick={() => {}}>
-				<Icon.Refresh />
-			</button>
-		</div>
-	</div>
-)
 
 const ActiveNetwork = () => (
 	<div class='flex flex-col items-center justify-center md:items-start md:gap-1 mb-2'>

@@ -22,7 +22,7 @@ type Account =
 			error: Error
 	  }
 
-export type AccountStore = ReturnType<typeof createAccountStore>
+export type AccountStore = Signal<Account>
 export function createAccountStore() {
 	const { value: query, waitFor, reset } = useAsyncState<string>()
 

@@ -2,37 +2,33 @@ import { ComponentChildren } from 'preact'
 import * as Layout from './Layout.js'
 import { AddressField } from './AddressField.js'
 import { AmountField } from './AmountField.js'
-import { accountStore } from '../store/account.js'
 import { assertUnreachable } from '../library/utilities.js'
-import { transferStore } from '../store/transfer.js'
-import { ethers } from 'ethers'
 import ErrorBoundary from './ErrorBoundary.js'
-import { useEffect } from 'preact/hooks'
-import { TransferProvider, useTransfer } from './TransferContext.js'
+import { TransferProvider, useTransferStore } from './TransferContext.js'
+import { useAccountStore } from './AccountContext.js'
+import { ethers } from 'ethers'
+import { createTransferStore } from '../store/transfer.js'
+import { isEthereumJsonRpcError } from '../library/exceptions.js'
 
 export const SendEthPage = () => {
+	const transferStore = createTransferStore()
+
 	return (
-		<Layout.Page>
-			<Layout.Header />
-			<Layout.Body>
-				<ErrorBoundary>
+		<TransferProvider store={transferStore}>
+			<Layout.Page>
+				<Layout.Header />
+				<Layout.Body>
 					<Main />
-				</ErrorBoundary>
-			</Layout.Body>
-			<Layout.Footer />
-		</Layout.Page>
+				</Layout.Body>
+				<Layout.Footer />
+			</Layout.Page>
+		</TransferProvider>
 	)
 }
 
 const Main = () => {
-	useEffect(() => {
-		// on mount, set the state to enable form composition
-		if (transferStore.value.status !== 'idle') return
-		transferStore.value.createNewTransfer()
-	}, [])
-
 	return (
-		<TransferProvider>
+		<ErrorBoundary>
 			<SendForm>
 				<FormLayout>
 					<div class='[grid-area:token]'>
@@ -48,40 +44,61 @@ const Main = () => {
 						<SendGuide />
 					</div>
 					<div class='[grid-area:controls]'>
-						<SendActions />
+						<FormActions />
 					</div>
 				</FormLayout>
 			</SendForm>
-		</TransferProvider>
+		</ErrorBoundary>
 	)
 }
 
-const SendGuide = () => {
-	const { asyncResponse } = useTransfer()
-	const [transactionResponse] = asyncResponse
+const SendForm = ({ children }: { children: ComponentChildren }) => {
+	const accountStore = useAccountStore()
+	const transfer = useTransferStore()
 
-	switch (transactionResponse.state) {
+	const handleSubmit = (event: Event) => {
+		event.preventDefault()
+
+		if (!accountStore.value.isConnected) {
+			accountStore.value.connectMutation.dispatch()
+			return
+		}
+
+		if (!transfer.value.isSigned) {
+			transfer.value.transactionResponseQuery.dispatch()
+			return
+		}
+
+		window.location.href = `#tx/${transfer.value.transactionResponse.hash}`
+		return
+	}
+
+	return <form onSubmit={handleSubmit}>{children}</form>
+}
+
+const SendGuide = () => {
+	const transferStore = useTransferStore()
+
+	if (transferStore.value.isSigned) return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
+
+	const transaction = transferStore.value.transactionResponseQuery.transport
+	switch (transaction.value.state) {
 		case 'inactive':
-			return (
-				<Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
-			)
+			return <Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
 		case 'pending':
-			return (
-				<Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
-			)
+			return <Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
+		case 'rejected': {
+			let errorMessage = isEthereumJsonRpcError(transaction.value.error) ? transaction.value.error.error.message : transaction.value.error.message
+			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={errorMessage} />
+		}
 		case 'resolved':
-			return (
-				<Guide title='Request Successfully Sent!' content='Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it&apos;s status.' />
-			)
-		case 'rejected':
-			return (
-				<Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={transactionResponse.error.message} />
-			)
-		default: assertUnreachable(transactionResponse)
+			return null
+		default:
+			assertUnreachable(transaction.value)
 	}
 }
 
-const Guide = ({ title, quote, content }: { title: string; quote?: string, content: string }) => {
+const Guide = ({ title, quote, content }: { title: string; quote?: string; content: string }) => {
 	return (
 		<div class='p-4 text-center xl:text-left'>
 			<div class='mb-3 font-bold'>{title}</div>
@@ -91,32 +108,63 @@ const Guide = ({ title, quote, content }: { title: string; quote?: string, conte
 	)
 }
 
-const SendActions = () => {
-	const account = accountStore
+const FormActions = () => {
+	const accountStore = useAccountStore()
 
-	switch (account.value.status) {
-		case 'busy':
-			return <div class='px-4 py-2 hover:bg-white/10 border w-full'>Connecting...</div>
-		case 'connected':
-			return <ActionsConnected />
-		case 'disconnected':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Connect Wallet</button>
+	if (accountStore.value.isConnected) return <FormActionButton />
+
+	switch (accountStore.value.connectMutation.transport.value.state) {
+		case 'inactive':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>Connect Wallet</span>
+				</button>
+			)
+		case 'pending':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
+					<span>Connecting... </span>
+				</button>
+			)
 		case 'rejected':
 			return <div class='px-4 py-2 bg-red-400/10 border border-red-400/50 text-white/50 text-center cursor-not-allowed'>Unable to connect to wallet!</div>
+		case 'resolved':
+			return null
 	}
 }
 
-const ActionsConnected = () => {
-	const transfer = transferStore.value
-	switch (transfer.status) {
-		case 'new':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>Send</button>
-		case 'signed':
-			return <button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>View Transaction</button>
-		case 'confirmed':
-		case 'idle':
-			return <button type='submit' class='px-4 py-2 bg-white/10 text-white/20 w-full' disabled>Loading...</button>
-		default: assertUnreachable(transfer)
+const FormActionButton = () => {
+	const transferStore = useTransferStore()
+
+	if (transferStore.value.isSigned) {
+		return (
+			<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+				<span>View Transaction</span>
+			</button>
+		)
+	}
+
+	switch (transferStore.value.transactionResponseQuery.transport.value.state) {
+		case 'inactive':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>Send</span>
+				</button>
+			)
+		case 'pending':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full disabled:text-white/50 disabled:border-white/30 disabled:cursor-not-allowed disabled:hover:bg-transparent' disabled>
+					<span>Sending...</span>
+				</button>
+			)
+		case 'rejected':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>Retry?</span>
+				</button>
+			)
+		case 'resolved':
+			return null
 	}
 }
 
@@ -131,64 +179,28 @@ const TokenSelectField = () => {
 	)
 }
 
-const SendForm = ({ children }: { children: ComponentChildren }) => {
-	const { asyncResponse, store: transfer } = useTransfer()
-	const [_transactionResponse, resolveTransactionResponse] = asyncResponse
-
-	switch (transfer.status) {
-		case 'new':
-			return <form onSubmit={(event: Event) => { event.preventDefault(); resolveTransactionResponse() }}>{children}</form>
-		case 'signed':
-			return <form onSubmit={(event: Event) => { event.preventDefault(); location.href = `#tx/${transfer.transactionResponse.hash}` }}>{children}</form>
-		case 'confirmed':
-		case 'idle':
-		case 'signed':
-			return <>{children}</>
-		default: assertUnreachable(transfer)
-	}
-
-}
-
 const SendAmountField = () => {
-	const { asyncResponse, store: transfer } = useTransfer()
-	const [transactionResponse] = asyncResponse
+	const transferStore = useTransferStore()
 
-	const handleChange = (amount: string) => {
-		if (transfer.status !== 'new') return // ignore input for other states
-		transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, amount } }
+	if (transferStore.value.isSigned) {
+		const fieldValue = ethers.utils.formatEther(transferStore.value.transactionResponse.value)
+		return <AmountField value={fieldValue} onChange={() => {}} label='Amount' name='amount' disabled />
 	}
 
-	switch (transfer.status) {
-		case 'new':
-			return <AmountField value={transfer.transactionRequest.amount} onChange={handleChange} label='Amount' name='amount' disabled={transactionResponse.state === 'pending'} required />
-		case 'signed':
-			return <AmountField value={ethers.utils.formatEther(transfer.transactionResponse.value!)} onChange={handleChange} label='Amount' name='amount' disabled />
-		case 'idle':
-		case 'confirmed':
-			return null
-		default: assertUnreachable(transfer)
-	}
+	const formData = transferStore.value.formData
+	return <AmountField value={formData.value.amount} onChange={amount => (formData.value = { ...formData.value, amount })} label='Amount' name='amount' disabled={transferStore.value.transactionResponseQuery.transport.value.state === 'pending'} required />
 }
 
 const SendToField = () => {
-	const { asyncResponse, store: transfer } = useTransfer()
-	const [transactionResponse] = asyncResponse
+	const transferStore = useTransferStore()
 
-	const handleChange = (to: string) => {
-		if (transfer.status !== 'new') return // ignore input for other states
-		transferStore.value = { ...transfer, transactionRequest: { ...transfer.transactionRequest, to } }
+	if (transferStore.value.isSigned) {
+		const fieldValue = transferStore.value.transactionResponse.to!
+		return <AddressField value={fieldValue} onChange={() => {}} label='To' name='to' disabled />
 	}
 
-	switch (transfer.status) {
-		case 'new':
-			return <AddressField value={transfer.transactionRequest.to} onChange={handleChange} label='To' name='to' disabled={transactionResponse.state === 'pending'} required />
-		case 'signed':
-			return <AddressField value={transfer.transactionResponse.to!} onChange={handleChange} label='To' name='to' disabled />
-		case 'idle':
-		case 'confirmed':
-			return null
-		default: assertUnreachable(transfer)
-	}
+	const formData = transferStore.value.formData
+	return <AddressField value={formData.value.to} onChange={to => (formData.value = { ...formData.value, to })} label='To' name='to' disabled={transferStore.value.transactionResponseQuery.transport.value.state === 'pending'} required />
 }
 
 const PageTitle = () => {
@@ -199,10 +211,9 @@ const PageTitle = () => {
 	)
 }
 
-
 const FormLayout = ({ children }: { children: ComponentChildren }) => {
 	return (
-		<div class='grid [grid-template-areas:_"title"_"token"_"amount"_"address"_"tip"_"controls"] grid-rows-[repeat(auto-fit,minmax(min-content,0))] gap-y-4 lg:[grid-template-areas:_"title_title"_"token_amount"_"address_address"_"tip_tip"_"controls_controls"] lg:gap-x-6 xl:[grid-template-areas:_"title_title_title"_"token_amount_tip"_"address_address_tip"_"controls_controls_tip"] lg:grid-cols-2 xl:grid-cols-3'>
+		<div class='grid [grid-template-areas:_"title"_"token"_"amount"_"address"_"tip"_"controls"] grid-rows-[repeat(auto-fit,minmax(min-content,0))] gap-y-4 lg:[grid-template-areas:_"title_title"_"token_amount"_"address_address"_"tip_tip"_"controls_controls"] lg:gap-x-6 xl:[grid-template-areas:_"title_title_title"_"token_amount_tip"_"address_address_tip"_"controls_controls_tip"_"._._tip"] lg:grid-cols-2 xl:grid-cols-3'>
 			<PageTitle />
 			{children}
 		</div>

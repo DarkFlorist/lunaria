@@ -1,77 +1,87 @@
-import { signal } from '@preact/signals'
+import { effect, Signal, useSignal } from '@preact/signals'
 import { ethers } from 'ethers'
-import { isEthereumJsonRpcError, EthereumJsonRpcError } from '../library/exceptions.js'
+import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { assertsExternalProvider, isEthereumObservable } from '../library/utilities.js'
 
-type AccountBusy = {
-	status: 'busy'
+export type ConnectMutation = {
+	transport: Signal<AsyncProperty<string>>
+	dispatch: () => void
+	reset: () => void
 }
 
-type AccountConnected = {
-	status: 'connected'
-	address: string
+export type ReconnectMutation = {
+	transport: Signal<AsyncProperty<unknown>>
+	dispatch: () => void
+	reset: () => void
 }
 
-type AccountDisconnected = {
-	status: 'disconnected'
-	connect: () => Promise<void>
-	ensureConnected: () => Promise<void>
-}
+type Account =
+	| {
+			isConnected: false
+			connectMutation: ConnectMutation
+			reconnectMutation: ReconnectMutation
+	  }
+	| {
+			isConnected: true
+			address: string
+	  }
 
-type AccountConnectRejected = {
-	status: 'rejected'
-	error: EthereumJsonRpcError | Error
-}
+export type AccountStore = Signal<Account>
+export function createAccountStore() {
+	const { value: asyncValue, waitFor, reset } = useAsyncState<string>()
+	const reconnect = useAsyncState()
 
-export type AccountStore = AccountBusy | AccountConnected | AccountDisconnected | AccountConnectRejected
+	const reconnectMutation = {
+		transport: reconnect.value,
+		dispatch: () => {
+			reconnect.waitFor(async () => {
+				try {
+					assertsExternalProvider(window.ethereum)
+					const provider = new ethers.providers.Web3Provider(window.ethereum)
+					const signer = provider.getSigner()
+					const address = await signer.getAddress()
+					accountStore.value = { isConnected: true, address }
+				} catch {
+					accountStore.value = accountDefaults
+				}
+			})
+		},
+		reset: reconnect.reset,
+	}
 
-const storeDefaults = { status: 'disconnected', connect, ensureConnected } as const
-export const accountStore = signal<AccountStore>(storeDefaults)
+	const connectMutation = {
+		transport: asyncValue,
+		dispatch: () => waitFor(async () => {
+			assertsExternalProvider(window.ethereum)
+			const provider = new ethers.providers.Web3Provider(window.ethereum)
+			await provider.send('eth_requestAccounts', [])
+			const signer = provider.getSigner()
+			const address = await signer.getAddress()
+			accountStore.value = { isConnected: true, address }
+			return address
+		}),
+		reset,
+	}
 
-async function connect() {
-	try {
+	const accountDefaults = { isConnected: false as const, connectMutation, reconnectMutation }
+	const accountStore = useSignal<Account>(accountDefaults)
+
+	const handleAccountChange = (newAccount: string[]) => {
+		if (ethers.utils.isAddress(newAccount[0])) {
+			accountStore.value = { isConnected: true, address: newAccount[0] }
+			return
+		}
+
+		reset()
+		accountStore.value = accountDefaults
+	}
+
+	effect(() => {
 		assertsExternalProvider(window.ethereum)
 		const provider = new ethers.providers.Web3Provider(window.ethereum)
-		accountStore.value = { status: 'busy' }
-		await provider.send('eth_requestAccounts', [])
-		const signer = provider.getSigner()
-		const address = await signer.getAddress()
-		accountStore.value = { status: 'connected', address }
-		// watch for account changes
 		if (!isEthereumObservable(provider.provider)) return
 		provider.provider.on('accountsChanged', handleAccountChange)
-	} catch (exception) {
-		let error = new Error(`An unknown error was encountered ${exception}`)
-		if (exception instanceof Error) {
-			error = exception
-		}
-		if (typeof exception === 'string') {
-			error = new Error(exception)
-		}
-		if (exception instanceof Object) {
-			if (isEthereumJsonRpcError(exception)) {
-				error = new EthereumJsonRpcError(exception.code, exception.message, exception.data)
-			}
-		}
-		accountStore.value = { status: 'rejected', error }
-	}
-}
+	})
 
-async function ensureConnected() {
- 	try {
- 		assertsExternalProvider(window.ethereum)
- 		const provider = new ethers.providers.Web3Provider(window.ethereum)
- 		const signer = provider.getSigner()
- 		accountStore.value = { status: 'busy' }
- 		const address = await signer.getAddress()
- 		accountStore.value = { status: 'connected', address }
- 	} catch (exception) {
-		accountStore.value = storeDefaults
- 	}
- }
-
-
-const handleAccountChange = (newAccount: string[]) => {
-	if (accountStore.value?.status !== 'connected') return
-	accountStore.value = ethers.utils.isAddress(newAccount[0]) ? { status: 'connected', address: newAccount[0] } : storeDefaults
+	return accountStore
 }

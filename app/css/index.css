@@ -436,40 +436,6 @@ video {
 	--tw-drop-shadow: ;
 }
 
-.container {
-	width: 100%;
-}
-
-@media (min-width: 640px) {
-	.container {
-		max-width: 640px;
-	}
-}
-
-@media (min-width: 768px) {
-	.container {
-		max-width: 768px;
-	}
-}
-
-@media (min-width: 1024px) {
-	.container {
-		max-width: 1024px;
-	}
-}
-
-@media (min-width: 1280px) {
-	.container {
-		max-width: 1280px;
-	}
-}
-
-@media (min-width: 1536px) {
-	.container {
-		max-width: 1536px;
-	}
-}
-
 .static {
 	position: static;
 }
@@ -519,11 +485,6 @@ video {
 .my-3 {
 	margin-top: 0.75rem;
 	margin-bottom: 0.75rem;
-}
-
-.my-2 {
-	margin-top: 0.5rem;
-	margin-bottom: 0.5rem;
 }
 
 .mb-2 {
@@ -578,6 +539,18 @@ video {
 	height: 4rem;
 }
 
+.h-5 {
+	height: 1.25rem;
+}
+
+.h-6 {
+	height: 1.5rem;
+}
+
+.h-3\.5 {
+	height: 0.875rem;
+}
+
 .h-full {
 	height: 100%;
 }
@@ -598,14 +571,6 @@ video {
 	width: 6rem;
 }
 
-.w-96 {
-	width: 24rem;
-}
-
-.w-64 {
-	width: 16rem;
-}
-
 .min-w-\[11rem\] {
 	min-width: 11rem;
 }
@@ -616,10 +581,6 @@ video {
 
 .max-w-lg {
 	max-width: 32rem;
-}
-
-.max-w-\[40rem\] {
-	max-width: 40rem;
 }
 
 .grow {
@@ -650,16 +611,16 @@ video {
 	appearance: none;
 }
 
+.grid-cols-\[minmax\(min-content\2c max-content\)_minmax\(auto\2c max-content\)\] {
+	grid-template-columns: minmax(min-content, max-content) minmax(auto, max-content);
+}
+
 .grid-cols-\[minmax\(auto\2c max-content\)_minmax\(auto\2c max-content\)_minmax\(auto\2c max-content\)\] {
 	grid-template-columns: minmax(auto, max-content) minmax(auto, max-content) minmax(auto, max-content);
 }
 
 .grid-cols-\[minmax\(min-content\2c max-content\)_minmax\(min-content\2c max-content\)\] {
 	grid-template-columns: minmax(min-content, max-content) minmax(min-content, max-content);
-}
-
-.grid-cols-\[minmax\(min-content\2c max-content\)_minmax\(auto\2c max-content\)\] {
-	grid-template-columns: minmax(min-content, max-content) minmax(auto, max-content);
 }
 
 .grid-cols-1 {
@@ -684,10 +645,6 @@ video {
 
 .flex-col {
 	flex-direction: column;
-}
-
-.flex-wrap {
-	flex-wrap: wrap;
 }
 
 .items-start {
@@ -734,10 +691,6 @@ video {
 .gap-x-6 {
 	-moz-column-gap: 1.5rem;
 	column-gap: 1.5rem;
-}
-
-.gap-y-1 {
-	row-gap: 0.25rem;
 }
 
 .overflow-auto {
@@ -802,10 +755,6 @@ video {
 
 .border-white\/10 {
 	border-color: rgb(255 255 255 / 0.1);
-}
-
-.border-red-400\/30 {
-	border-color: rgb(248 113 113 / 0.3);
 }
 
 .bg-white\/5 {
@@ -877,16 +826,6 @@ video {
 .px-8 {
 	padding-left: 2rem;
 	padding-right: 2rem;
-}
-
-.px-2 {
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
-}
-
-.py-1 {
-	padding-top: 0.25rem;
-	padding-bottom: 0.25rem;
 }
 
 .py-\[10\%\] {
@@ -972,14 +911,6 @@ video {
 
 .text-white\/30 {
 	color: rgb(255 255 255 / 0.3);
-}
-
-.text-white\/20 {
-	color: rgb(255 255 255 / 0.2);
-}
-
-.underline-offset-4 {
-	text-underline-offset: 4px;
 }
 
 .outline-none {
@@ -1156,10 +1087,6 @@ video {
 	color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
-.hover\:underline:hover {
-	text-decoration-line: underline;
-}
-
 .focus\:border-white:focus {
 	--tw-border-opacity: 1;
 	border-color: rgb(255 255 255 / var(--tw-border-opacity));
@@ -1190,12 +1117,24 @@ video {
 	--tw-ring-color: rgb(255 255 255 / var(--tw-ring-opacity));
 }
 
+.disabled\:cursor-not-allowed:disabled {
+	cursor: not-allowed;
+}
+
+.disabled\:border-white\/30:disabled {
+	border-color: rgb(255 255 255 / 0.3);
+}
+
 .disabled\:bg-white\/5:disabled {
 	background-color: rgb(255 255 255 / 0.05);
 }
 
 .disabled\:text-white\/30:disabled {
 	color: rgb(255 255 255 / 0.3);
+}
+
+.disabled\:text-white\/50:disabled {
+	color: rgb(255 255 255 / 0.5);
 }
 
 .disabled\:opacity-30:disabled {
@@ -1332,7 +1271,7 @@ video {
 		text-align: left;
 	}
 
-	.xl\:\[grid-template-areas\:_\"title_title_title\"_\"token_amount_tip\"_\"address_address_tip\"_\"controls_controls_tip\"\] {
-		grid-template-areas: 'title title title' 'token amount tip' 'address address tip' 'controls controls tip';
+	.xl\:\[grid-template-areas\:_\"title_title_title\"_\"token_amount_tip\"_\"address_address_tip\"_\"controls_controls_tip\"_\"\._\._tip\"\] {
+		grid-template-areas: 'title title title' 'token amount tip' 'address address tip' 'controls controls tip' '. . tip';
 	}
 }

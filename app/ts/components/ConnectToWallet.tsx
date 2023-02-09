@@ -55,7 +55,8 @@ export const ConnectToWallet = () => {
 						<div class='text-center md:text-right'>
 							<div class='font-bold'>Failed to connect to wallet!</div>
 							<a class='text-sm text-white/50 flex items-center justify-center gap-1 italic' title={`${accountStore.value.error.message} (${accountStore.value.error.code})`}>
-								<span>Open your wallet extension window for details</span>️ <Icon.Info />
+								<span>Open your wallet extension window for details</span>
+								<Icon.Info />
 							</a>
 						</div>
 					</Wrapper>

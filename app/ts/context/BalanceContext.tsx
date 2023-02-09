@@ -1,14 +1,23 @@
-import { Signal, useSignal } from '@preact/signals'
-import { BigNumber, ethers } from 'ethers'
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
+import { BigNumber } from 'ethers'
 import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
+import { useEthereumProvider } from '../components/EthereumProvider.js'
 import { useAsyncState } from '../library/preact-utilities.js'
-import { assertsExternalProvider, assertUnreachable, isEthereumObservable } from '../library/utilities.js'
+import { assertUnreachable, isEthereumObservable } from '../library/utilities.js'
+import { AccountStore } from '../store/account.js'
+import { Web3Provider } from '../types.js'
 
 type Balance =
 	| {
-			state: 'initial'
-			checkBalance: () => void
+			state: 'unavailable'
+	  }
+	| {
+			state: 'disconnected'
+			connect: () => void
+	  }
+	| {
+			state: 'connected'
 	  }
 	| {
 			state: 'updating'
@@ -25,53 +34,86 @@ type Balance =
 			reset: () => void
 	  }
 
-export type BalanceStore = Signal<Balance>
-export function createBalanceStore() {
-	const { value: query, waitFor, reset } = useAsyncState<BigNumber>()
+type BlockChangeObserver = {
+	removeListener: () => Web3Provider
+}
 
-	const checkBalance = () => {
+export type BalanceStore = Signal<Balance>
+export function createBalanceStore(accountStore: AccountStore) {
+	const blockListener = useSignal<BlockChangeObserver | undefined>(undefined)
+	const { value: query, waitFor, reset } = useAsyncState<BigNumber>()
+	const ethereumProvider = useEthereumProvider()
+
+	const checkBalance = (address: string) => {
+		reset()
 		waitFor(async () => {
-			assertsExternalProvider(window.ethereum)
-			const provider = new ethers.providers.Web3Provider(window.ethereum)
-			const signer = provider.getSigner()
-			const address = await signer.getAddress()
-			return await provider.getBalance(address)
+			return await ethereumProvider.getBalance(address)
 		})
 	}
 
-	const balanceStoreDefaults = { state: 'initial' as const, checkBalance }
-	const balanceStore = useSignal<Balance>(balanceStoreDefaults)
+	const connect = () => {
+		if (accountStore.value.state !== 'disconnected') return
+		return accountStore.value.connect()
+	}
 
-	const handleAccountChange = (newAccount: string[]) => {
-		if (ethers.utils.isAddress(newAccount[0])) {
-			checkBalance()
+	const balanceStore = useSignal<Balance>({ state: 'disconnected' as const, connect })
+
+	const createBlockListener = (handler: () => void) => {
+		if (!isEthereumObservable(ethereumProvider.provider)) return
+		const listener = ethereumProvider.on('block', handler)
+		const removeListener = () => listener.off('block', handler)
+		// run handler after create
+		handler()
+		return { removeListener }
+	}
+
+	const listenForAsyncStateChanges = () => {
+		if (accountStore.value.state !== 'connected') return
+
+		switch (query.value.state) {
+			case 'inactive':
+				balanceStore.value = { state: 'connected' as const }
+				break
+			case 'pending':
+				balanceStore.value = { state: 'updating' as const, reset }
+				break
+			case 'rejected':
+				balanceStore.value = { state: 'failed' as const, error: query.value.error, reset }
+				break
+			case 'resolved':
+				balanceStore.value = { state: 'updated' as const, balance: query.value.value, updated_at: new Date() }
+				break
+			default:
+				assertUnreachable(query.value)
 		}
 	}
 
-	const listenForAccountChanges = () => {
-		assertsExternalProvider(window.ethereum)
-		const provider = new ethers.providers.Web3Provider(window.ethereum)
-		if (!isEthereumObservable(provider.provider)) return
-		provider.provider.on('accountsChanged', handleAccountChange)
+	const listenForAccountChange = () => {
+		switch (accountStore.value.state) {
+			case 'disconnected':
+				// remove previous periodical balance check
+				if (blockListener.value !== undefined) blockListener.value.removeListener()
+				balanceStore.value = { state: 'disconnected', connect: accountStore.value.connect }
+				break
+			case 'connecting':
+				balanceStore.value = { state: 'updating' as const, reset }
+				break
+			case 'connected':
+				blockListener.value = createBlockListener(checkBalance.bind(null, accountStore.value.address))
+				break
+			case 'failed':
+				balanceStore.value = { state: 'unavailable' }
+				break
+			default:
+				assertUnreachable(accountStore.value)
+		}
 	}
 
-	switch (query.value.state) {
-		case 'inactive':
-			balanceStore.value = { state: 'initial' as const, checkBalance }
-			break
-		case 'pending':
-			balanceStore.value = { state: 'updating' as const, reset }
-			break
-		case 'rejected':
-			balanceStore.value = { state: 'failed' as const, error: query.value.error, reset }
-			break
-		case 'resolved':
-			balanceStore.value = { state: 'updated' as const, balance: query.value.value, updated_at: new Date() }
-			listenForAccountChanges()
-			break
-		default:
-			assertUnreachable(query.value)
-	}
+	// listen for account store signal
+	useSignalEffect(listenForAccountChange)
+
+	// listen for async state
+	useSignalEffect(listenForAsyncStateChanges)
 
 	return balanceStore
 }
@@ -80,10 +122,11 @@ const BalanceContext = createContext<BalanceStore | undefined>(undefined)
 
 type BalanceProviderProps = {
 	children: ComponentChildren
-	store: BalanceStore
+	accountStore: AccountStore
 }
 
-export const BalanceProvider = ({ children, store }: BalanceProviderProps) => {
+export const BalanceProvider = ({ children, accountStore }: BalanceProviderProps) => {
+	const store = createBalanceStore(accountStore)
 	return <BalanceContext.Provider value={store}>{children}</BalanceContext.Provider>
 }
 

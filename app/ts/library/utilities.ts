@@ -31,6 +31,10 @@ export function assertsExternalProvider(ethereum: unknown): asserts ethereum is 
 	if (ethereum === null || ethereum === undefined || typeof ethereum !== 'object') throw new Error('Ethereum object does not exist')
 }
 
+export function isExternalProvider(ethereum: unknown): ethereum is ExternalProvider {
+	return ethereum !== null && ethereum !== undefined && typeof ethereum === 'object'
+}
+
 export type EthereumWithListeners = {
 	on(eventName: string | symbol, listener: (...args: any[]) => void): void
 }

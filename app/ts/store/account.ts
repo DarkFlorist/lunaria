@@ -1,4 +1,4 @@
-import { Signal, useSignal } from '@preact/signals'
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
 import { ConnectAttemptError } from '../library/exceptions.js'
 import { useAsyncState } from '../library/preact-utilities.js'
@@ -64,23 +64,25 @@ export function createAccountStore() {
 		accountStore.value = error instanceof ConnectAttemptError ? accountStoreDefaults : { state: 'failed', error }
 	}
 
-	switch (query.value.state) {
-		case 'inactive':
-			break
-		case 'pending':
-			accountStore.value = { state: 'connecting', reset }
-			break
-		case 'rejected':
-			handleRejection(query.value.error)
-			break
-		case 'resolved': {
-			accountStore.value = { state: 'connected', address: query.value.value }
-			listenForAccountChanges()
-			break
+	useSignalEffect(() => {
+		switch (query.value.state) {
+			case 'inactive':
+				break
+			case 'pending':
+				accountStore.value = { state: 'connecting', reset }
+				break
+			case 'rejected':
+				handleRejection(query.value.error)
+				break
+			case 'resolved': {
+				accountStore.value = { state: 'connected', address: query.value.value }
+				listenForAccountChanges()
+				break
+			}
+			default:
+				assertUnreachable(query.value)
 		}
-		default:
-			assertUnreachable(query.value)
-	}
+	})
 
 	return accountStore
 }

@@ -35,8 +35,8 @@ export function createAccountStore() {
 					const signer = provider.getSigner()
 					return await signer.getAddress()
 				} catch (unknownError) {
-					let error = new Error(`Unknown error ${unknownError}`)
-					if (typeof unknownError === 'string') error = new Error(unknownError)
+					let error = new ConnectAttemptError(`Unknown error ${unknownError}`)
+					if (typeof unknownError === 'string') error = new ConnectAttemptError(unknownError)
 					if (unknownError instanceof Error) error = new ConnectAttemptError(error.message)
 					throw error
 				}

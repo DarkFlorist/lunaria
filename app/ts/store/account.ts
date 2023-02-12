@@ -1,86 +1,90 @@
-import { effect, Signal, useSignal } from '@preact/signals'
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
-import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
-import { assertsExternalProvider, isEthereumObservable } from '../library/utilities.js'
-
-export type ConnectMutation = {
-	transport: Signal<AsyncProperty<string>>
-	dispatch: () => void
-	reset: () => void
-}
-
-export type ReconnectMutation = {
-	transport: Signal<AsyncProperty<unknown>>
-	dispatch: () => void
-	reset: () => void
-}
+import { ConnectAttemptError } from '../library/exceptions.js'
+import { useAsyncState } from '../library/preact-utilities.js'
+import { assertsExternalProvider, assertUnreachable, isEthereumObservable } from '../library/utilities.js'
 
 type Account =
 	| {
-			isConnected: false
-			connectMutation: ConnectMutation
-			reconnectMutation: ReconnectMutation
+			state: 'disconnected'
+			connect: (attemptOnly?: boolean) => void
 	  }
 	| {
-			isConnected: true
+			state: 'connecting'
+			reset: () => void
+	  }
+	| {
+			state: 'connected'
 			address: string
+	  }
+	| {
+			state: 'failed'
+			error: Error
 	  }
 
 export type AccountStore = Signal<Account>
 export function createAccountStore() {
-	const { value: asyncValue, waitFor, reset } = useAsyncState<string>()
-	const reconnect = useAsyncState()
+	const { value: query, waitFor, reset } = useAsyncState<string>()
 
-	const reconnectMutation = {
-		transport: reconnect.value,
-		dispatch: () => {
-			reconnect.waitFor(async () => {
+	const connect = (attemptOnly?: boolean) =>
+		waitFor(async () => {
+			if (attemptOnly) {
 				try {
 					assertsExternalProvider(window.ethereum)
 					const provider = new ethers.providers.Web3Provider(window.ethereum)
 					const signer = provider.getSigner()
-					const address = await signer.getAddress()
-					accountStore.value = { isConnected: true, address }
-				} catch {
-					accountStore.value = accountDefaults
+					return await signer.getAddress()
+				} catch (unknownError) {
+					let error = new ConnectAttemptError(`Unknown error ${unknownError}`)
+					if (typeof unknownError === 'string') error = new ConnectAttemptError(unknownError)
+					if (unknownError instanceof Error) error = new ConnectAttemptError(error.message)
+					throw error
 				}
-			})
-		},
-		reset: reconnect.reset,
-	}
+			}
 
-	const connectMutation = {
-		transport: asyncValue,
-		dispatch: () => waitFor(async () => {
 			assertsExternalProvider(window.ethereum)
 			const provider = new ethers.providers.Web3Provider(window.ethereum)
 			await provider.send('eth_requestAccounts', [])
 			const signer = provider.getSigner()
-			const address = await signer.getAddress()
-			accountStore.value = { isConnected: true, address }
-			return address
-		}),
-		reset,
-	}
+			return await signer.getAddress()
+		})
 
-	const accountDefaults = { isConnected: false as const, connectMutation, reconnectMutation }
-	const accountStore = useSignal<Account>(accountDefaults)
+	const accountStoreDefaults = { state: 'disconnected' as const, connect }
+	const accountStore = useSignal<Account>(accountStoreDefaults)
 
 	const handleAccountChange = (newAccount: string[]) => {
-		if (ethers.utils.isAddress(newAccount[0])) {
-			accountStore.value = { isConnected: true, address: newAccount[0] }
-			return
-		}
-
-		reset()
-		accountStore.value = accountDefaults
+		accountStore.value = ethers.utils.isAddress(newAccount[0]) ? { state: 'connected', address: newAccount[0] } : accountStoreDefaults
 	}
 
-	effect(() => {
+	const listenForAccountChanges = () => {
 		assertsExternalProvider(window.ethereum)
 		const provider = new ethers.providers.Web3Provider(window.ethereum)
 		if (!isEthereumObservable(provider.provider)) return
 		provider.provider.on('accountsChanged', handleAccountChange)
+	}
+
+	const handleRejection = (error: Error) => {
+		accountStore.value = error instanceof ConnectAttemptError ? accountStoreDefaults : { state: 'failed', error }
+	}
+
+	useSignalEffect(() => {
+		switch (query.value.state) {
+			case 'inactive':
+				break
+			case 'pending':
+				accountStore.value = { state: 'connecting', reset }
+				break
+			case 'rejected':
+				handleRejection(query.value.error)
+				break
+			case 'resolved': {
+				accountStore.value = { state: 'connected', address: query.value.value }
+				listenForAccountChanges()
+				break
+			}
+			default:
+				assertUnreachable(query.value)
+		}
 	})
 
 	return accountStore

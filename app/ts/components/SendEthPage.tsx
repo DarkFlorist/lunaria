@@ -59,8 +59,8 @@ const SendForm = ({ children }: { children: ComponentChildren }) => {
 	const handleSubmit = (event: Event) => {
 		event.preventDefault()
 
-		if (!accountStore.value.isConnected) {
-			accountStore.value.connectMutation.dispatch()
+		if (accountStore.value.state === 'disconnected') {
+			accountStore.value.connect()
 			return
 		}
 
@@ -111,25 +111,23 @@ const Guide = ({ title, quote, content }: { title: string; quote?: string; conte
 const FormActions = () => {
 	const accountStore = useAccountStore()
 
-	if (accountStore.value.isConnected) return <FormActionButton />
-
-	switch (accountStore.value.connectMutation.transport.value.state) {
-		case 'inactive':
+	switch (accountStore.value.state) {
+		case 'disconnected':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
 					<span>Connect Wallet</span>
 				</button>
 			)
-		case 'pending':
+		case 'connecting':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full' disabled>
 					<span>Connecting... </span>
 				</button>
 			)
-		case 'rejected':
+		case 'failed':
 			return <div class='px-4 py-2 bg-red-400/10 border border-red-400/50 text-white/50 text-center cursor-not-allowed'>Unable to connect to wallet!</div>
-		case 'resolved':
-			return null
+		case 'connected':
+			return <FormActionButton />
 	}
 }
 

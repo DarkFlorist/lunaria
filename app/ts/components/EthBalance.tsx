@@ -16,13 +16,12 @@ export const EthBalance = () => {
 				</div>
 			)
 		case 'disconnected':
-			const connectWallet = balanceStore.value.connect
 			return (
 				<div class='flex flex-col items-center justify-center md:items-start md:gap-1 mb-2'>
 					<div class='uppercase text-white/50 text-xs md:text-sm flex'>balance (ETH)</div>
 					<div class='flex items-center gap-2'>
 						<div>
-							<button class='font-bold text-white/80 hover:text-white' onClick={() => connectWallet()}>
+							<button class='font-bold text-white/80 hover:text-white' onClick={balanceStore.value.connect}>
 								Connect wallet
 							</button>{' '}
 							<span class='text-white/50'>to view balance</span>

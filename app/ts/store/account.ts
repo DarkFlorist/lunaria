@@ -27,7 +27,6 @@ export function createAccountStore() {
 	const { value: query, waitFor, reset } = useAsyncState<string>()
 
 	const connect = (attemptOnly?: boolean) => {
-		console.log('attemptOnly', attemptOnly)
 		waitFor(async () => {
 			if (attemptOnly === true) {
 				try {

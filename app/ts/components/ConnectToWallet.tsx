@@ -24,7 +24,6 @@ export const ConnectToWallet = () => {
 				</Wrapper>
 			)
 		case 'disconnected': {
-			const connectToWallet = accountStore.value.connect
 			return (
 				<Wrapper>
 					<div class='grid grid-cols-[minmax(auto,max-content)_minmax(auto,max-content)_minmax(auto,max-content)] gap-3 items-center justify-center'>
@@ -32,7 +31,7 @@ export const ConnectToWallet = () => {
 						<div class='transition animate-bounce-x'>
 							<Icon.ArrowRight />
 						</div>
-						<Button class='whitespace-nowrap' onClick={() => connectToWallet()}>
+						<Button class='whitespace-nowrap' onClick={accountStore.value.connect.bind(null, false)}>
 							Connect Wallet
 						</Button>
 					</div>

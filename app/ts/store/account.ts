@@ -34,8 +34,11 @@ export function createAccountStore() {
 					const provider = new ethers.providers.Web3Provider(window.ethereum)
 					const signer = provider.getSigner()
 					return await signer.getAddress()
-				} catch (error) {
-					throw new ConnectAttemptError()
+				} catch (unknownError) {
+					let error = new Error(`Unknown error ${unknownError}`)
+					if (typeof unknownError === 'string') error = new Error(unknownError)
+					if (unknownError instanceof Error) error = new ConnectAttemptError(error.message)
+					throw error
 				}
 			}
 

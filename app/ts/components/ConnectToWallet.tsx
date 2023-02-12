@@ -31,7 +31,7 @@ export const ConnectToWallet = () => {
 						<div class='transition animate-bounce-x'>
 							<Icon.ArrowRight />
 						</div>
-						<Button class='whitespace-nowrap' onClick={accountStore.value.connect.bind(null, false)}>
+						<Button class='whitespace-nowrap' onClick={accountStore.value.connect.bind(undefined, false)}>
 							Connect Wallet
 						</Button>
 					</div>

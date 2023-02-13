@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { Web3Provider } from '../types'
 
 export async function sleep(milliseconds: number) {
 	await new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -26,25 +27,29 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 /**
  * Describe a window ethereum object
  */
-type ExternalProvider = ethers.providers.ExternalProvider
-export function assertsExternalProvider(ethereum: unknown): asserts ethereum is ExternalProvider {
-	if (ethereum === null || ethereum === undefined || typeof ethereum !== 'object') throw new Error('Ethereum object does not exist')
-}
-
+type ExternalProvider = ethers.providers.ExternalProvider & { chainId: string }
 export function isExternalProvider(ethereum: unknown): ethereum is ExternalProvider {
-	return ethereum !== null && ethereum !== undefined && typeof ethereum === 'object'
+	return ethereum !== null && ethereum !== undefined && typeof ethereum === 'object' && 'chainId' in ethereum && typeof ethereum.chainId === 'string'
 }
 
-export type EthereumWithListeners = {
+export function assertsExternalProvider(ethereum: unknown): asserts ethereum is ExternalProvider {
+	if (!isExternalProvider(ethereum)) throw new Error('Ethereum object does not exist')
+}
+
+export type ObservableEthereum = {
 	on(eventName: string | symbol, listener: (...args: any[]) => void): void
 }
 
-export function isEthereumObservable(ethereum: unknown): ethereum is EthereumWithListeners {
+export function isEthereumObservable(ethereum: unknown): ethereum is ObservableEthereum {
 	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
 }
 
+export function assertsEthereumObservable(ethereum: unknown): asserts ethereum is ObservableEthereum {
+	if (!isEthereumObservable(ethereum)) throw new Error('Ethereum object is not observable')
+}
+
 export function assertUnreachable(value: never): never {
-	throw new Error(`Never gonna give you up (${value})`)
+	throw new Error(`Unexpected code execution (${value})`)
 }
 
 export function isTransactionHash(hash: string): hash is `0x${string}` {
@@ -59,4 +64,26 @@ export const calculateGasFee = (effectiveGasPrice: ethers.BigNumber, gasUsed: et
 	const gasFeeBigNum = effectiveGasPrice.mul(gasUsed)
 	const gasFee = ethers.utils.formatEther(gasFeeBigNum)
 	return gasFee
+}
+
+export function isWeb3Provider(provider: unknown): provider is Web3Provider {
+	return (
+		provider !== null &&
+		typeof provider === 'object' &&
+		// provider functions that matter
+		'send' in provider &&
+		typeof provider.send === 'function' &&
+		'getBalance' in provider &&
+		typeof provider.getBalance === 'function' &&
+		'sendTransaction' in provider &&
+		typeof provider.sendTransaction === 'function' &&
+		'getTransaction' in provider &&
+		typeof provider.getTransaction === 'function' &&
+		'waitForTransaction' in provider &&
+		typeof provider.waitForTransaction === 'function'
+	)
+}
+
+export function assertsWeb3Provider(provider: unknown): asserts provider is Web3Provider {
+	if (!isWeb3Provider(provider)) throw new Error('Could not connect to compatible ethereum provider.')
 }

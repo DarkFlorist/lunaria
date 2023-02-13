@@ -5,10 +5,10 @@ import { AmountField } from './AmountField.js'
 import { assertUnreachable } from '../library/utilities.js'
 import ErrorBoundary from './ErrorBoundary.js'
 import { TransferProvider, useTransferStore } from './TransferContext.js'
-import { useAccountStore } from './AccountContext.js'
 import { ethers } from 'ethers'
 import { createTransferStore } from '../store/transfer.js'
 import { isEthereumJsonRpcError } from '../library/exceptions.js'
+import { useAccountStore } from '../context/Account.js'
 
 export const SendEthPage = () => {
 	const transferStore = createTransferStore()

@@ -26,9 +26,9 @@ export type AccountStore = Signal<Account>
 export function createAccountStore() {
 	const { value: query, waitFor, reset } = useAsyncState<string>()
 
-	const connect = (attemptOnly?: boolean) =>
+	const connect = (attemptOnly?: boolean) => {
 		waitFor(async () => {
-			if (attemptOnly) {
+			if (attemptOnly === true) {
 				try {
 					assertsExternalProvider(window.ethereum)
 					const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -48,13 +48,11 @@ export function createAccountStore() {
 			const signer = provider.getSigner()
 			return await signer.getAddress()
 		})
-
+	}
 	const accountStoreDefaults = { state: 'disconnected' as const, connect }
 	const accountStore = useSignal<Account>(accountStoreDefaults)
 
-	const handleAccountChange = (newAccount: string[]) => {
-		accountStore.value = ethers.utils.isAddress(newAccount[0]) ? { state: 'connected', address: newAccount[0] } : accountStoreDefaults
-	}
+	const handleAccountChange = () => connect(true)
 
 	const listenForAccountChanges = () => {
 		assertsExternalProvider(window.ethereum)
@@ -67,7 +65,7 @@ export function createAccountStore() {
 		accountStore.value = error instanceof ConnectAttemptError ? accountStoreDefaults : { state: 'failed', error }
 	}
 
-	useSignalEffect(() => {
+	const listenForAsyncChanges = () => {
 		switch (query.value.state) {
 			case 'inactive':
 				break
@@ -85,7 +83,9 @@ export function createAccountStore() {
 			default:
 				assertUnreachable(query.value)
 		}
-	})
+	}
+
+	useSignalEffect(listenForAsyncChanges)
 
 	return accountStore
 }

@@ -413,17 +413,6 @@ video {
 	display: none;
 }
 
-.focus\:ring-1 {
-	--tw-ring-inset: ;
-	--tw-ring-offset-width: 0px;
-	--tw-ring-offset-color: #fff;
-	--tw-ring-color: rgb(59 130 246 / 0.5);
-	--tw-ring-offset-shadow: 0 0 #0000;
-	--tw-ring-shadow: 0 0 #0000;
-	--tw-shadow: 0 0 #0000;
-	--tw-shadow-colored: 0 0 #0000;
-}
-
 .filter {
 	--tw-blur: ;
 	--tw-brightness: ;
@@ -515,6 +504,10 @@ video {
 	margin-top: 1rem;
 }
 
+.block {
+	display: block;
+}
+
 .flex {
 	display: flex;
 }
@@ -535,12 +528,12 @@ video {
 	height: 1rem;
 }
 
-.h-16 {
-	height: 4rem;
-}
-
 .h-5 {
 	height: 1.25rem;
+}
+
+.h-16 {
+	height: 4rem;
 }
 
 .h-6 {
@@ -569,6 +562,10 @@ video {
 
 .w-24 {
 	width: 6rem;
+}
+
+.w-40 {
+	width: 10rem;
 }
 
 .min-w-\[11rem\] {
@@ -667,16 +664,16 @@ video {
 	gap: 0.75rem;
 }
 
+.gap-2 {
+	gap: 0.5rem;
+}
+
 .gap-4 {
 	gap: 1rem;
 }
 
 .gap-6 {
 	gap: 1.5rem;
-}
-
-.gap-2 {
-	gap: 0.5rem;
 }
 
 .gap-x-4 {
@@ -773,16 +770,16 @@ video {
 	background-color: rgb(0 0 0 / 0.1);
 }
 
+.bg-white\/30 {
+	background-color: rgb(255 255 255 / 0.3);
+}
+
 .bg-red-400\/10 {
 	background-color: rgb(248 113 113 / 0.1);
 }
 
 .bg-white\/10 {
 	background-color: rgb(255 255 255 / 0.1);
-}
-
-.bg-white\/30 {
-	background-color: rgb(255 255 255 / 0.3);
 }
 
 .p-4 {
@@ -856,14 +853,14 @@ video {
 	line-height: 1.75rem;
 }
 
-.text-3xl {
-	font-size: 1.875rem;
-	line-height: 2.25rem;
-}
-
 .text-lg {
 	font-size: 1.125rem;
 	line-height: 1.75rem;
+}
+
+.text-3xl {
+	font-size: 1.875rem;
+	line-height: 2.25rem;
 }
 
 .text-2xl {
@@ -1101,22 +1098,6 @@ video {
 	background-color: rgb(255 255 255 / 0.1);
 }
 
-.focus\:outline-none:focus {
-	outline: 2px solid transparent;
-	outline-offset: 2px;
-}
-
-.focus\:ring-1:focus {
-	--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-	--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-	box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-}
-
-.focus\:ring-white:focus {
-	--tw-ring-opacity: 1;
-	--tw-ring-color: rgb(255 255 255 / var(--tw-ring-opacity));
-}
-
 .disabled\:cursor-not-allowed:disabled {
 	cursor: not-allowed;
 }
@@ -1148,6 +1129,10 @@ video {
 @media (min-width: 768px) {
 	.md\:order-last {
 		order: 9999;
+	}
+
+	.md\:h-5 {
+		height: 1.25rem;
 	}
 
 	.md\:min-h-0 {

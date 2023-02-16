@@ -2,11 +2,11 @@ import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { BigNumber } from 'ethers'
 import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
-import { useEthereumProvider } from '../components/EthereumProvider.js'
+import { useEthereumProvider } from './EthereumProvider.js'
 import { useAsyncState } from '../library/preact-utilities.js'
-import { assertUnreachable, isEthereumObservable } from '../library/utilities.js'
-import { AccountStore } from '../store/account.js'
+import { assertsWeb3Provider, assertUnreachable } from '../library/utilities.js'
 import { Web3Provider } from '../types.js'
+import { AccountStore, useAccountStore } from './Account.js'
 
 type Balance =
 	| {
@@ -34,20 +34,21 @@ type Balance =
 			reset: () => void
 	  }
 
-type BlockChangeObserver = {
+type BlockChangeListener = {
 	removeListener: () => Web3Provider
 }
 
 export type BalanceStore = Signal<Balance>
 export function createBalanceStore(accountStore: AccountStore) {
-	const blockListener = useSignal<BlockChangeObserver | undefined>(undefined)
+	const blockListener = useSignal<BlockChangeListener | undefined>(undefined)
 	const { value: query, waitFor, reset } = useAsyncState<BigNumber>()
 	const ethereumProvider = useEthereumProvider()
 
 	const checkBalance = (address: string) => {
 		reset()
 		waitFor(async () => {
-			return await ethereumProvider.getBalance(address)
+			assertsWeb3Provider(ethereumProvider.value.provider)
+			return await ethereumProvider.value.provider.getBalance(address)
 		})
 	}
 
@@ -59,8 +60,8 @@ export function createBalanceStore(accountStore: AccountStore) {
 	const balanceStore = useSignal<Balance>({ state: 'disconnected' as const, connect })
 
 	const createBlockListener = (handler: () => void) => {
-		if (!isEthereumObservable(ethereumProvider.provider)) return
-		const listener = ethereumProvider.on('block', handler)
+		assertsWeb3Provider(ethereumProvider.value.provider)
+		const listener = ethereumProvider.value.provider.on('block', handler)
 		const removeListener = () => listener.off('block', handler)
 		// run handler after create
 		handler()
@@ -122,10 +123,10 @@ const BalanceContext = createContext<BalanceStore | undefined>(undefined)
 
 type BalanceProviderProps = {
 	children: ComponentChildren
-	accountStore: AccountStore
 }
 
-export const BalanceProvider = ({ children, accountStore }: BalanceProviderProps) => {
+export const BalanceProvider = ({ children }: BalanceProviderProps) => {
+	const accountStore = useAccountStore()
 	const store = createBalanceStore(accountStore)
 	return <BalanceContext.Provider value={store}>{children}</BalanceContext.Provider>
 }

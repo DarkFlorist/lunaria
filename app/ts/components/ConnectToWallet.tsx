@@ -1,6 +1,6 @@
 import { ComponentChildren } from 'preact'
+import { useAccountStore } from '../context/Account.js'
 import { EthereumJsonRpcError } from '../library/exceptions.js'
-import { useAccountStore } from './AccountContext.js'
 import Blockie from './Blockie.js'
 import { Button } from './Button.js'
 import * as Icon from './Icon/index.js'

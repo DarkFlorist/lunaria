@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { BigNumber, Contract, ethers } from 'ethers'
 
 export type Web3Provider = ethers.providers.Web3Provider
 export type ExternalProvider = ethers.providers.ExternalProvider
@@ -13,3 +13,15 @@ declare global {
 }
 
 export type HexString = `0x${string}`
+
+export interface ERC20 extends Contract {
+	balanceOf(address: string): Promise<BigNumber>
+	totalSupply(): Promise<BigNumber>
+	transfer(to: string, value: BigNumber): Promise<boolean>
+	transferFrom(from: string, to: string, value: BigNumber): Promise<boolean>
+	approve(spender: string, value: BigNumber): Promise<boolean>
+	allowance(owner: string, spender: string): Promise<BigNumber>
+	name(): Promise<string>
+	symbol(): Promise<string>
+	decimals(): Promise<number>
+}

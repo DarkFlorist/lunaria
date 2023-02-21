@@ -656,16 +656,16 @@ video {
 	justify-content: center;
 }
 
+.gap-2 {
+	gap: 0.5rem;
+}
+
 .gap-1 {
 	gap: 0.25rem;
 }
 
 .gap-3 {
 	gap: 0.75rem;
-}
-
-.gap-2 {
-	gap: 0.5rem;
 }
 
 .gap-4 {
@@ -750,6 +750,10 @@ video {
 	border-color: rgb(248 113 113 / 0.5);
 }
 
+.border-white\/20 {
+	border-color: rgb(255 255 255 / 0.2);
+}
+
 .border-white\/10 {
 	border-color: rgb(255 255 255 / 0.1);
 }
@@ -780,6 +784,11 @@ video {
 
 .bg-white\/10 {
 	background-color: rgb(255 255 255 / 0.1);
+}
+
+.bg-black {
+	--tw-bg-opacity: 1;
+	background-color: rgb(0 0 0 / var(--tw-bg-opacity));
 }
 
 .p-4 {
@@ -838,19 +847,9 @@ video {
 	text-align: right;
 }
 
-.text-sm {
-	font-size: 0.875rem;
-	line-height: 1.25rem;
-}
-
 .text-xs {
 	font-size: 0.75rem;
 	line-height: 1rem;
-}
-
-.text-xl {
-	font-size: 1.25rem;
-	line-height: 1.75rem;
 }
 
 .text-lg {
@@ -858,9 +857,24 @@ video {
 	line-height: 1.75rem;
 }
 
+.text-sm {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+}
+
+.text-xl {
+	font-size: 1.25rem;
+	line-height: 1.75rem;
+}
+
 .text-3xl {
 	font-size: 1.875rem;
 	line-height: 2.25rem;
+}
+
+.text-4xl {
+	font-size: 2.25rem;
+	line-height: 2.5rem;
 }
 
 .text-2xl {
@@ -892,13 +906,13 @@ video {
 	color: rgb(255 255 255 / 0.5);
 }
 
+.text-white\/80 {
+	color: rgb(255 255 255 / 0.8);
+}
+
 .text-red-400 {
 	--tw-text-opacity: 1;
 	color: rgb(248 113 113 / var(--tw-text-opacity));
-}
-
-.text-white\/80 {
-	color: rgb(255 255 255 / 0.8);
 }
 
 .text-white {
@@ -991,6 +1005,10 @@ video {
 	60% {
 		transform: translateX(-20%);
 	}
+}
+
+.fade-to-white {
+	background: linear-gradient(271.22deg, rgba(255, 255, 255, 0.1) 1.03%, rgba(255, 255, 255, 0) 100%);
 }
 
 .\[grid-template-areas\:_\"header\"_\"body\"_\"footer\"\] {

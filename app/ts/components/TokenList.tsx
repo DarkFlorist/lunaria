@@ -1,7 +1,7 @@
 import { useSignal } from '@preact/signals'
 import { tokenList, TokenMetaData } from '../library/tokens.js'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
-import { TokenIcon } from './Icon/Tokens/TokenIcon.js'
+import { TokenIcon } from './Icon/Tokens/index.js'
 
 export const TokenList = () => {
 	const active = useSignal<string | undefined>(undefined)

@@ -205,7 +205,19 @@ const TokenSelectField = () => {
 		case 'failed':
 		case 'signed':
 		case 'signing':
-			return <></>
+			return (
+				<div class='flex flex-col gap-1'>
+					<div class='text-sm text-white/50'>Asset</div>
+					<div class='appearance-none relative flex items-center px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'>
+						<select disabled class='appearance-none bg-transparent w-full'>
+							<option value='Ether'>ETH</option>
+							<option value='0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'>WETH</option>
+							<option value='0x07865c6e87b9f70255377e024ace6630c1eaa37f'>USDC</option>
+						</select>
+					</div>
+				</div>
+			)
+
 		default:
 			assertUnreachable(transfer.value)
 	}
@@ -243,7 +255,7 @@ const SendToField = () => {
 		case 'signing':
 			return <AddressField value={transfer.value.formData.value.to} onChange={() => {}} label='Recipient Address' name='to' disabled required />
 		case 'signed':
-			return <AddressField value={ethers.utils.formatEther(transfer.value.transactionResponse.value)} onChange={() => {}} label='Recipient Address' name='to' disabled required />
+			return <AddressField value={transfer.value.transactionResponse.to!} onChange={() => {}} label='Recipient Address' name='to' disabled required />
 		case 'failed': {
 			const formData = transfer.value.formData
 			return <AddressField value={formData.value.to} onChange={to => (formData.value = { ...formData.value, to })} label='Recipient Address' name='to' disabled required />

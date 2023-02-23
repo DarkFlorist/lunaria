@@ -4,6 +4,7 @@ import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState } from '../library/preact-utilities.js'
+import { TokenMetaData } from '../library/tokens.js'
 import { assertUnreachable } from '../library/utilities.js'
 import { ERC20, TransactionResponse } from '../types.js'
 import { useEthereumProvider } from './EthereumProvider.js'
@@ -16,7 +17,7 @@ type TransferInput =
 	  }
 	| {
 			type: 'Token'
-			tokenAddress: string
+			tokenMetadata: TokenMetaData
 			to: string
 			amount: string
 	  }
@@ -50,12 +51,9 @@ export const TransferProvider = ({ children }: { children: ComponentChildren }) 
 	return <TransferContext.Provider value={store}>{children}</TransferContext.Provider>
 }
 
-// 0x07865c6e87b9f70255377e024ace6630c1eaa37f USDC Goerli
-// 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6 WETH Goerli
-
 const createTransferStore = () => {
 	const { value: query, waitFor, reset } = useAsyncState<TransactionResponse>()
-	const transferInput = useSignal<TransferInput>({ to: '', amount: '', type: 'Token', tokenAddress: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6' })
+	const transferInput = useSignal<TransferInput>({ to: '', amount: '', type: 'Ether' })
 	const providerStore = useEthereumProvider()
 
 	const send = () => {
@@ -63,15 +61,19 @@ const createTransferStore = () => {
 			if (providerStore.value.provider === undefined) throw new Error('Web3Provider is not instantiated.')
 			const provider = providerStore.value.provider
 			const signer = provider.getSigner()
-			const value = ethers.utils.parseEther(transferInput.value.amount)
 			const to = ethers.utils.getAddress(transferInput.value.to)
 
 			switch (transferInput.value.type) {
-				case 'Ether':
+				case 'Ether': {
+					const value = ethers.utils.parseEther(transferInput.value.amount)
 					return await signer.sendTransaction({ to, value })
-				case 'Token':
-					const contract = new ethers.Contract(transferInput.value.tokenAddress, ERC20ABI, signer) as ERC20
+				}
+				case 'Token': {
+					const tokenMetadata = transferInput.value.tokenMetadata
+					const contract = new ethers.Contract(tokenMetadata.address, ERC20ABI, signer) as ERC20
+					const value = ethers.utils.parseUnits(transferInput.value.amount, tokenMetadata.data.decimals)
 					return await contract.transfer(to, value)
+				}
 				default:
 					assertUnreachable(transferInput.value)
 			}

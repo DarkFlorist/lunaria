@@ -17,7 +17,7 @@ export type HexString = `0x${string}`
 export interface ERC20 extends Contract {
 	balanceOf(address: string): Promise<BigNumber>
 	totalSupply(): Promise<BigNumber>
-	transfer(to: string, value: BigNumber): Promise<boolean>
+	transfer(to: string, value: BigNumber): Promise<TransactionResponse>
 	transferFrom(from: string, to: string, value: BigNumber): Promise<boolean>
 	approve(spender: string, value: BigNumber): Promise<boolean>
 	allowance(owner: string, spender: string): Promise<BigNumber>

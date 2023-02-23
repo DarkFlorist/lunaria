@@ -38,10 +38,11 @@ export function assertsExternalProvider(ethereum: unknown): asserts ethereum is 
 
 export type ObservableEthereum = {
 	on(eventName: string | symbol, listener: (...args: any[]) => void): void
+	off(eventName: string | symbol, listener: (...args: any[]) => void): void
 }
 
 export function isEthereumObservable(ethereum: unknown): ethereum is ObservableEthereum {
-	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
+	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function' && 'off' in ethereum && typeof ethereum.off === 'function'
 }
 
 export function assertsEthereumObservable(ethereum: unknown): asserts ethereum is ObservableEthereum {

@@ -2,15 +2,24 @@ import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
 import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
+import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { assertUnreachable } from '../library/utilities.js'
-import { TransactionResponse } from '../types.js'
+import { ERC20, TransactionResponse } from '../types.js'
 import { useEthereumProvider } from './EthereumProvider.js'
 
-type TransferInput = {
-	to: string
-	amount: string
-}
+type TransferInput =
+	| {
+			type: 'Ether'
+			to: string
+			amount: string
+	  }
+	| {
+			type: 'Token'
+			tokenAddress: string
+			to: string
+			amount: string
+	  }
 
 type TransferSigning =
 	| {
@@ -41,9 +50,12 @@ export const TransferProvider = ({ children }: { children: ComponentChildren }) 
 	return <TransferContext.Provider value={store}>{children}</TransferContext.Provider>
 }
 
+// 0x07865c6e87b9f70255377e024ace6630c1eaa37f USDC Goerli
+// 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6 WETH Goerli
+
 const createTransferStore = () => {
 	const { value: query, waitFor, reset } = useAsyncState<TransactionResponse>()
-	const transferInput = useSignal<TransferInput>({ to: '', amount: '' })
+	const transferInput = useSignal<TransferInput>({ to: '', amount: '', type: 'Token', tokenAddress: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6' })
 	const providerStore = useEthereumProvider()
 
 	const send = () => {
@@ -53,7 +65,16 @@ const createTransferStore = () => {
 			const signer = provider.getSigner()
 			const value = ethers.utils.parseEther(transferInput.value.amount)
 			const to = ethers.utils.getAddress(transferInput.value.to)
-			return await signer.sendTransaction({ to, value })
+
+			switch (transferInput.value.type) {
+				case 'Ether':
+					return await signer.sendTransaction({ to, value })
+				case 'Token':
+					const contract = new ethers.Contract(transferInput.value.tokenAddress, ERC20ABI, signer) as ERC20
+					return await contract.transfer(to, value)
+				default:
+					assertUnreachable(transferInput.value)
+			}
 		})
 	}
 

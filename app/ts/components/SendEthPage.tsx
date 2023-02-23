@@ -8,6 +8,8 @@ import { ethers } from 'ethers'
 import { isEthereumJsonRpcError } from '../library/exceptions.js'
 import { useAccountStore } from '../context/Account.js'
 import { TransferProvider, useTransfer } from '../context/Transfer.js'
+import { tokenData } from '../library/tokens.js'
+import { JSXInternal } from 'preact/src/jsx.js'
 
 export const SendEthPage = () => {
 	return (
@@ -163,14 +165,50 @@ const FormActionButton = () => {
 }
 
 const TokenSelectField = () => {
-	return (
-		<div class='flex flex-col gap-1'>
-			<div class='text-sm text-white/50'>Token</div>
-			<div class='appearance-none relative flex items-center px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'>
-				<div class='cursor-pointer'>ETH</div>
-			</div>
-		</div>
-	)
+	const transfer = useTransfer()
+
+	switch (transfer.value.state) {
+		case 'unsigned': {
+			const formData = transfer.value.formData
+
+			const getTokenMetadata = (address: string) => {
+				const tokenMetadata = tokenData.goerli.find(token => token.address === address)
+				if (tokenMetadata === undefined) throw new Error('Invalid address passed.')
+				return tokenMetadata
+			}
+
+			const handleChange = (event: JSXInternal.TargetedEvent<HTMLSelectElement>) => {
+				const value = event.currentTarget.value
+				if (value === 'Ether') {
+					formData.value = { ...formData.value, type: 'Ether' }
+					return
+				}
+
+				const tokenMetadata = getTokenMetadata(value)
+				formData.value = { ...formData.value, type: 'Token', tokenMetadata }
+			}
+
+			return (
+				<div class='flex flex-col gap-1'>
+					<div class='text-sm text-white/50'>Asset</div>
+					<div class='appearance-none relative flex items-center px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'>
+						<select onChange={handleChange} class='appearance-none bg-transparent w-full'>
+							<option value='Ether'>ETH</option>
+							{/* hardcoded for test */}
+							<option value='0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'>WETH</option>
+							<option value='0x07865c6e87b9f70255377e024ace6630c1eaa37f'>USDC</option>
+						</select>
+					</div>
+				</div>
+			)
+		}
+		case 'failed':
+		case 'signed':
+		case 'signing':
+			return <></>
+		default:
+			assertUnreachable(transfer.value)
+	}
 }
 
 const SendAmountField = () => {

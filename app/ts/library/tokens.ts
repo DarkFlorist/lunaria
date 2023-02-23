@@ -8,7 +8,7 @@ export type TokenMetaData = {
 	logoUri?: string
 }
 
-export const tokenData: Record<string, TokenMetaData[]> = {
+export const tokenData: Record<'mainnet' | 'goerli', TokenMetaData[]> = {
 	mainnet: [
 		{
 			address: '0x4c9bbfc1fbd93dfb509e718400978fbeedf590e9',

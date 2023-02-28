@@ -4,17 +4,16 @@ import { AddressField } from './AddressField.js'
 import { AmountField } from './AmountField.js'
 import { assertUnreachable } from '../library/utilities.js'
 import ErrorBoundary from './ErrorBoundary.js'
-import { TransferProvider, useTransferStore } from './TransferContext.js'
 import { ethers } from 'ethers'
-import { createTransferStore } from '../store/transfer.js'
 import { isEthereumJsonRpcError } from '../library/exceptions.js'
 import { useAccountStore } from '../context/Account.js'
+import { TransferProvider, useTransfer } from '../context/Transfer.js'
+import { tokenData } from '../library/tokens.js'
+import { JSXInternal } from 'preact/src/jsx.js'
 
 export const SendEthPage = () => {
-	const transferStore = createTransferStore()
-
 	return (
-		<TransferProvider store={transferStore}>
+		<TransferProvider>
 			<Layout.Page>
 				<Layout.Header />
 				<Layout.Body>
@@ -54,7 +53,7 @@ const Main = () => {
 
 const SendForm = ({ children }: { children: ComponentChildren }) => {
 	const accountStore = useAccountStore()
-	const transfer = useTransferStore()
+	const transfer = useTransfer()
 
 	const handleSubmit = (event: Event) => {
 		event.preventDefault()
@@ -64,37 +63,40 @@ const SendForm = ({ children }: { children: ComponentChildren }) => {
 			return
 		}
 
-		if (!transfer.value.isSigned) {
-			transfer.value.transactionResponseQuery.dispatch()
-			return
+		switch (transfer.value.state) {
+			case 'failed':
+				transfer.value.reset()
+				return
+			case 'signed':
+				window.location.href = `#tx/${transfer.value.transactionResponse.hash}`
+				return
+			case 'signing':
+				return
+			case 'unsigned':
+				transfer.value.send()
+				return
 		}
-
-		window.location.href = `#tx/${transfer.value.transactionResponse.hash}`
-		return
 	}
 
 	return <form onSubmit={handleSubmit}>{children}</form>
 }
 
 const SendGuide = () => {
-	const transferStore = useTransferStore()
+	const transfer = useTransfer()
 
-	if (transferStore.value.isSigned) return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
-
-	const transaction = transferStore.value.transactionResponseQuery.transport
-	switch (transaction.value.state) {
-		case 'inactive':
+	switch (transfer.value.state) {
+		case 'unsigned':
 			return <Guide title='What happens when I click send?' content='This app will forward your request to the wallet you chose to connect with. The connected wallet handles signing and submitting your request to the chain.' />
-		case 'pending':
+		case 'signing':
 			return <Guide title='Awaiting wallet confirmation...' content='At this point, your connected wallet will need action to proceed with this transaction. Carefully check the information before accepting the wallet confirmation.' />
-		case 'rejected': {
-			let errorMessage = isEthereumJsonRpcError(transaction.value.error) ? transaction.value.error.error.message : transaction.value.error.message
+		case 'failed': {
+			let errorMessage = isEthereumJsonRpcError(transfer.value.error) ? transfer.value.error.error.message : transfer.value.error.message
 			return <Guide title='Wallet returned an error!' content='Check that your inputs are correct and click Send again.' quote={errorMessage} />
 		}
-		case 'resolved':
-			return null
+		case 'signed':
+			return <Guide title='Request Successfully Sent!' content="Your transaction is awaiting confirmation from the chain. You may click on the View Transaction button to check it's status." />
 		default:
-			assertUnreachable(transaction.value)
+			assertUnreachable(transfer.value)
 	}
 }
 
@@ -132,73 +134,135 @@ const FormActions = () => {
 }
 
 const FormActionButton = () => {
-	const transferStore = useTransferStore()
+	const transfer = useTransfer()
 
-	if (transferStore.value.isSigned) {
-		return (
-			<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
-				<span>View Transaction</span>
-			</button>
-		)
-	}
-
-	switch (transferStore.value.transactionResponseQuery.transport.value.state) {
-		case 'inactive':
+	switch (transfer.value.state) {
+		case 'unsigned':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
 					<span>Send</span>
 				</button>
 			)
-		case 'pending':
+		case 'signing':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full disabled:text-white/50 disabled:border-white/30 disabled:cursor-not-allowed disabled:hover:bg-transparent' disabled>
 					<span>Sending...</span>
 				</button>
 			)
-		case 'rejected':
+		case 'failed':
 			return (
 				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
 					<span>Retry?</span>
 				</button>
 			)
-		case 'resolved':
-			return null
+		case 'signed':
+			return (
+				<button type='submit' class='px-4 py-2 hover:bg-white/10 border w-full'>
+					<span>View Transaction</span>
+				</button>
+			)
 	}
 }
 
 const TokenSelectField = () => {
-	return (
-		<div class='flex flex-col gap-1'>
-			<div class='text-sm text-white/50'>Token</div>
-			<div class='appearance-none relative flex items-center px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'>
-				<div class='cursor-pointer'>ETH</div>
-			</div>
-		</div>
-	)
+	const transfer = useTransfer()
+
+	switch (transfer.value.state) {
+		case 'unsigned': {
+			const formData = transfer.value.formData
+
+			const getTokenMetadata = (address: string) => {
+				const tokenMetadata = tokenData.goerli.find(token => token.address === address)
+				if (tokenMetadata === undefined) throw new Error('Invalid address passed.')
+				return tokenMetadata
+			}
+
+			const handleChange = (event: JSXInternal.TargetedEvent<HTMLSelectElement>) => {
+				const value = event.currentTarget.value
+				if (value === 'Ether') {
+					formData.value = { ...formData.value, type: 'Ether' }
+					return
+				}
+
+				const tokenMetadata = getTokenMetadata(value)
+				formData.value = { ...formData.value, type: 'Token', tokenMetadata }
+			}
+
+			return (
+				<div class='flex flex-col gap-1'>
+					<div class='text-sm text-white/50'>Asset</div>
+					<div class='appearance-none relative flex items-center px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'>
+						<select onChange={handleChange} class='appearance-none bg-transparent w-full'>
+							<option value='Ether'>ETH</option>
+							{/* hardcoded for test */}
+							<option value='0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'>WETH</option>
+							<option value='0x07865c6e87b9f70255377e024ace6630c1eaa37f'>USDC</option>
+						</select>
+					</div>
+				</div>
+			)
+		}
+		case 'failed':
+		case 'signed':
+		case 'signing':
+			return (
+				<div class='flex flex-col gap-1'>
+					<div class='text-sm text-white/50'>Asset</div>
+					<div class='appearance-none relative flex items-center px-3 h-10 bg-white/5 w-full outline-none disabled:bg-white/5 disabled:text-white/30 invalid:text-red-200 border-b border-white/30 focus:border-b-white'>
+						<select disabled class='appearance-none bg-transparent w-full'>
+							<option value='Ether'>ETH</option>
+							<option value='0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'>WETH</option>
+							<option value='0x07865c6e87b9f70255377e024ace6630c1eaa37f'>USDC</option>
+						</select>
+					</div>
+				</div>
+			)
+
+		default:
+			assertUnreachable(transfer.value)
+	}
 }
 
 const SendAmountField = () => {
-	const transferStore = useTransferStore()
+	const transfer = useTransfer()
 
-	if (transferStore.value.isSigned) {
-		const fieldValue = ethers.utils.formatEther(transferStore.value.transactionResponse.value)
-		return <AmountField value={fieldValue} onChange={() => {}} label='Amount' name='amount' disabled />
+	switch (transfer.value.state) {
+		case 'unsigned': {
+			const formData = transfer.value.formData
+			return <AmountField value={formData.value.amount} onChange={amount => (formData.value = { ...formData.value, amount })} label='Amount' name='amount' required />
+		}
+		case 'signing':
+			return <AmountField value={transfer.value.formData.value.amount} onChange={() => {}} label='Amount' name='amount' disabled required />
+		case 'signed':
+			return <AmountField value={ethers.utils.formatEther(transfer.value.transactionResponse.value)} onChange={() => {}} label='Amount' name='amount' disabled required />
+		case 'failed': {
+			const formData = transfer.value.formData
+			return <AmountField value={formData.value.amount} onChange={amount => (formData.value = { ...formData.value, amount })} label='Amount' name='amount' disabled required />
+		}
+		default:
+			assertUnreachable(transfer.value)
 	}
-
-	const formData = transferStore.value.formData
-	return <AmountField value={formData.value.amount} onChange={amount => (formData.value = { ...formData.value, amount })} label='Amount' name='amount' disabled={transferStore.value.transactionResponseQuery.transport.value.state === 'pending'} required />
 }
 
 const SendToField = () => {
-	const transferStore = useTransferStore()
+	const transfer = useTransfer()
 
-	if (transferStore.value.isSigned) {
-		const fieldValue = transferStore.value.transactionResponse.to!
-		return <AddressField value={fieldValue} onChange={() => {}} label='To' name='to' disabled />
+	switch (transfer.value.state) {
+		case 'unsigned': {
+			const formData = transfer.value.formData
+			return <AddressField value={formData.value.to} onChange={to => (formData.value = { ...formData.value, to })} label='Recipient Address' name='to' required />
+		}
+		case 'signing':
+			return <AddressField value={transfer.value.formData.value.to} onChange={() => {}} label='Recipient Address' name='to' disabled required />
+		case 'signed':
+			return <AddressField value={transfer.value.transactionResponse.to!} onChange={() => {}} label='Recipient Address' name='to' disabled required />
+		case 'failed': {
+			const formData = transfer.value.formData
+			return <AddressField value={formData.value.to} onChange={to => (formData.value = { ...formData.value, to })} label='Recipient Address' name='to' disabled required />
+		}
+		default:
+			assertUnreachable(transfer.value)
 	}
-
-	const formData = transferStore.value.formData
-	return <AddressField value={formData.value.to} onChange={to => (formData.value = { ...formData.value, to })} label='To' name='to' disabled={transferStore.value.transactionResponseQuery.transport.value.state === 'pending'} required />
 }
 
 const PageTitle = () => {

@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
 import { assertsEthereumObservable, assertsExternalProvider } from '../library/utilities.js'
-import { Web3Provider } from '../types.js'
+import { Network, Web3Provider } from '../types.js'
 
 type EthereumProvider =
 	| {
@@ -53,4 +53,20 @@ function createEthereumProviderStore() {
 	useSignalEffect(listenForChainChange)
 
 	return providerStore
+}
+
+export function useEthereumNetwork() {
+	const network = useSignal<Network | undefined>(undefined)
+	const ethProvider = useEthereumProvider()
+
+	const getNetwork = async (provider: Web3Provider | undefined) => {
+		if (!provider) return
+		network.value = await provider.getNetwork()
+	}
+
+	useSignalEffect(() => {
+		getNetwork(ethProvider.value.provider)
+	})
+
+	return network
 }

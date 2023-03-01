@@ -50,8 +50,7 @@ const AsyncBalance = ({ address, token }: BalanceConnectedProps) => {
 				return await provider.getBalance(address)
 			}
 
-			const signer = provider.getSigner()
-			const contract = new ethers.Contract(token.address, ERC20ABI, signer) as ERC20
+			const contract = new ethers.Contract(token.address, ERC20ABI, provider) as ERC20
 			return await contract.balanceOf(address)
 		})
 	}

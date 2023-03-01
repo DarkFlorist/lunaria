@@ -1,18 +1,12 @@
 import { useSignal } from '@preact/signals'
 import { JSX } from 'preact'
 import { useEffect } from 'preact/hooks'
-import { AssetMetadata } from '../../../library/constants'
 
-export const TokenIcon = ({ assetMetadata }: { assetMetadata: AssetMetadata | undefined }) => {
+export const TokenIcon = ({ address }: { address?: string }) => {
 	const component = useSignal<JSX.Element | undefined>(undefined)
 
 	const getTokenIcon = async () => {
-		if (assetMetadata === undefined) {
-			component.value = undefined
-			return
-		}
-
-		const path = assetMetadata.type === 'token' ? `./${assetMetadata.address}.js` : `./Native.js`
+		const path = address === undefined ? './Native.js' : `./${address}.js`
 		const module = await import(path)
 		component.value = module.default()
 	}

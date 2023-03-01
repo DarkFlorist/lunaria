@@ -1,7 +1,6 @@
 import { useSignal } from '@preact/signals'
 import { JSX } from 'preact'
 import { useEffect } from 'preact/hooks'
-import { AssetMetadata } from '../../../library/constants'
 
 export const TokenIcon = ({ address }: { address?: string }) => {
 	const component = useSignal<JSX.Element | undefined>(undefined)

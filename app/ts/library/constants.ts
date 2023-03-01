@@ -115,9 +115,12 @@ export function getTokenByChainId(chainId: string) {
 	return assets.filter(isTokenAsset).filter(asset => asset.chainId === chainId)
 }
 
-export function getNativeCurrencyByChainId(chainId: string) {
+export function getNativeCurrencyByChainId(chainId: string): NativeAsset {
 	const match = assets.filter(asset => asset.chainId === chainId).find(isNativeAsset)
-	if (match === undefined) throw new Error(`Could not find the native currency for ${chainId}`)
+
+	// ETH fallback for unknown network
+	if (match === undefined) return { chainId, type: 'native', name: 'Ether', symbol: 'ETH' }
+
 	return match
 }
 

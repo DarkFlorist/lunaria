@@ -1,3 +1,4 @@
+import { ethers } from 'ethers'
 import { useEthereumNetwork } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { TokenIcon } from '../Icon/Tokens/index.js'
@@ -103,6 +104,7 @@ const AssetDescription = ({ text }: { text: string }) => {
 
 const CopyAddressButton = ({ address }: { address: string }) => {
 	const network = useEthereumNetwork()
+
 	const handleClick = () => {
 		// TODO: copy address to clipboard
 		console.log(address)

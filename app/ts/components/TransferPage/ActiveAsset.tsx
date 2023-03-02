@@ -1,7 +1,9 @@
+import { useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
 import { useEthereumNetwork } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { TokenIcon } from '../Icon/Tokens/index.js'
+import * as Icon from '../Icon/index.js'
 
 type ActiveAssetDetailProps = {
 	onChange: () => void
@@ -38,7 +40,7 @@ const AssetDetail = ({ address, name, symbol, onChange }: AssetDetailProps) => {
 				</div>
 				<div style={{ gridArea: 'action' }}>
 					<div class='flex flex-col gap-1'>
-						{address && <CopyAddressButton address={address} />}
+						{address && <CopyAddressButton key={address} address={address} />}
 						<button type='button' class='text-xs bg-white/10 px-2 py-1 uppercase md:hidden' onClick={onChange}>
 							Change
 						</button>
@@ -103,15 +105,32 @@ const AssetDescription = ({ text }: { text: string }) => {
 }
 
 const CopyAddressButton = ({ address }: { address: string }) => {
+	const isCopied = useSignal(false)
 	const network = useEthereumNetwork()
 
-	const handleClick = () => {
-		// TODO: copy address to clipboard
-		console.log(address)
+	const handleClick = async () => {
+		await navigator.clipboard.writeText(address)
+		isCopied.value = true
 	}
+
+	useSignalEffect(() => {
+		if (isCopied.value !== true) return
+		setTimeout(() => {
+			isCopied.value = false
+		}, 1000)
+	})
 
 	if (network.value === undefined) {
 		return <div class='animate animate-pulse w-20 h-4 bg-white/50' />
+	}
+
+	if (isCopied.value) {
+		return (
+			<button type='button' class='text-xs text-white/30 bg-white/10 px-2 py-1 uppercase whitespace-nowrap flex items-center gap-1' onClick={handleClick} disabled>
+				<span>Copied!</span>
+				<Icon.Check />
+			</button>
+		)
 	}
 
 	return (

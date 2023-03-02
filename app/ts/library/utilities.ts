@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { Web3Provider } from '../types'
+import { ExternalProvider, Web3Provider } from '../types'
 
 export async function sleep(milliseconds: number) {
 	await new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -27,9 +27,8 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 /**
  * Describe a window ethereum object
  */
-type ExternalProvider = ethers.providers.ExternalProvider & { chainId: string }
 export function isExternalProvider(ethereum: unknown): ethereum is ExternalProvider {
-	return ethereum !== null && ethereum !== undefined && typeof ethereum === 'object' && 'chainId' in ethereum && typeof ethereum.chainId === 'string'
+	return ethereum !== null && ethereum !== undefined && typeof ethereum === 'object'
 }
 
 export function assertsExternalProvider(ethereum: unknown): asserts ethereum is ExternalProvider {

@@ -4,23 +4,16 @@ import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState } from '../library/preact-utilities.js'
-import { TokenMetaData } from '../library/tokens.js'
+import { TokenAsset } from '../library/constants.js'
 import { assertUnreachable } from '../library/utilities.js'
 import { ERC20, TransactionResponse } from '../types.js'
 import { useEthereumProvider } from './EthereumProvider.js'
 
-type TransferInput =
-	| {
-			type: 'Ether'
-			to: string
-			amount: string
-	  }
-	| {
-			type: 'Token'
-			tokenMetadata: TokenMetaData
-			to: string
-			amount: string
-	  }
+type TransferInput = {
+	token: TokenAsset | undefined
+	to: string
+	amount: string
+}
 
 type TransferSigning =
 	| {
@@ -35,6 +28,7 @@ type TransferSigning =
 	  }
 	| {
 			state: 'signed'
+			formData: Signal<TransferInput>
 			transactionResponse: TransactionResponse
 	  }
 	| {
@@ -53,7 +47,7 @@ export const TransferProvider = ({ children }: { children: ComponentChildren }) 
 
 const createTransferStore = () => {
 	const { value: query, waitFor, reset } = useAsyncState<TransactionResponse>()
-	const transferInput = useSignal<TransferInput>({ to: '', amount: '', type: 'Ether' })
+	const transferInput = useSignal<TransferInput>({ to: '', amount: '', token: undefined })
 	const providerStore = useEthereumProvider()
 
 	const send = () => {
@@ -63,20 +57,17 @@ const createTransferStore = () => {
 			const signer = provider.getSigner()
 			const to = ethers.utils.getAddress(transferInput.value.to)
 
-			switch (transferInput.value.type) {
-				case 'Ether': {
-					const value = ethers.utils.parseEther(transferInput.value.amount)
-					return await signer.sendTransaction({ to, value })
-				}
-				case 'Token': {
-					const tokenMetadata = transferInput.value.tokenMetadata
-					const contract = new ethers.Contract(tokenMetadata.address, ERC20ABI, signer) as ERC20
-					const value = ethers.utils.parseUnits(transferInput.value.amount, tokenMetadata.data.decimals)
-					return await contract.transfer(to, value)
-				}
-				default:
-					assertUnreachable(transferInput.value)
+			// Ether transfer
+			if (transferInput.value.token === undefined) {
+				const value = ethers.utils.parseEther(transferInput.value.amount)
+				return await signer.sendTransaction({ to, value })
 			}
+
+			// Token transfer
+			const tokenMetadata = transferInput.value.token
+			const contract = new ethers.Contract(tokenMetadata.address, ERC20ABI, signer) as ERC20
+			const value = ethers.utils.parseUnits(transferInput.value.amount, tokenMetadata.decimals)
+			return await contract.transfer(to, value)
 		})
 	}
 
@@ -95,7 +86,7 @@ const createTransferStore = () => {
 				transactionStore.value = { state: 'failed', error: query.value.error, formData: transferInput, reset }
 				break
 			case 'resolved':
-				transactionStore.value = { state: 'signed', transactionResponse: query.value.value }
+				transactionStore.value = { state: 'signed', transactionResponse: query.value.value, formData: transferInput }
 				break
 			default:
 				assertUnreachable(query.value)

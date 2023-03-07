@@ -1,5 +1,6 @@
 {
-	"description": "",
+	"name": "lunaria",
+	"description": "A decentralized asset manager",
 	"repository": {},
 	"license": "Unlicense",
 	"devDependencies": {

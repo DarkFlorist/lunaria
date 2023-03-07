@@ -1,12 +1,18 @@
 import { ComponentChildren } from 'preact'
 import { useAccountStore } from '../../context/Account.js'
+import { useEthereumProvider } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { assertUnreachable } from '../../library/utilities.js'
 import { AddressField } from '../AddressField.js'
 import { AmountField } from '../AmountField.js'
 
 export const TransferAmountField = () => {
+	const ethProvider = useEthereumProvider()
 	const transfer = useTransfer()
+
+	if (ethProvider.value.provider === undefined) {
+		return <AmountField name='amount' value='' onChange={() => {}} label='Amount' />
+	}
 
 	switch (transfer.value.state) {
 		case 'unsigned': {
@@ -34,7 +40,12 @@ export const TransferAmountField = () => {
 }
 
 export const TransferAddressField = () => {
+	const ethProvider = useEthereumProvider()
 	const transfer = useTransfer()
+
+	if (ethProvider.value.provider === undefined) {
+		return <AddressField name='to' value='' onChange={() => {}} label='Recipient Address' />
+	}
 
 	switch (transfer.value.state) {
 		case 'unsigned': {

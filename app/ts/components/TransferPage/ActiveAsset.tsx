@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import { useEthereumNetwork } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { TokenIcon } from '../Icon/Tokens/index.js'
 

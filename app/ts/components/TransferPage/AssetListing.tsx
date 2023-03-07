@@ -1,6 +1,6 @@
 import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
-import { useEthereumNetwork, useEthereumProvider } from '../../context/EthereumProvider.js'
+import { useEthereumNetwork } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { getNativeCurrencyByChainId, getTokenByChainId, NativeAsset, TokenAsset } from '../../library/constants.js'
 import { assertUnreachable, removeNonStringsAndTrim } from '../../library/utilities.js'

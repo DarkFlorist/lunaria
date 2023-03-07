@@ -4,6 +4,7 @@ import { useEthereumNetwork } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { getNativeCurrencyByChainId, getTokenByChainId, NativeAsset, TokenAsset } from '../../library/constants.js'
 import { assertUnreachable, removeNonStringsAndTrim } from '../../library/utilities.js'
+import { Balance } from '../Balance.js'
 import { TokenIcon } from '../Icon/Tokens/index.js'
 
 type SelectAssetProps = {
@@ -86,8 +87,8 @@ const OptionNative = ({ metadata, onClick }: OptionNativeProps) => {
 						<div class='leading-tight' style={{ gridArea: 'name' }}>
 							<span>{metadata.name}</span>
 						</div>
-						<div style={{ gridArea: 'balance' }}>
-							<span class='md:hidden lg:inline leading-tight text-sm text-white/50'>balance:</span> 1014.130987460
+						<div class='leading-tight text-sm text-white/50' style={{ gridArea: 'balance' }}>
+							<Balance token={undefined} />
 						</div>
 					</div>
 				</div>
@@ -106,8 +107,8 @@ const OptionNative = ({ metadata, onClick }: OptionNativeProps) => {
 						<div style={{ gridArea: 'name' }}>
 							<span class='leading-tight'>{metadata.name}</span>
 						</div>
-						<div style={{ gridArea: 'balance' }}>
-							<span class='md:hidden lg:inline leading-tight text-sm text-white/50'>balance:</span> 1014.130987460
+						<div class='leading-tight text-sm text-white/50' style={{ gridArea: 'balance' }}>
+							<Balance token={undefined} />
 						</div>
 					</div>
 				</div>
@@ -149,8 +150,8 @@ const OptionToken = ({ metadata, onClick }: OptionTokenProps) => {
 						<div style={{ gridArea: 'name' }}>
 							<span class='leading-tight'>{metadata.name}</span>
 						</div>
-						<div style={{ gridArea: 'balance' }}>
-							<span class='md:hidden lg:inline leadig-tight text-sm text-white/50'>balance:</span> 1014.130987460
+						<div class='leading-tight text-sm text-white/50' style={{ gridArea: 'balance' }}>
+							<Balance token={metadata} />
 						</div>
 					</div>
 				</div>
@@ -169,8 +170,8 @@ const OptionToken = ({ metadata, onClick }: OptionTokenProps) => {
 						<div style={{ gridArea: 'name' }}>
 							<span class='leading-tight'>{metadata.name}</span>
 						</div>
-						<div style={{ gridArea: 'balance' }}>
-							<span class='md:hidden lg:inline leadig-tight text-sm text-white/50'>balance:</span> 1014.130987460
+						<div class='leading-tight text-sm text-white/50' style={{ gridArea: 'balance' }}>
+							<Balance token={metadata} />
 						</div>
 					</div>
 				</div>

@@ -25,6 +25,14 @@ export function removeNonStringsAndTrim(...strings: (string | boolean | undefine
 }
 
 /**
+ * Generate a number within a number range
+ */
+
+export function getRandomNumberBetween(from: number, to: number): number {
+	return Math.floor(Math.random() * (to - from + 1)) + from
+}
+
+/**
  * Describe a window ethereum object
  */
 export function isExternalProvider(ethereum: unknown): ethereum is ExternalProvider {

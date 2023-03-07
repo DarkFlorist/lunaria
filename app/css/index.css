@@ -1232,6 +1232,23 @@ video {
 	grid-template-areas: 'form' 'review' 'action' 'support';
 }
 
+.text-empty:empty:before {
+	content: attr(data-placeholder);
+}
+
+@keyframes pulse {
+	50% {
+		opacity: 0.5;
+	}
+}
+
+.text-empty:empty:before {
+	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	border-radius: 0.125rem;
+	background-color: rgb(255 255 255 / 0.1);
+	color: transparent;
+}
+
 .placeholder\:text-white\/30::-moz-placeholder {
 	color: rgb(255 255 255 / 0.3);
 }
@@ -1449,10 +1466,6 @@ video {
 }
 
 @media (min-width: 1024px) {
-	.lg\:inline {
-		display: inline;
-	}
-
 	.lg\:grid-cols-\[3fr_minmax\(0\2c 2fr\)\] {
 		grid-template-columns: 3fr minmax(0, 2fr);
 	}

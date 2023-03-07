@@ -442,3 +442,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 		background: linear-gradient(271.22deg, rgba(255, 255, 255, 0.1) 1.03%, rgba(255, 255, 255, 0) 100%);
 	}
 }
+
+.text-empty:empty:before {
+	content: attr(data-placeholder);
+	@apply bg-white/10 text-transparent animate-pulse rounded-sm;
+}

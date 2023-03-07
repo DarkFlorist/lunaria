@@ -1,6 +1,6 @@
 import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
-import { useEthereumNetwork } from '../../context/EthereumProvider.js'
+import { useEthereumNetwork, useEthereumProvider } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { getNativeCurrencyByChainId, getTokenByChainId, NativeAsset, TokenAsset } from '../../library/constants.js'
 import { assertUnreachable, removeNonStringsAndTrim } from '../../library/utilities.js'
@@ -17,7 +17,12 @@ export const SelectAsset = ({ mobileVisibility }: SelectAssetProps) => {
 	const native = useSignal<NativeAsset | undefined>(undefined)
 
 	function listenForNetworkChanges() {
-		if (network.value === undefined) return
+		if (network.value === undefined) {
+			tokens.value = getTokenByChainId('0x01')
+			native.value = getNativeCurrencyByChainId('0x01')
+			return
+		}
+
 		const chainIdHex = ethers.utils.hexlify(network.value.chainId)
 
 		// update list on network change

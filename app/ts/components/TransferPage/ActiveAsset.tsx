@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import { useEthereumNetwork } from '../../context/EthereumProvider.js'
 import { useTransfer } from '../../context/Transfer.js'
 import { TokenIcon } from '../Icon/Tokens/index.js'
 
@@ -49,16 +48,6 @@ const AssetDetail = ({ address, name, symbol, onChange }: AssetDetailProps) => {
 }
 
 const DetailIcon = ({ address }: { address?: string }) => {
-	const network = useEthereumNetwork()
-
-	if (network.value === undefined) {
-		return (
-			<span class='text-4xl'>
-				<div style={{ width: '1em', height: '1em' }} class='bg-white/50 animate-puls' />
-			</span>
-		)
-	}
-
 	const tokenAddress = address === undefined ? 'Ether' : address
 
 	return (
@@ -74,16 +63,6 @@ type AssetTitleProps = {
 }
 
 const AssetTitle = ({ name, symbol }: AssetTitleProps) => {
-	const network = useEthereumNetwork()
-
-	if (network.value === undefined) {
-		return (
-			<div class='font-bold'>
-				<div class='animate animate-pulse w-40 h-4 bg-white/50 max-w-full' />
-			</div>
-		)
-	}
-
 	return (
 		<div class='font-bold'>
 			{name} <span class='text-white/50'>{symbol}</span>
@@ -92,11 +71,5 @@ const AssetTitle = ({ name, symbol }: AssetTitleProps) => {
 }
 
 const AssetDescription = ({ text }: { text: string }) => {
-	const network = useEthereumNetwork()
-
-	if (network.value === undefined) {
-		return <div class='animate animate-pulse w-72 h-3 bg-white/50 max-w-full' />
-	}
-
 	return <div class='text-sm text-white/50 leading-tight overflow-hidden text-ellipsis'>{text}</div>
 }

@@ -6,7 +6,12 @@ import { AddressField } from '../AddressField.js'
 import { AmountField } from '../AmountField.js'
 
 export const TransferAmountField = () => {
+	const account = useAccountStore()
 	const transfer = useTransfer()
+
+	if (account.value.state === 'disconnected') {
+		return <AmountField name='amount' value='' onChange={() => {}} label='Amount' />
+	}
 
 	switch (transfer.value.state) {
 		case 'unsigned': {
@@ -34,7 +39,12 @@ export const TransferAmountField = () => {
 }
 
 export const TransferAddressField = () => {
+	const account = useAccountStore()
 	const transfer = useTransfer()
+
+	if (account.value.state === 'disconnected') {
+		return <AddressField name='to' value='' onChange={() => {}} label='Recipient Address' />
+	}
 
 	switch (transfer.value.state) {
 		case 'unsigned': {

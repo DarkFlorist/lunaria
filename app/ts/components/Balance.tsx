@@ -21,7 +21,7 @@ export const Balance = ({ token }: BalanceProps) => {
 		case 'disconnected':
 		case 'connecting':
 		case 'failed':
-			return <span class='italic'>Connect wallet to view balance</span>
+			return <span class='italic'></span>
 		case 'connected':
 			return <AsyncBalance address={account.value.address} token={token} />
 		default:

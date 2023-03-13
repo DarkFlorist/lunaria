@@ -10,6 +10,7 @@ import { TransactionReceipt, TransactionResponse } from '../types.js'
 import { createTransactionStore } from '../store/transaction.js'
 import { TransactionProvider, useTransactionStore } from './TransactionContext.js'
 import { TextSkeleton } from './TextSkeleton.js'
+import { CopyButton } from './CopyButton.js'
 
 export const TransactionDetailsPage = () => {
 	const transactionStore = createTransactionStore()
@@ -175,10 +176,17 @@ const PageTitle = () => {
 
 const ReadOnlyField = ({ label, value }: { label: string; value: string }) => {
 	return (
-		<>
-			<div class='text-white/50 text-sm'>{label}</div>
-			<div class='overflow-scroll no-scrollbar'>{value}</div>
-		</>
+		<div class='grid [grid-template-areas:"label_copy"_"text_text"] grid-cols-[1fr_min-content] place-content-between'>
+			<div style={{ gridArea: 'label' }}>
+				<span class='text-white/50 text-sm'>{label}</span>
+			</div>
+			<div style={{ gridArea: 'copy' }}>
+				<CopyButton label='Copy' value={value} />
+			</div>
+			<div style={{ gridArea: 'text' }}>
+				<span class='overflow-scroll no-scrollbar'>{value}</span>
+			</div>
+		</div>
 	)
 }
 

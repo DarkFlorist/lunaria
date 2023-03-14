@@ -1,31 +1,36 @@
-# Web3 App
+# Lunaria
 
-Built on preact-es2020-template
+A decentralized asset management tool
 
-## TODO
+https://lunaria.dark.florist/
 
-- [ ] Implement wallet using v6 ethers
+For a more complete workflow on managing your assets, checkout these projects!
+
+- [TheInterceptor](https://github.com/DarkFlorist/TheInterceptor)
+- [Boquet](https://github.com/DarkFlorist/bouquet)
 
 ## Commands
 
 ### Install
-_this command will do an `npm install` for you_
+
+_this command will also install dependencies for you_
+
 ```bash
 npm run vendor
 ```
 
-### Build
+### Development
+
+```bash
+# spins up a static server at http://localhost:8080
+npm run serve
+
+# parse and watch for typescript changes
+npm run build -- --watch
+```
+
+### Build for production
+
 ```bash
 npm run build
-```
-
-### Watch
-```bash
-# Removed/broken until https://github.com/cevek/ttypescript/issues/121 is fixed
-# npx --no-install ttsc --watch
-```
-
-### Serve
-```bash
-npm run serve
 ```

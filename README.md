@@ -1,6 +1,6 @@
 # Lunaria
 
-A decentralized asset manager
+A decentralized asset management tool
 
 https://lunaria.dark.florist/
 

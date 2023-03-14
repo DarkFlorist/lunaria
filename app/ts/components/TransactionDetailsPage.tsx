@@ -1,6 +1,8 @@
 import { ethers } from 'ethers'
+import { useMemo } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
-import { queryTransactionReceipt, queryTransactionResponse, TransactionProvider } from '../context/Transaction.js'
+import { queryTransactionReceipt, queryTransactionResponse, queryTransactionToken, TransactionProvider } from '../context/Transaction.js'
+import { getTransferTokenValue } from '../library/ethereum.js'
 import { calculateGasFee, isTransactionHash, removeNonStringsAndTrim } from '../library/utilities.js'
 import { AsyncText } from './AsyncText.js'
 import { CopyButton } from './CopyButton.js'
@@ -30,37 +32,57 @@ export const TransactionDetails = () => {
 }
 
 const TransactionResponseDetails = () => {
-	const txResponse = queryTransactionResponse()
+	const { data, isLoading, error } = queryTransactionResponse()
 
-	if (txResponse.data === undefined) return null
-	const errorMessage = txResponse.error instanceof Error ? 'Failed to fetch transaction response.' : undefined
+	const response = isLoading === false && error === undefined ? data : undefined
+	const errorMessage = 'Failed to fetch transaction resopnse'
 
 	return (
 		<>
 			<GridItem class='xl:col-span-full'>
-				<ReadOnlyField label='Transaction Hash:' isLoading={txResponse.isLoading} error={errorMessage} value={txResponse.data.hash} />
+				<ReadOnlyField label='Transaction Hash:' isLoading={isLoading} value={response ? response.hash : errorMessage} />
 			</GridItem>
 			<GridItem>
-				<ReadOnlyField label='From:' value={txResponse.data.from} error={errorMessage} isLoading={txResponse.isLoading} />
+				<ReadOnlyField label='From:' isLoading={isLoading} value={response ? response.from : errorMessage} />
 			</GridItem>
 			<GridItem>
-				<ReadOnlyField label='To:' value={txResponse.data.to!} error={errorMessage} isLoading={txResponse.isLoading} />
+				<ReadOnlyField label='To:' isLoading={isLoading} value={response ? response.to! : errorMessage} />
 			</GridItem>
 			<GridItem>
-				<ReadOnlyField label='To:' value={ethers.utils.formatEther(txResponse.data.value)} error={errorMessage} isLoading={txResponse.isLoading} />
+				<ReadOnlyField label='Amount:' isLoading={isLoading} value={response ? ethers.utils.formatEther(response.value) : errorMessage} />
 			</GridItem>
 		</>
 	)
 }
 
 const TransactionReceiptDetails = () => {
-	const txReceipt = queryTransactionReceipt()
-	if (txReceipt.data === undefined) return null
-	const transactionFee = calculateGasFee(txReceipt.data.effectiveGasPrice, txReceipt.data.gasUsed)
+	const { data, isLoading, error } = queryTransactionReceipt()
+	const txToken = queryTransactionToken()
+
+	const receipt = isLoading === false && error === undefined ? data : undefined
+	const errorMessage = 'Failed to fetch transaction receipt'
+
+	const tokenValue = useMemo(() => {
+		if (txToken === undefined) return
+		if (receipt === undefined) return
+		const valueBigNumber = getTransferTokenValue(receipt)
+
+		return ethers.utils.formatUnits(valueBigNumber, txToken.decimals)
+	}, [receipt, txToken])
+
 	return (
-		<GridItem>
-			<ReadOnlyField label='Transaction Fee:' value={transactionFee} isLoading={txReceipt.isLoading} />
-		</GridItem>
+		<>
+			<GridItem>
+				<ReadOnlyField label='Transaction Fee:' value={receipt ? calculateGasFee(receipt.effectiveGasPrice, receipt.gasUsed) : errorMessage} isLoading={isLoading} />
+			</GridItem>
+			{txToken === undefined ? (
+				<></>
+			) : (
+				<GridItem>
+					<ReadOnlyField label='Token Transferred:' value={`${tokenValue} ${txToken.symbol}`} isLoading={isLoading} />
+				</GridItem>
+			)}
+		</>
 	)
 }
 
@@ -74,12 +96,11 @@ const PageTitle = () => {
 
 type ReadOnlyFieldProps = {
 	label: string
-	value?: string
+	value: string
 	isLoading?: boolean
-	error?: string
 }
 
-const ReadOnlyField = ({ label, value, isLoading, error }: ReadOnlyFieldProps) => {
+const ReadOnlyField = ({ label, value, isLoading }: ReadOnlyFieldProps) => {
 	return (
 		<div class='grid [grid-template-areas:"label_copy"_"text_text"] grid-cols-[1fr_min-content] place-content-between'>
 			<div style={{ gridArea: 'label' }}>
@@ -92,7 +113,7 @@ const ReadOnlyField = ({ label, value, isLoading, error }: ReadOnlyFieldProps) =
 					<CopyButton label='Copy' value={value} />
 				</div>
 			)}
-			<div style={{ gridArea: 'text' }}>{isLoading ? <AsyncText /> : <span class='overflow-scroll no-scrollbar'>{error || value}</span>}</div>
+			<div style={{ gridArea: 'text' }}>{isLoading ? <AsyncText /> : <span class='overflow-scroll no-scrollbar'>{value}</span>}</div>
 		</div>
 	)
 }

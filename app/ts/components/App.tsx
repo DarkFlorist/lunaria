@@ -4,7 +4,7 @@ import { BalanceProvider } from '../context/BalanceContext.js'
 import { EthereumProvider } from '../context/EthereumProvider.js'
 import { AccountProvider } from '../context/Account.js'
 import { TransferPage } from './TransferPage/index.js'
-import { TransactionDetails } from './TransactionDetails.js'
+import { TransactionDetails } from './TransactionDetailsPage.js'
 
 export function App() {
 	return (

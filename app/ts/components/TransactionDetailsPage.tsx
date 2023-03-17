@@ -65,9 +65,9 @@ const TransactionReceiptDetails = () => {
 	const tokenValue = useMemo(() => {
 		if (txToken === undefined) return
 		if (receipt === undefined) return
-		const valueBigNumber = getTransferTokenValue(receipt)
-
-		return ethers.utils.formatUnits(valueBigNumber, txToken.decimals)
+		const tokenValue = getTransferTokenValue(receipt)
+		if (tokenValue === undefined) return
+		return ethers.utils.formatUnits(tokenValue, txToken.decimals)
 	}, [receipt, txToken])
 
 	return (

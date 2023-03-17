@@ -4,7 +4,7 @@ import { TransactionReceipt, TransactionResponse, TransferTransactionResponse } 
 import { ERC20ABI } from './ERC20ABI.js'
 
 export function isTransferTransaction(txResponse: TransactionResponse): txResponse is TransferTransactionResponse {
-	return txResponse.data.toLower().startsWith('0xa9059cbb')
+	return txResponse.data.toLowerCase().startsWith('0xa9059cbb')
 }
 
 export function getTransferTokenValue(transactionReceipt: TransactionReceipt) {

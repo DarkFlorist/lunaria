@@ -25,3 +25,7 @@ export interface ERC20 extends Contract {
 	symbol(): Promise<string>
 	decimals(): Promise<number>
 }
+
+export type TransferTransactionResponse = TransactionResponse & {
+	to: string
+}

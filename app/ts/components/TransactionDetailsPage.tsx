@@ -1,27 +1,29 @@
-import { JSX } from 'preact'
-import { useCallback, useEffect } from 'preact/hooks'
-import { Signal } from '@preact/signals'
 import { ethers } from 'ethers'
-import * as Layout from './Layout.js'
-import { useParams } from './HashRouter.js'
+import { useMemo } from 'preact/hooks'
+import { JSX } from 'preact/jsx-runtime'
+import { queryTransactionReceipt, queryTransactionResponse, queryTransactionToken, TransactionProvider } from '../context/Transaction.js'
+import { getTransferTokenValue } from '../library/ethereum.js'
 import { calculateGasFee, isTransactionHash, removeNonStringsAndTrim } from '../library/utilities.js'
-import { AsyncProperty } from '../library/preact-utilities.js'
-import { TransactionReceipt, TransactionResponse } from '../types.js'
-import { createTransactionStore } from '../store/transaction.js'
-import { TransactionProvider, useTransactionStore } from './TransactionContext.js'
-import { TextSkeleton } from './TextSkeleton.js'
+import { AsyncText } from './AsyncText.js'
 import { CopyButton } from './CopyButton.js'
+import { useParams } from './HashRouter.js'
+import * as Layout from './Layout.js'
 
-export const TransactionDetailsPage = () => {
-	const transactionStore = createTransactionStore()
+export const TransactionDetails = () => {
+	const transactionHashFromUrl = extractTransactionHashFromParams()
+
+	if (!transactionHashFromUrl) return <TransactionDetailsInvalid />
 
 	return (
-		<TransactionProvider store={transactionStore}>
+		<TransactionProvider transactionHash={transactionHashFromUrl}>
 			<Layout.Page>
 				<Layout.Header />
 				<Layout.Body>
 					<PageTitle />
-					<Main />
+					<Grid>
+						<TransactionResponseDetails />
+						<TransactionReceiptDetails />
+					</Grid>
 				</Layout.Body>
 				<Layout.Footer />
 			</Layout.Page>
@@ -29,141 +31,59 @@ export const TransactionDetailsPage = () => {
 	)
 }
 
-const Main = () => {
-	const transaction = useTransactionStore().value
-	const transactionHashFromUrl = extractTransactionHashFromParams()
+const TransactionResponseDetails = () => {
+	const { data, isLoading, error } = queryTransactionResponse()
 
-	const initialize = useCallback(() => {
-		if (transactionHashFromUrl === null) return
-		if (transaction.transactionHash !== undefined) return
-		transaction.setTransactionHash(transactionHashFromUrl)
-	}, [transactionHashFromUrl])
-
-	useEffect(() => {
-		initialize()
-	}, [])
-
-	if (transactionHashFromUrl === null) return <TransactionDetailsInvalid />
-	if (transaction.transactionHash === undefined) return <TransactionDetailsInvalid />
+	const response = isLoading === false && error === undefined ? data : undefined
+	const errorMessage = 'Failed to fetch transaction resopnse'
 
 	return (
-		<Grid>
+		<>
 			<GridItem class='xl:col-span-full'>
-				<TransactionHash transport={transaction.transactionResponseQuery.transport} />
+				<ReadOnlyField label='Transaction Hash:' isLoading={isLoading} value={response ? response.hash : errorMessage} />
 			</GridItem>
 			<GridItem>
-				<TransactionFrom transport={transaction.transactionResponseQuery.transport} />
+				<ReadOnlyField label='From:' isLoading={isLoading} value={response ? response.from : errorMessage} />
 			</GridItem>
 			<GridItem>
-				<TransactionTo transport={transaction.transactionResponseQuery.transport} />
+				<ReadOnlyField label='To:' isLoading={isLoading} value={response ? response.to! : errorMessage} />
 			</GridItem>
 			<GridItem>
-				<TransactionAmount transport={transaction.transactionResponseQuery.transport} />
+				<ReadOnlyField label='Amount:' isLoading={isLoading} value={response ? ethers.utils.formatEther(response.value) : errorMessage} />
 			</GridItem>
-			<GridItem>
-				<TransactionFee transport={transaction.transactionReceiptQuery.transport} />
-			</GridItem>
-		</Grid>
+		</>
 	)
 }
 
-const TransactionHashField = ({ text }: { text: string }) => <ReadOnlyField label='Transaction Hash:' value={text} />
-const TransactionHash = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
-	const response = transport.value
+const TransactionReceiptDetails = () => {
+	const { data, isLoading, error } = queryTransactionReceipt()
+	const txToken = queryTransactionToken()
 
-	switch (response.state) {
-		case 'inactive':
-			return <TransactionHashField text='' />
-		case 'rejected':
-			return <TransactionHashField text='Failed to retrieve transaction hash.' />
-		case 'pending':
-			return (
-				<>
-					<TextSkeleton textSize='sm' length={16} />
-					<TextSkeleton length={64} />
-				</>
-			)
-		case 'resolved':
-			return <TransactionHashField text={response.value.hash} />
-	}
-}
+	const receipt = isLoading === false && error === undefined ? data : undefined
+	const errorMessage = 'Failed to fetch transaction receipt'
 
-const TransactionFrom = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
-	const response = transport.value
-	switch (response.state) {
-		case 'inactive':
-			return <ReadOnlyField label='From:' value='' />
-		case 'rejected':
-			return <ReadOnlyField label='From:' value='Failed to retrieve source address (from).' />
-		case 'pending':
-			return (
-				<>
-					<TextSkeleton textSize='sm' length={10} />
-					<TextSkeleton length={40} />
-				</>
-			)
-		case 'resolved':
-			return <ReadOnlyField label='From:' value={response.value.from} />
-	}
-}
+	const tokenValue = useMemo(() => {
+		if (txToken === undefined) return
+		if (receipt === undefined) return
+		const tokenValue = getTransferTokenValue(receipt)
+		if (tokenValue === undefined) return
+		return ethers.utils.formatUnits(tokenValue, txToken.decimals)
+	}, [receipt, txToken])
 
-const TransactionTo = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
-	const response = transport.value
-	switch (response.state) {
-		case 'inactive':
-			return <ReadOnlyField label='To:' value='' />
-		case 'rejected':
-			return <ReadOnlyField label='To:' value='Failed to retrieve destination address (to).' />
-		case 'pending':
-			return (
-				<>
-					<TextSkeleton textSize='sm' length={10} />
-					<TextSkeleton length={40} />
-				</>
-			)
-		case 'resolved':
-			return <ReadOnlyField label='To:' value={response.value.to!} />
-	}
-}
-
-const TransactionAmount = ({ transport }: { transport: Signal<AsyncProperty<TransactionResponse>> }) => {
-	const response = transport.value
-	switch (response.state) {
-		case 'inactive':
-			return <ReadOnlyField label='Amount:' value='' />
-		case 'rejected':
-			return <ReadOnlyField label='Amount:' value='Failed to retrieve amount.' />
-		case 'pending':
-			return (
-				<>
-					<TextSkeleton textSize='sm' length={12} />
-					<TextSkeleton length={20} />
-				</>
-			)
-		case 'resolved':
-			return <ReadOnlyField label='Amount:' value={`${ethers.utils.formatEther(response.value.value)} Ether`} />
-	}
-}
-
-const TransactionFee = ({ transport }: { transport: Signal<AsyncProperty<TransactionReceipt>> }) => {
-	const response = transport.value
-	switch (response.state) {
-		case 'inactive':
-			return <ReadOnlyField label='Transaction Fee:' value='' />
-		case 'rejected':
-			return <ReadOnlyField label='Transaction Fee:' value='Failed to retrieve receipt.' />
-		case 'pending':
-			return (
-				<>
-					<TextSkeleton textSize='sm' length={14} />
-					<TextSkeleton length={32} />
-				</>
-			)
-		case 'resolved': {
-			const transactionFee = calculateGasFee(response.value.effectiveGasPrice, response.value.gasUsed)
-			return <ReadOnlyField label='Transaction Fee:' value={`${transactionFee} Ether`} />
-		}
-	}
+	return (
+		<>
+			<GridItem>
+				<ReadOnlyField label='Transaction Fee:' value={receipt ? calculateGasFee(receipt.effectiveGasPrice, receipt.gasUsed) : errorMessage} isLoading={isLoading} />
+			</GridItem>
+			{txToken === undefined ? (
+				<></>
+			) : (
+				<GridItem>
+					<ReadOnlyField label='Token Transferred:' value={`${tokenValue} ${txToken.symbol}`} isLoading={isLoading} />
+				</GridItem>
+			)}
+		</>
+	)
 }
 
 const TransactionDetailsInvalid = () => {
@@ -174,18 +94,26 @@ const PageTitle = () => {
 	return <div class='bg-white/10 text-xl font-bold px-6 py-2 -ml-6 mb-4'>Transaction Details</div>
 }
 
-const ReadOnlyField = ({ label, value }: { label: string; value: string }) => {
+type ReadOnlyFieldProps = {
+	label: string
+	value: string
+	isLoading?: boolean
+}
+
+const ReadOnlyField = ({ label, value, isLoading }: ReadOnlyFieldProps) => {
 	return (
 		<div class='grid [grid-template-areas:"label_copy"_"text_text"] grid-cols-[1fr_min-content] place-content-between'>
 			<div style={{ gridArea: 'label' }}>
 				<span class='text-white/50 text-sm'>{label}</span>
 			</div>
-			<div style={{ gridArea: 'copy' }}>
-				<CopyButton label='Copy' value={value} />
-			</div>
-			<div style={{ gridArea: 'text' }}>
-				<span class='overflow-scroll no-scrollbar'>{value}</span>
-			</div>
+			{value === undefined ? (
+				<></>
+			) : (
+				<div style={{ gridArea: 'copy' }}>
+					<CopyButton label='Copy' value={value} />
+				</div>
+			)}
+			<div style={{ gridArea: 'text' }}>{isLoading ? <AsyncText /> : <span class='overflow-scroll no-scrollbar'>{value}</span>}</div>
 		</div>
 	)
 }

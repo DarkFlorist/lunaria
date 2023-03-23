@@ -1,9 +1,12 @@
 import { ethers } from 'ethers'
 import { useMemo } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
+import { useAccountStore } from '../context/Account.js'
 import { queryTransactionReceipt, queryTransactionResponse, queryTransactionToken, TransactionProvider } from '../context/Transaction.js'
-import { getTransferTokenValue } from '../library/ethereum.js'
+import { ERC20ABI } from '../library/ERC20ABI.js'
+import { isTransferLogFrom, isTransferResult } from '../library/ethereum.js'
 import { calculateGasFee, isTransactionHash, removeNonStringsAndTrim } from '../library/utilities.js'
+import { TransactionReceipt } from '../types.js'
 import { AsyncText } from './AsyncText.js'
 import { CopyButton } from './CopyButton.js'
 import { useParams } from './HashRouter.js'
@@ -56,18 +59,31 @@ const TransactionResponseDetails = () => {
 }
 
 const TransactionReceiptDetails = () => {
+	const account = useAccountStore()
+
 	const { data, isLoading, error } = queryTransactionReceipt()
 	const txToken = queryTransactionToken()
 
 	const receipt = isLoading === false && error === undefined ? data : undefined
 	const errorMessage = 'Failed to fetch transaction receipt'
 
+	function getTransferTokenValue(transactionReceipt: TransactionReceipt) {
+		if (account.value.state !== 'connected') return
+		const accountAddress = account.value.address
+		const erc20Interface = new ethers.utils.Interface(ERC20ABI)
+		const transferLog = transactionReceipt.logs.find(log => isTransferLogFrom(log, accountAddress))
+
+		if (transferLog === undefined) return
+		const logArgs = erc20Interface.parseLog(transferLog).args
+		return isTransferResult(logArgs) ? logArgs.value : undefined
+	}
+
 	const tokenValue = useMemo(() => {
 		if (txToken === undefined) return
 		if (receipt === undefined) return
-		const tokenValue = getTransferTokenValue(receipt)
-		if (tokenValue === undefined) return
-		return ethers.utils.formatUnits(tokenValue, txToken.decimals)
+		const value = getTransferTokenValue(receipt)
+		if (value === undefined) return 'Not available'
+		return ethers.utils.formatUnits(value, txToken.decimals)
 	}, [receipt, txToken])
 
 	return (

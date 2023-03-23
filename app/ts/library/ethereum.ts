@@ -1,24 +1,17 @@
 import { BigNumber, ethers } from 'ethers'
 import { Result } from 'ethers/lib/utils.js'
-import { TransactionReceipt, TransactionResponse, TransferTransactionResponse } from '../types.js'
-import { ERC20ABI } from './ERC20ABI.js'
+import { TransactionResponse, TransferTransactionResponse } from '../types.js'
 
 export function isTransferTransaction(txResponse: TransactionResponse): txResponse is TransferTransactionResponse {
 	return txResponse.data.toLowerCase().startsWith('0xa9059cbb')
 }
 
-export function getTransferTokenValue(transactionReceipt: TransactionReceipt) {
-	const erc20Interface = new ethers.utils.Interface(ERC20ABI)
-	const transferLog = transactionReceipt.logs.find(isTransferLog)
-	if (transferLog === undefined) return undefined
-	const logArgs = erc20Interface.parseLog(transferLog).args
-	return isTransferResult(logArgs) ? logArgs.value : undefined
-}
+export function isTransferLogFrom(log: ethers.providers.Log, address: string) {
+	const [topic, from] = log.topics
 
-export function isTransferLog(log: ethers.providers.Log) {
-	const [topic] = log.topics
 	const transferTopic = ethers.utils.id('Transfer(address,address,uint256)')
-	return topic === transferTopic
+	const topicFrom = ethers.utils.getAddress(ethers.utils.hexStripZeros(from))
+	return topic === transferTopic && topicFrom === address
 }
 
 export interface TransferResult extends Result {

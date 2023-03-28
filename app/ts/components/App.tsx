@@ -5,6 +5,7 @@ import { EthereumProvider } from '../context/EthereumProvider.js'
 import { AccountProvider } from '../context/Account.js'
 import { TransferPage } from './TransferPage/index.js'
 import { TransactionDetails } from './TransactionDetailsPage.js'
+import { AssetsPage } from './AssetsPage/index.js'
 
 export function App() {
 	return (
@@ -12,6 +13,7 @@ export function App() {
 			<AccountProvider>
 				<BalanceProvider>
 					<Router>
+						<Route path='#assets' component={AssetsPage} />
 						<Route path='#tx' component={TransactionPage} />
 						<Route path='#tx/:transaction_hash' component={TransactionDetails} />
 						<Route path='/' component={TransferPage} />

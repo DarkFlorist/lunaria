@@ -7,11 +7,11 @@ export type Notice = {
 }
 
 const notices = signal<Notice[]>([])
-const noticesCount = computed(() => notices.value.length)
+const nextId = computed(() => notices.value.length + 1)
 
 export function useNotice() {
 	const notify = (notice: Omit<Notice, 'id'>) => {
-		notices.value = [{ ...notice, id: noticesCount.value + 1 }, ...notices.value]
+		notices.value = [{ ...notice, id: nextId.value }, ...notices.value]
 	}
 
 	return { notices, notify }

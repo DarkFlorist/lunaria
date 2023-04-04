@@ -6,10 +6,8 @@ export const Notices = () => {
 	if (notices.value.length < 1) return <></>
 
 	return (
-		<>
-			<Modal title={notices.value[0]?.title} onClose={() => (notices.value = notices.value.filter(n => n.id !== notices.value[0]?.id))} hasCloseButton>
-				{notices.value[0]?.message}
-			</Modal>
-		</>
+		<Modal title={notices.value[0]?.title} onClose={() => (notices.value = notices.value.filter(n => n.id !== notices.value[0]?.id))} hasCloseButton>
+			{notices.value[0]?.message}
+		</Modal>
 	)
 }

@@ -32,23 +32,6 @@ export function assertsWithEthereum(global: unknown): asserts global is WithEthe
 	if (!withEthereum(global)) throw new WalletError()
 }
 
-interface BrowserProvider extends ethers.providers.ExternalProvider {
-	addListener(eventName: string | symbol, listener: (...args: any[]) => void): void
-	removeListener(eventName: string | symbol, listener: (...args: any[]) => void): void
-}
-
-export interface WithEthereum {
-	ethereum: BrowserProvider
-}
-
-export function withEthereum(global: unknown): global is WithEthereum {
-	return global !== null && typeof global === 'object' && 'ethereum' in global && global.ethereum !== null && typeof global.ethereum === 'object' && 'addListener' in global.ethereum && typeof global.ethereum.addListener === 'function' && 'removeListener' in global.ethereum && typeof global.ethereum.removeListener === 'function'
-}
-
-export function assertsWithEthereum(global: unknown): asserts global is WithEthereum {
-	if (!withEthereum(global)) throw new Error('Wallet not detected')
-}
-
 export function isTransferTransaction(txResponse: TransactionResponse): txResponse is TransferTransactionResponse {
 	return txResponse.data.toLowerCase().startsWith('0xa9059cbb')
 }

@@ -1,7 +1,8 @@
 import { signal } from '@preact/signals'
 import { ethers } from 'ethers'
-import { assertsWithEthereum } from '../library/ethereum'
-import { Notice, useNotice } from './notice'
+import { assertsWithEthereum } from '../library/ethereum.js'
+import { useNotice } from './notice.js'
+import { WalletError } from '../library/exceptions.js'
 
 const provider = signal<ethers.providers.Web3Provider | undefined>(undefined)
 
@@ -18,36 +19,41 @@ const createChainChangeListener = (handler: (chainHex?: string) => void) => {
 	}
 }
 
-const getBrowserProvider = (chainHex?: string) => {
+const createEthersProvider = (chainHex?: string) => {
 	assertsWithEthereum(window)
 	const newNetwork = chainHex ? ethers.providers.getNetwork(chainHex) : undefined
+
+	// set browserprovider
 	provider.value = new ethers.providers.Web3Provider(window.ethereum, newNetwork)
 	return provider.value
 }
 
-const chainChangedObserver = createChainChangeListener(getBrowserProvider)
+const chainChangedObserver = createChainChangeListener(createEthersProvider)
 
 export function useProviders() {
-	return {
-		// only initialize provider when called, avoid calling this function on page load
-		get browserProvider() {
-			const { notices } = useNotice()
+	const { notify } = useNotice()
 
-			if (provider.value !== undefined) return provider.value
+	const getbrowserProvider = () => {
+		if (provider.value !== undefined) return provider.value
 
-			try {
-				chainChangedObserver.subscribe()
-				return getBrowserProvider()
-			} catch (error) {
-				const message = error instanceof Error ? error.message : 'An unknown error occurred.'
-				const notice: Notice = {
-					id: notices.value.length + 1,
-					title: 'Important',
-					message,
-				}
-				notices.value = [...notices.value, notice]
-				throw message
+		try {
+			const provider = createEthersProvider()
+			chainChangedObserver.subscribe()
+			return provider
+		} catch (error) {
+			if (error instanceof WalletError) {
+				notify({ title: 'Important', message: error.message })
+				throw error
 			}
-		},
+
+			const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : 'An unknown error occurred.'
+			notify({ title: 'Important', message: errorMessage })
+			throw new Error(errorMessage)
+		}
+	}
+
+	return {
+		browserProvider: provider.value,
+		getbrowserProvider,
 	}
 }

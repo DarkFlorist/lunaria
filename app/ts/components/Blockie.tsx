@@ -107,7 +107,7 @@ function generateIdenticon(options: BlockieProps, canvasRef: HTMLCanvasElement) 
 	}
 
 	const scale = options.scale || defaultScale
-	const seed = options.seed
+	const seed = options.seed.toLocaleLowerCase()
 
 	seedrand(seed)
 

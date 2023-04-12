@@ -48,7 +48,7 @@ const AssetDetail = ({ address, name, symbol, onChange }: AssetDetailProps) => {
 }
 
 const DetailIcon = ({ address }: { address?: string }) => {
-	const tokenAddress = address === undefined ? 'Ether' : address
+	const tokenAddress = address === undefined ? 'Native' : address
 
 	return (
 		<span class='text-4xl'>

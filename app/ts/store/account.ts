@@ -1,13 +1,14 @@
+import { assertsWithEthereum } from '../library/ethereum.js'
 import { ConnectAttemptError } from '../library/exceptions.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
-import { signal, useSignalEffect } from '@preact/signals'
+import { effect, signal, useSignalEffect } from '@preact/signals'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
 
 export function useAccount() {
 	const providers = useProviders()
-	const { value: query, waitFor, reset } = useAsyncState<string>()
+	const { value: query, waitFor } = useAsyncState<string>()
 
 	const connect = (attemptOnly?: boolean) => {
 		waitFor(async () => {
@@ -31,13 +32,24 @@ export function useAccount() {
 		})
 	}
 
-	// only replicate states besides inactive to prevent looping
 	const listenForQueryChanges = () => {
+		// do not reset shared state for other instances of this hooks
 		if (query.value.state === 'inactive') return
 		address.value = query.value
 	}
 
 	useSignalEffect(listenForQueryChanges)
 
-	return { address, connect, reset }
+	return { address, connect }
 }
+
+const handleAccountChanged = (newAddress: string[]) => {
+	if (address.value.state !== 'resolved') return
+	removeAccountChangedListener()
+	address.value = newAddress[0] ? { ...address.value, value: newAddress[0] } : { state: 'inactive' }
+}
+
+const removeAccountChangedListener = effect(() => {
+	assertsWithEthereum(window)
+	window.ethereum.addListener('accountsChanged', handleAccountChanged)
+})

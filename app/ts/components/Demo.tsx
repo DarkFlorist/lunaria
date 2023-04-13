@@ -11,14 +11,17 @@ export const DemoPage = () => {
 			<div class='font-bold mt-4'>ActiveAddress</div>
 			<hr class='my-1' />
 			<Address />
+			<hr class='my-4' />
 
 			<div class='font-bold mt-4'>Network ID</div>
 			<hr class='my-1' />
 			<Network />
+			<hr class='my-4' />
 
 			<div class='font-bold mt-4'>Account Tokens</div>
 			<hr class='my-1' />
 			<AccountTokens />
+			<hr class='my-4' />
 
 			<div class='font-bold mt-4'>Add Token</div>
 			<hr class='my-1' />

@@ -9,14 +9,17 @@ export const DemoPage = () => {
 		<div class='p-4'>
 			<div class='font-bold'>ActiveAddress</div>
 			<Address />
+			<hr class='my-4' />
 
 			<div class='font-bold'>Network ID</div>
 			<Network />
+			<hr class='my-4' />
 
 			<div class='font-bold'>Account Tokens</div>
 			<AccountTokens />
+			<hr class='my-4' />
 
-			<div class='font-bold'>Add Token</div>
+			<div class='font-bold'>Add Tokens</div>
 			<AddToken />
 		</div>
 	)
@@ -94,10 +97,15 @@ const AccountTokens = () => {
 }
 
 const AddToken = () => {
-	const { address, connect } = useAccount()
 	const { addToken } = useAccountTokens()
+	const { network } = useNetwork()
+
+	const chainId = useComputed(() => {
+		return network.value.state !== 'resolved' ? 1 : network.value.value.chainId
+	})
+
 	const tokenMeta = useSignal<TokenMeta>({
-		chainId: 1,
+		chainId: chainId.value,
 		name: '',
 		address: '',
 		symbol: '',
@@ -106,15 +114,19 @@ const AddToken = () => {
 
 	const handleChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
 		const { name, value } = e.currentTarget
-		tokenMeta.value = { ...tokenMeta.value, [name]: value }
+
+		let inputValue: string | number = value
+		if (name === 'chainId' || name === 'decimals') {
+			inputValue = parseInt(inputValue)
+		}
+
+		tokenMeta.value = { ...tokenMeta.value, [name]: inputValue }
 	}
 
 	const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		addToken(tokenMeta.value)
 	}
-
-	if (address.value.state !== 'resolved') return <Button text='Connect' onClick={() => connect()} />
 
 	return (
 		<form onSubmit={handleSubmit}>

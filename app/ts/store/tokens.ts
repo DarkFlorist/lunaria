@@ -27,15 +27,22 @@ export function useAccountTokens() {
 		return `${CACHEID_PREFIX}:${address.value.value}`
 	})
 
+	const addToken = (newToken: TokenMeta) => {
+		tokens.value = [...tokens.value, newToken]
+	}
+
 	const listenForCacheKeyChange = () => {
 		tokens.value = retrieveTokensFromCache(cacheKey.value)
 	}
 
-	const addToken = (token: TokenMeta) => {
-		tokens.value = [...tokens.value, token]
+	const listenForTokensChange = () => {
+		if (cacheKey.value === `${CACHEID_PREFIX}:default`) return
+		const newCache = JSON.stringify(tokens.value)
+		localStorage.setItem(cacheKey.value, newCache)
 	}
 
 	useSignalEffect(listenForCacheKeyChange)
+	useSignalEffect(listenForTokensChange)
 
 	return {
 		tokens,

@@ -95,7 +95,7 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 	{
 		chainId: 1,
 		address: '0x4c9BBFc1FbD93dFB509E718400978fbEedf590E9',
-		name: 'Rai',
+		name: 'Rai Reflex Index',
 		symbol: 'RAI',
 		decimals: 18,
 	},

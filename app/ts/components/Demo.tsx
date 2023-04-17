@@ -1,40 +1,29 @@
-import { useComputed, useSignal } from '@preact/signals'
-import { JSX } from 'preact/jsx-runtime'
+import { useComputed } from '@preact/signals'
 import { useAccount } from '../store/account.js'
-import { TokenMeta, useAccountTokens } from '../store/tokens.js'
+import { useAccountTokens } from '../store/tokens.js'
 import { useNetwork } from '../store/network.js'
+import { QueryToken } from './QueryToken.js'
+import { assertUnreachable } from '../library/utilities.js'
 
 export const DemoPage = () => {
 	return (
 		<div class='p-4'>
-			<div class='font-bold'>ActiveAddress</div>
+			<div class='font-bold mt-4'>ActiveAddress</div>
+			<hr class='my-1' />
 			<Address />
-			<hr class='my-4' />
 
-			<div class='font-bold'>Network ID</div>
+			<div class='font-bold mt-4'>Network ID</div>
+			<hr class='my-1' />
 			<Network />
-			<hr class='my-4' />
 
-			<div class='font-bold'>Account Tokens</div>
+			<div class='font-bold mt-4'>Account Tokens</div>
+			<hr class='my-1' />
 			<AccountTokens />
-			<hr class='my-4' />
 
-			<div class='font-bold'>Add Tokens</div>
-			<AddToken />
+			<div class='font-bold mt-4'>Add Token</div>
+			<hr class='my-1' />
+			<AddTokenToAccount />
 		</div>
-	)
-}
-
-type ButtonProps = {
-	text: string
-	onClick: () => void
-}
-
-const Button = ({ text, onClick }: ButtonProps) => {
-	return (
-		<button class='bg-black/20 px-4 py-2 leading-none' onClick={onClick}>
-			{text}
-		</button>
 	)
 }
 
@@ -70,14 +59,16 @@ const Network = () => {
 		case 'resolved':
 			return (
 				<>
-					<div>{network.value.value.chainId}</div>
+					<div>
+						{network.value.value.chainId} - {network.value.value.name}
+					</div>
 				</>
 			)
 	}
 }
 
 const AccountTokens = () => {
-	const { tokens } = useAccountTokens()
+	const { tokens, removeToken } = useAccountTokens()
 	const { network } = useNetwork()
 
 	const tokensInChain = useComputed(() => {
@@ -87,56 +78,62 @@ const AccountTokens = () => {
 		})
 	})
 
+	if (tokensInChain.value.length < 1) {
+		return <div>No tokens</div>
+	}
+
 	return (
 		<div>
 			{tokensInChain.value.map(token => (
-				<div>- {token.name}</div>
+				<div class='border-b flex items-center gap-4 h-10'>
+					<span>{token.name}</span>
+					<button class='border p-1 text-xs font-bold uppercase leading-none' onClick={() => removeToken(token.address)}>
+						&times; remove
+					</button>
+				</div>
 			))}
 		</div>
 	)
 }
 
-const AddToken = () => {
-	const { addToken } = useAccountTokens()
-	const { network } = useNetwork()
+const AddTokenToAccount = () => {
+	const { address, connect } = useAccount()
 
-	const chainId = useComputed(() => {
-		return network.value.state !== 'resolved' ? 1 : network.value.value.chainId
-	})
-
-	const tokenMeta = useSignal<TokenMeta>({
-		chainId: chainId.value,
-		name: '',
-		address: '',
-		symbol: '',
-		decimals: 18,
-	})
-
-	const handleChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
-		const { name, value } = e.currentTarget
-
-		let inputValue: string | number = value
-		if (name === 'chainId' || name === 'decimals') {
-			inputValue = parseInt(inputValue)
-		}
-
-		tokenMeta.value = { ...tokenMeta.value, [name]: inputValue }
+	switch (address.value.state) {
+		case 'inactive':
+			return <Button text='Connect' onClick={() => connect()} />
+		case 'pending':
+			return <Button text='Connect' onClick={() => connect()} disabled />
+		case 'rejected':
+			return <div>Error connecting to account</div>
+		case 'resolved':
+			return (
+				<div class='grid grid-cols-1 gap-2'>
+					<div class=''>Test addresses</div>
+					<div class='text-xs'>
+						Goerli USDC <pre class='inline px-2 py-1 bg-black/10'>0x07865c6E87B9F70255377e024ace6630C1Eaa37F</pre>
+					</div>
+					<div class='text-xs'>
+						Mainnet USDC <pre class='inline px-2 py-1 bg-black/10'>0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48</pre>
+					</div>
+					<QueryToken />
+				</div>
+			)
+		default:
+			assertUnreachable(address.value)
 	}
+}
 
-	const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		addToken(tokenMeta.value)
-	}
+type ButtonProps = {
+	text: string
+	disabled?: boolean
+	onClick: () => void
+}
 
+const Button = ({ text, disabled, onClick }: ButtonProps) => {
 	return (
-		<form onSubmit={handleSubmit}>
-			<input class='border block' placeholder='Name' name='name' onInput={handleChange} />
-			<input class='border block' placeholder='Address' name='address' onInput={handleChange} />
-			<input class='border block' placeholder='Symbol' name='symbol' onInput={handleChange} />
-			<input class='border block' placeholder='Decimals' name='decimals' onInput={handleChange} />
-			<button type='submit' class='bg-black/20 px-4 py-2 leading-none'>
-				Add
-			</button>
-		</form>
+		<button class='bg-black/20 px-4 py-2 leading-none' onClick={onClick} disabled={disabled}>
+			{text}
+		</button>
 	)
 }

@@ -1,5 +1,10 @@
-import { signal, useComputed, useSignalEffect } from '@preact/signals'
+import { signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { useAccount } from './account.js'
+import { useAsyncState } from '../library/preact-utilities.js'
+import { useProviders } from './provider.js'
+import { useNetwork } from './network.js'
+import { errors, ethers, logger, utils } from 'ethers'
+import { ERC20ABI } from '../library/ERC20ABI.js'
 
 const CACHEID_PREFIX = '_ut'
 
@@ -27,8 +32,12 @@ export function useAccountTokens() {
 		return `${CACHEID_PREFIX}:${address.value.value}`
 	})
 
-	const addToken = (newToken: TokenMeta) => {
-		tokens.value = [...tokens.value, newToken]
+	const addToken = (token: TokenMeta) => {
+		tokens.value = [...tokens.value, token]
+	}
+
+	const removeToken = (address: TokenMeta['address']) => {
+		tokens.value = [...tokens.value.filter(token => token.address !== address)]
 	}
 
 	const listenForCacheKeyChange = () => {
@@ -47,7 +56,42 @@ export function useAccountTokens() {
 	return {
 		tokens,
 		addToken,
+		removeToken,
 	}
+}
+
+export function useTokenQuery() {
+	const { value: query, waitFor, reset } = useAsyncState<TokenMeta>()
+	const providers = useProviders()
+	const { network } = useNetwork()
+	const tokenAddress = useSignal('')
+
+	const validateChangedAddress = () => {
+		reset()
+
+		// check address validity
+		if (!utils.isAddress(tokenAddress.value)) return
+
+		waitFor(async () => {
+			if (network.value.state !== 'resolved') logger.throwError('Disconnected', errors.NETWORK_ERROR)
+			const chainId = network.value.value.chainId
+
+			try {
+				const provider = providers.getbrowserProvider()
+				const contract = new ethers.Contract(tokenAddress.value, ERC20ABI, provider)
+				const name = await contract.name()
+				const symbol = await contract.symbol()
+				const decimals = await contract.decimals()
+				return { chainId, name, symbol, decimals, address: tokenAddress.value } as const
+			} catch (unknownError) {
+				logger.throwError('Contract call failed.', errors.CALL_EXCEPTION)
+			}
+		})
+	}
+
+	useSignalEffect(validateChangedAddress)
+
+	return { query, tokenAddress }
 }
 
 // Move to constants later
@@ -62,35 +106,35 @@ export type TokenMeta = {
 export const DEFAULT_TOKENS: TokenMeta[] = [
 	{
 		chainId: 1,
-		address: '0x4c9bbfc1fbd93dfb509e718400978fbeedf590e9',
+		address: '0x4c9BBFc1FbD93dFB509E718400978fbEedf590E9',
 		name: 'Rai',
 		symbol: 'RAI',
 		decimals: 18,
 	},
 	{
 		chainId: 1,
-		address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+		address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
 		name: 'Dai',
 		symbol: 'DAI',
 		decimals: 18,
 	},
 	{
 		chainId: 1,
-		address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+		address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
 		name: 'WETH',
 		symbol: 'WETH',
 		decimals: 18,
 	},
 	{
 		chainId: 1,
-		address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+		address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 		name: 'USD Coin',
 		symbol: 'USDC',
 		decimals: 6,
 	},
 	{
 		chainId: 1,
-		address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+		address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
 		name: 'Wrapped Bitcoin',
 		symbol: 'WBTC',
 		decimals: 8,
@@ -104,7 +148,7 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 	},
 	{
 		chainId: 5,
-		address: '0x07865c6e87b9f70255377e024ace6630c1eaa37f',
+		address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
 		name: 'USD Coin',
 		symbol: 'USDC',
 		decimals: 6,

@@ -43,13 +43,14 @@ export function useAccount() {
 	return { address, connect }
 }
 
-const handleAccountChanged = (newAddress: string[]) => {
+const handleAccountChanged = (newAddress: string) => {
 	if (address.value.state !== 'resolved') return
 	removeAccountChangedListener()
-	address.value = newAddress[0] ? { ...address.value, value: newAddress[0] } : { state: 'inactive' }
+	address.value = { ...address.value, value: newAddress }
 }
 
 const removeAccountChangedListener = effect(() => {
+	if (address.value.state !== 'resolved') return
 	assertsWithEthereum(window)
 	window.ethereum.addListener('accountsChanged', handleAccountChanged)
 })

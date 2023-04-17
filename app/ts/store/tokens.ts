@@ -8,20 +8,6 @@ import { ERC20ABI } from '../library/ERC20ABI.js'
 
 const CACHEID_PREFIX = '_ut'
 
-const retrieveTokensFromCache = (cacheKey: string) => {
-	const tokensCache = localStorage.getItem(cacheKey)
-
-	if (tokensCache === null) {
-		return DEFAULT_TOKENS
-	}
-
-	try {
-		return JSON.parse(tokensCache) as TokenMeta[]
-	} catch {
-		throw new Error('Tokens cache may be corrupted.')
-	}
-}
-
 const tokens = signal<TokenMeta[]>([])
 
 export function useAccountTokens() {
@@ -41,7 +27,9 @@ export function useAccountTokens() {
 	}
 
 	const listenForCacheKeyChange = () => {
-		tokens.value = retrieveTokensFromCache(cacheKey.value)
+		const tokensCache = useTokensCache(cacheKey.value)
+		if (tokensCache.error !== undefined) throw new Error('Cache may be corrupted')
+		tokens.value = tokensCache.data
 	}
 
 	const listenForTokensChange = () => {
@@ -154,3 +142,33 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 		decimals: 6,
 	},
 ]
+
+function isTokenMeta(meta: object): meta is TokenMeta {
+	return 'chainId' in meta && typeof meta.chainId === 'number' && 'address' in meta && typeof meta.address === 'string' && 'name' in meta && typeof meta.name === 'string' && 'symbol' in meta && typeof meta.symbol === 'string' && 'decimals' in meta && typeof meta.decimals === 'number'
+}
+
+export function useTokensCache(cacheKey: string) {
+	const tokensCache = localStorage.getItem(cacheKey)
+
+	if (tokensCache === null) {
+		return { data: DEFAULT_TOKENS }
+	}
+
+	try {
+		let tokens = []
+		const parsed = JSON.parse(tokensCache)
+		if (!Array.isArray(parsed)) throw new Error()
+
+		for (const item of parsed) {
+			if (!isTokenMeta(item)) continue
+			tokens.push(item)
+		}
+
+		return { data: tokens }
+	} catch (unknownError) {
+		let error = new Error('An unknown error has occured.')
+		if (unknownError instanceof Error) error = unknownError
+		if (typeof unknownError === 'string') error = new Error(unknownError)
+		return { error }
+	}
+}

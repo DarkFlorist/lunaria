@@ -82,16 +82,14 @@ const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
 const AddTokenToAssets = ({ token }: { token: TokenMeta }) => {
 	const { tokens, addToken } = useAccountTokens()
 
-	const tokenExist = useComputed(() => Boolean(tokens.value.find(userToken => userToken.address === token.address)))
-
-	console.log(tokenExist.value)
+	const accountTokenExists = useComputed(() => Boolean(tokens.value.find(userToken => userToken.address === token.address)))
 
 	return (
 		<div class='flex gap-4 items-center'>
 			<div>
 				<span class='font-bold'>{token.name}</span> <span class='text-black/50'>({token.symbol})</span>
 			</div>
-			{tokenExist.value ? (
+			{accountTokenExists.value ? (
 				<div class='text-black/50'>Saved</div>
 			) : (
 				<button onClick={() => addToken(token)} class='border px-4 py-2'>

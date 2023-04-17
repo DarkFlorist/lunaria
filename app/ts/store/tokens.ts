@@ -28,7 +28,7 @@ export function useAccountTokens() {
 
 	const listenForCacheKeyChange = () => {
 		const tokensCache = useTokensCache(cacheKey.value)
-		if (tokensCache.error !== undefined) throw new Error('Cache may be corrupted')
+		if (tokensCache.error !== undefined) throw new Error('Cache data could not be read.')
 		tokens.value = tokensCache.data
 	}
 

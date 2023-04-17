@@ -1,7 +1,8 @@
+import { assertsWithEthereum } from '../library/ethereum.js'
 import { ConnectAttemptError } from '../library/exceptions.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
-import { signal, useSignalEffect } from '@preact/signals'
+import { effect, signal, useSignalEffect } from '@preact/signals'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
 
@@ -41,3 +42,15 @@ export function useAccount() {
 
 	return { address, connect }
 }
+
+const handleAccountChanged = (newAddress: string) => {
+	if (address.value.state !== 'resolved') return
+	removeAccountChangedListener()
+	address.value = { ...address.value, value: newAddress }
+}
+
+const removeAccountChangedListener = effect(() => {
+	if (address.value.state !== 'resolved') return
+	assertsWithEthereum(window)
+	window.ethereum.on('accountsChanged', handleAccountChanged)
+})

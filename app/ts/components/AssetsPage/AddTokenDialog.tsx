@@ -1,4 +1,5 @@
 import { Signal } from '@preact/signals'
+import { QueryToken } from '../QueryToken.js'
 
 type Props = {
 	show: Signal<boolean>
@@ -21,7 +22,9 @@ export const AddTokenDialog = ({ show }: Props) => {
 					</button>
 				</div>
 				<div class='px-6 py-6'>
-					<div>Add Token</div>
+					<div class='font-bold mb-2'>Add Token</div>
+					<div class='mb-2'>Enter the token's contract address to retrieve details</div>
+					<QueryToken />
 				</div>
 			</div>
 		</div>

@@ -36,7 +36,7 @@ const Address = () => {
 		case 'pending':
 			return <>connecting...</>
 		case 'rejected':
-			return <>error</>
+			return <>error {address.value.error.message}</>
 		case 'resolved':
 			return (
 				<>

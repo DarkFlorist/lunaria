@@ -52,5 +52,5 @@ const handleAccountChanged = (newAddress: string) => {
 const removeAccountChangedListener = effect(() => {
 	if (address.value.state !== 'resolved') return
 	assertsWithEthereum(window)
-	window.ethereum.addListener('accountsChanged', handleAccountChanged)
+	window.ethereum.on('accountsChanged', handleAccountChanged)
 })

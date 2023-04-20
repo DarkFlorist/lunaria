@@ -41,5 +41,5 @@ const handleChainChange = async () => {
 const removeChainChangeListener = effect(() => {
 	if (provider.value === undefined) return
 	assertsWithEthereum(window)
-	window.ethereum.addListener('chainChanged', handleChainChange)
+	window.ethereum.on('chainChanged', handleChainChange)
 })

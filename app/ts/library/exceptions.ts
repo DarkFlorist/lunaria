@@ -33,3 +33,11 @@ export class ConnectAttemptError extends Error {
 		Object.setPrototypeOf(this, ConnectAttemptError.prototype)
 	}
 }
+
+export class WalletError extends Error {
+	constructor(message: string = 'Wallet not installed or incompatible.') {
+		super()
+		this.message = message
+		Object.setPrototypeOf(this, WalletError.prototype)
+	}
+}

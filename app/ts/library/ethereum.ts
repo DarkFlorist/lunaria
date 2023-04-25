@@ -2,6 +2,35 @@ import { BigNumber, ethers } from 'ethers'
 import { Result } from 'ethers/lib/utils.js'
 import { TransactionReceipt, TransactionResponse, TransferTransactionResponse } from '../types.js'
 import { ERC20ABI } from './ERC20ABI.js'
+import { WalletError } from './exceptions.js'
+
+interface BrowserProvider extends ethers.providers.ExternalProvider {
+	on(eventName: string | symbol, listener: (...args: any[]) => void): void
+}
+
+export interface WithEthereum {
+	ethereum: BrowserProvider
+}
+
+export function withEthereum(global: unknown): global is WithEthereum {
+	return global !== null && typeof global === 'object' && 'ethereum' in global && global.ethereum !== null && typeof global.ethereum === 'object' && 'on' in global.ethereum && typeof global.ethereum.on === 'function'
+}
+
+export type ObservableEthereum = {
+	on(eventName: string | symbol, listener: (...args: any[]) => void): void
+}
+
+export function isEthereumObservable(ethereum: unknown): ethereum is ObservableEthereum {
+	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
+}
+
+export function assertsEthereumObservable(ethereum: unknown): asserts ethereum is ObservableEthereum {
+	if (!isEthereumObservable(ethereum)) throw new Error('Ethereum object is not observable')
+}
+
+export function assertsWithEthereum(global: unknown): asserts global is WithEthereum {
+	if (!withEthereum(global)) throw new WalletError()
+}
 
 export function isTransferTransaction(txResponse: TransactionResponse): txResponse is TransferTransactionResponse {
 	return txResponse.data.toLowerCase().startsWith('0xa9059cbb')

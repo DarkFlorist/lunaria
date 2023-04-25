@@ -6,6 +6,7 @@ import { AccountProvider } from '../context/Account.js'
 import { TransferPage } from './TransferPage/index.js'
 import { TransactionDetails } from './TransactionDetailsPage.js'
 import { Notices } from './Notice.js'
+import { DemoPage } from './Demo.js'
 
 export function App() {
 	return (
@@ -16,6 +17,7 @@ export function App() {
 						<Router>
 							<Route path='#tx' component={TransactionPage} />
 							<Route path='#tx/:transaction_hash' component={TransactionDetails} />
+							<Route path='#test' component={DemoPage} />
 							<Route path='/' component={TransferPage} />
 						</Router>
 					</BalanceProvider>

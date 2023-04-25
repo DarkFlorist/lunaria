@@ -8,6 +8,7 @@ import { TransactionDetails } from './TransactionDetailsPage.js'
 import { AssetsPage } from './AssetsPage/index.js'
 import { Notices } from './Notice.js'
 import { DemoPage } from './Demo.js'
+import { LayoutDemo } from './LayoutDemo.js'
 
 export function App() {
 	return (
@@ -19,6 +20,7 @@ export function App() {
 							<Route path='#tx' component={TransactionPage} />
 							<Route path='#tx/:transaction_hash' component={TransactionDetails} />
 							<Route path='#test' component={DemoPage} />
+							<Route path='#layout' component={LayoutDemo} />
 							<Route path='#assets' component={AssetsPage} />
 							<Route path='/' component={TransferPage} />
 						</Router>

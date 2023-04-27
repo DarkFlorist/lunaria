@@ -113,7 +113,7 @@ const ReadOnlyField = ({ label, value, isLoading }: ReadOnlyFieldProps) => {
 					<CopyButton label='Copy' value={value} />
 				</div>
 			)}
-			<div style={{ gridArea: 'text' }}>{isLoading ? <AsyncText /> : <span class='overflow-scroll no-scrollbar'>{value}</span>}</div>
+			<div style={{ gridArea: 'text' }}>{isLoading ? <AsyncText /> : <span class='overflow-scroll scrollbar-hidden'>{value}</span>}</div>
 		</div>
 	)
 }

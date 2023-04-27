@@ -1,20 +1,36 @@
-import { ComponentChildren } from "preact"
-import { Ref, useEffect, useRef } from "preact/hooks"
+import { ComponentChildren, ComponentType } from "preact"
+import { useEffect, useRef } from "preact/hooks"
 import { signal } from "@preact/signals"
 
 type Panel = {
-	name: 'main' | 'nav' | 'aside'
 	target: Element
-	isActive: boolean
+	isIntersecting: boolean
 }
 
-const panels = signal<Panel[]>([])
+type Panels = {
+	nav: Panel | null
+	main: Panel | null
+	aside: Panel | null
+}
 
-export const Page = ({ children }: { children: ComponentChildren }) => {
+const panelsObserver = signal<IntersectionObserver | undefined>(undefined)
+const panels = signal<Panels>({ nav: null, main: null, aside: null })
+
+export const Root = ({ children }: { children: ComponentChildren }) => {
 	const rootRef = useRef<HTMLDivElement>(null)
 
+	const onIntersect: IntersectionObserverCallback = (entries) => {
+		entries.map(entry => panels.value = { ...panels.value, [entry.target.id]: entry })
+	}
+
+	useEffect(() => {
+		const options = { root: rootRef.current, rootMargin: '0px', threshold: 0.9 }
+		panelsObserver.value = new IntersectionObserver(onIntersect, options);
+		return () => panelsObserver.value?.disconnect()
+	}, [rootRef.current])
+
 	return (
-		<div ref={rootRef} class='grid grid-cols-[75vw,100vw,75vw] sm:grid-cols-[40vw,100vw,40vw] md:grid-cols-[30vw,70vw,30vw] lg:grid-cols-[2fr,5fr,2fr] h-full snap-mandatory snap-x overflow-y-hidden scrollbar-hidden'>
+		<div ref={rootRef} class='grid grid-cols-[75vw,100vw,75vw] sm:grid-cols-[40vw,100vw,40vw] md:grid-cols-[35vw,65vw,35vw] lg:grid-cols-[2fr,5fr,2fr] h-full snap-mandatory snap-x overflow-y-hidden scrollbar-hidden'>
 			{children}
 		</div>
 	)
@@ -23,10 +39,16 @@ export const Page = ({ children }: { children: ComponentChildren }) => {
 export const Navigation = ({ children }: { children: ComponentChildren }) => {
 	const elementRef = useRef<HTMLDivElement>(null)
 
-	usePanelObserver('nav', elementRef)
+	useEffect(() => {
+		const element = elementRef.current
+		const observer = panelsObserver.value
+		if (element === null || observer === undefined) return
+		observer.observe(element)
+		return () => observer.unobserve(element)
+	}, [elementRef.current, panelsObserver.value])
 
 	return (
-		<div ref={elementRef} class='overflow-x-hidden snap-start scrollbar-hidden'>
+		<div id='nav' ref={elementRef} class='overflow-x-hidden snap-start scrollbar-hidden'>
 			{children}
 		</div>
 	)
@@ -35,10 +57,13 @@ export const Navigation = ({ children }: { children: ComponentChildren }) => {
 export const Main = ({ children }: { children: ComponentChildren }) => {
 	const elementRef = useRef<HTMLDivElement>(null)
 
-	usePanelObserver('main', elementRef)
+	useEffect(() => {
+		if (elementRef.current === null || panelsObserver.value === undefined) return
+		panelsObserver.value.observe(elementRef.current)
+	}, [elementRef.current, panelsObserver.value])
 
 	return (
-		<div ref={elementRef} class='overflow-x-hidden snap-start scrollbar-hidden'>
+		<div id='main' ref={elementRef} class='overflow-x-hidden snap-start scrollbar-hidden'>
 			{children}
 		</div>
 	)
@@ -47,44 +72,45 @@ export const Main = ({ children }: { children: ComponentChildren }) => {
 export const Aside = ({ children }: { children: ComponentChildren }) => {
 	const elementRef = useRef<HTMLDivElement>(null)
 
-	usePanelObserver('aside', elementRef)
+	useEffect(() => {
+		if (elementRef.current === null || panelsObserver.value === undefined) return
+		panelsObserver.value.observe(elementRef.current)
+	}, [elementRef.current, panelsObserver.value])
 
 	return (
-		<div ref={elementRef} class='overflow-x-hidden snap-start scrollbar-hidden'>
+		<div id='aside' ref={elementRef} class='overflow-x-hidden snap-start scrollbar-hidden'>
 			{children}
 		</div>
 	)
 }
 
-function usePanelObserver(name: Panel["name"], element: Ref<HTMLDivElement>) {
-	const options = { rootMargin: '0px', threshold: 1.0 };
-	const panel = { name, isActive: false } as const
-
-	useEffect(() => {
-		if (element.current === null) return;
-		const observer = new IntersectionObserver((entries) => {
-			const [entry] = entries;
-			panels.value = [...panels.value.filter(p => p.name !== panel.name), { ...panel, target: entry.target, isActive: entry.isIntersecting }]
-		}, options);
-
-		observer.observe(element.current)
-
-		return () => observer.disconnect()
-	}, [element])
+export const Header = ({ children }: { children: ComponentChildren }) => {
+	return (
+		<div class='sticky top-0 bg-black/50'>
+			{children}
+		</div>
+	)
 }
 
+type HeaderNavProps = {
+	text: string,
+	onClick: () => void
+	show?: boolean
+	iconLeft?: ComponentType
+	iconRight?: ComponentType
+}
+
+export const HeaderNav = (props: HeaderNavProps) => {
+	const LeftIcon = props.iconLeft || (() => null)
+	const RightIcon = props.iconRight || (() => null)
+
+	return (
+		<button class={`flex items-center gap-2 transition-opacity duration-500 ${props.show ? `opacity-1` : `opacity-0 pointer-events-none`}`} onClick={props.onClick}><LeftIcon /><span>{props.text}</span><RightIcon /></button>
+	)
+}
 
 export function usePanels() {
-	return {
-		get nav() {
-			return panels.value.find(p => p.name === 'nav')
-		},
-		get main() {
-			return panels.value.find(p => p.name === 'main')
-		},
-		get aside() {
-			return panels.value.find(p => p.name === 'aside')
-		}
-	}
+	return panels.value
 }
+
 

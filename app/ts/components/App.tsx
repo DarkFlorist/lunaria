@@ -8,7 +8,7 @@ import { TransactionDetails } from './TransactionDetailsPage.js'
 import { AssetsPage } from './AssetsPage/index.js'
 import { Notices } from './Notice.js'
 import { DemoPage } from './Demo.js'
-import { LayoutDemo } from './LayoutDemo.js'
+import { LayoutDemo } from './DefaultLayout/Demo.js'
 
 export function App() {
 	return (

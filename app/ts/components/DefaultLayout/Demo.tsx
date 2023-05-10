@@ -29,7 +29,7 @@ const LeftPanel = () => {
 					<img class='w-10 h-10' src="/img/icon-lunaria.svg" />
 					<div>
 						<div class="text-3xl font-bold leading-none">Lunaria</div>
-						<div class="text-white/50 leading-none">Decentralized Asset Manager</div>
+						<div class="text-white/50 leading-none">Decentralized Wallet</div>
 					</div>
 				</div>
 			</div>

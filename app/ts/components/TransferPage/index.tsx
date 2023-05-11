@@ -28,7 +28,7 @@ const MainPanel = () => {
 	const formData = useSignal<FormData>({ amount: '', address: '', token: undefined })
 	const { nav, main } = usePanels()
 
-	const handleTokenSelect = (token: TokenMeta) => {
+	const handleTokenSelect = (token?: TokenMeta) => {
 		formData.value = { ...formData.value, token }
 		tokenManager.value = false
 	}

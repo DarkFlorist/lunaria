@@ -152,6 +152,7 @@ const TokenField = (props: TokenFieldProps) => {
 }
 
 const Connect = () => {
+	// TODO: use and text connect component
 	return (
 		<div class='grid grid-cols-[1fr,46px] gap-2 px-4 lg:px-0 py-4 border border-white/20 lg:border-none'>
 			<div class='grid justify-end overflow-hidden'>

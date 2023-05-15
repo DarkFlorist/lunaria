@@ -616,6 +616,10 @@ img,
   display: flex;
 }
 
+.inline-flex {
+  display: inline-flex;
+}
+
 .grid {
   display: grid;
 }
@@ -632,6 +636,14 @@ img,
   height: 2.5rem;
 }
 
+.h-20 {
+  height: 5rem;
+}
+
+.h-12 {
+  height: 3rem;
+}
+
 .h-3 {
   height: 0.75rem;
 }
@@ -646,10 +658,6 @@ img,
 
 .h-16 {
   height: 4rem;
-}
-
-.h-12 {
-  height: 3rem;
 }
 
 .h-full {
@@ -670,10 +678,6 @@ img,
 
 .h-\[100dvh\] {
   height: 100dvh;
-}
-
-.h-20 {
-  height: 5rem;
 }
 
 .max-h-\[80\%\] {
@@ -821,6 +825,10 @@ img,
           appearance: none;
 }
 
+.grid-cols-\[1fr\2c auto\] {
+  grid-template-columns: 1fr auto;
+}
+
 .grid-cols-\[minmax\(min-content\2c max-content\)_minmax\(auto\2c max-content\)\] {
   grid-template-columns: minmax(min-content,max-content) minmax(auto,max-content);
 }
@@ -835,10 +843,6 @@ img,
 
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.grid-cols-\[1fr\2c auto\] {
-  grid-template-columns: 1fr auto;
 }
 
 .grid-cols-\[1fr\2c 46px\] {
@@ -909,8 +913,16 @@ img,
   flex-direction: column;
 }
 
+.place-content-center {
+  place-content: center;
+}
+
 .place-content-between {
   place-content: space-between;
+}
+
+.place-items-end {
+  place-items: end;
 }
 
 .place-items-center {
@@ -1060,6 +1072,10 @@ img,
   border-color: rgb(255 255 255 / 0.5);
 }
 
+.border-white\/20 {
+  border-color: rgb(255 255 255 / 0.2);
+}
+
 .border-red-400\/20 {
   border-color: rgb(248 113 113 / 0.2);
 }
@@ -1081,10 +1097,6 @@ img,
   border-color: rgb(0 0 0 / 0.1);
 }
 
-.border-white\/20 {
-  border-color: rgb(255 255 255 / 0.2);
-}
-
 .border-transparent {
   border-color: transparent;
 }
@@ -1103,6 +1115,10 @@ img,
 
 .bg-white\/5 {
   background-color: rgb(255 255 255 / 0.05);
+}
+
+.bg-white\/20 {
+  background-color: rgb(255 255 255 / 0.2);
 }
 
 .bg-white\/50 {
@@ -1132,10 +1148,6 @@ img,
 .bg-black {
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
-}
-
-.bg-white\/20 {
-  background-color: rgb(255 255 255 / 0.2);
 }
 
 .bg-black\/50 {
@@ -1602,8 +1614,7 @@ img,
 
 .text-empty:empty:before {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  border-radius: 0.125rem;
-  background-color: rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.2);
   color: transparent;
 }
 
@@ -1964,6 +1975,10 @@ img,
 
   .lg\:grid-cols-\[2fr\2c 5fr\] {
     grid-template-columns: 2fr 5fr;
+  }
+
+  .lg\:place-items-end {
+    place-items: end;
   }
 
   .lg\:border-none {

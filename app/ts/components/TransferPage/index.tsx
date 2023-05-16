@@ -1,9 +1,10 @@
 import { useSignal } from '@preact/signals'
-import { useRef } from 'preact/hooks'
 import { TokenMeta } from '../../store/tokens.js'
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { TokenManager } from '../TokenManager/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
+import { AmountField } from '../AmountField.js'
+import { AddressField } from '../AddressField.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -64,10 +65,9 @@ const MainPanel = () => {
 					<div class='grid gap-4'>
 						<div class='grid md:grid-cols-2 gap-4'>
 							<TokenField token={formData.value.token} onClick={() => tokenManager.value = true} />
-							<InputField label='Amount' placeholder='1.00' value={formData.value.amount} onInput={(value) => formData.value = { ...formData.value, amount: value }} onClear={() => formData.value = { ...formData.value, amount: '' }} />
+							<AmountField label='Amount' placeholder='1.00' value={formData.value.amount} onInput={(value) => formData.value = { ...formData.value, amount: value }} onClear={() => formData.value = { ...formData.value, amount: '' }} />
 						</div>
-
-						<InputField label='Addrses' placeholder='0x123...789' value={formData.value.address} onInput={handleAddressChange} onClear={handleAddressChange} />
+						<AddressField label='Addrses' placeholder='0x123...789' value={formData.value.address} onInput={handleAddressChange} onClear={handleAddressChange} />
 						<SubmitButton />
 					</div>
 				</form>
@@ -160,40 +160,6 @@ const SubmitButton = () => {
 			</svg>
 			<span>Send</span>
 		</button>
-	)
-}
-
-type InputFieldProps = {
-	label: string
-	placeholder?: string
-	value: string
-	onInput: (amount: string) => void
-	onClear: () => void
-}
-
-const InputField = (props: InputFieldProps) => {
-	const inputRef = useRef<HTMLInputElement>(null)
-
-	const handleClear = () => {
-		props.onClear?.()
-		inputRef.current?.focus()
-	}
-
-	return (
-		<div class='border border-white/50 bg-transparent focus-within:border-white/90 focus-within:bg-white/5'>
-			<div class='grid grid-cols-[1fr,auto] items-center h-16'>
-				<div class='grid px-4'>
-					<label class='text-sm text-white/50 leading-tight'>{props.label}</label>
-					<input ref={inputRef} placeholder={props.placeholder} class='h-6 bg-transparent outline-none placeholder:text-white/20' type='text' value={props.value} onInput={event => props.onInput(event.currentTarget.value)} required />
-				</div>
-				{props.value !== '' && (
-					<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white' onClick={handleClear}>
-						<svg width='1em' height='1em' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path fill='currentColor' fill-rule='evenodd' d='M11.293 3.293a1 1 0 1 1 1.414 1.414L9.414 8l3.293 3.293a1 1 0 0 1-1.414 1.414L8 9.414l-3.293 3.293a1 1 0 0 1-1.414-1.414L6.586 8 3.293 4.707a1 1 0 0 1 1.414-1.414L8 6.586l3.293-3.293Z' /></svg>
-					</button>)}
-
-			</div>
-		</div>
-
 	)
 }
 

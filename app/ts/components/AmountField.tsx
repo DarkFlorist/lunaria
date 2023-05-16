@@ -38,7 +38,7 @@ export const AmountField = (props: Props) => {
 	}
 
 	return (
-		<div class={removeNonStringsAndTrim(baseClasses.root, isValid.value === false && 'border-red-500 focus-within:border-red-500')}>
+		<div class={removeNonStringsAndTrim(baseClasses.root, isValid.value === false ? 'border-red-400 focus-within:border-red-400' : 'border-white/50 focus-within:border-white/90')}>
 			<div class='grid grid-cols-[1fr,auto] items-center h-16'>
 				<div class='grid px-4'>
 					<label class='text-sm text-white/50 leading-tight'>{props.label}</label>
@@ -55,6 +55,6 @@ export const AmountField = (props: Props) => {
 }
 
 const baseClasses = {
-	root: 'border border-white/50 bg-transparent focus-within:border-white/90 focus-within:bg-white/5',
+	root: 'border bg-transparent focus-within:bg-white/5',
 	field: 'h-6 bg-transparent outline-none placeholder:text-white/20' 
 }

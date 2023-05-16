@@ -10,7 +10,6 @@ type Props = {
 	value: string
 	onInput: (amount: string) => void
 	onClear: () => void
-	disabled?: boolean
 }
 
 export const AmountField = (props: Props) => {
@@ -26,7 +25,7 @@ export const AmountField = (props: Props) => {
 		const inputField = inputRef.current
 		const value = e.currentTarget.value
 
-		if (inputField === null) return
+		if (inputField === null) return;
 
 		// clear errors and update field value
 		inputField.setCustomValidity('')
@@ -39,14 +38,14 @@ export const AmountField = (props: Props) => {
 	}
 
 	return (
-		<div class={removeNonStringsAndTrim(baseClasses.root, isValid.value === false ? 'border-red-400 focus-within:border-red-400' : 'border-white/50 focus-within:border-white/90', props.disabled && 'opacity-50')}>
+		<div class={removeNonStringsAndTrim(baseClasses.root, isValid.value === false && 'border-red-500 focus-within:border-red-500')}>
 			<div class='grid grid-cols-[1fr,auto] items-center h-16'>
 				<div class='grid px-4'>
 					<label class='text-sm text-white/50 leading-tight'>{props.label}</label>
-					<input ref={inputRef} placeholder={props.placeholder} inputMode='numeric' pattern='^[\d, ]*\.?\d*$' class={baseClasses.field} type='text' value={props.value} onInput={handleInput} disabled={props.disabled} required />
+					<input ref={inputRef} placeholder={props.placeholder} inputMode='numeric' pattern='^[\d, ]*\.?\d*$' class={baseClasses.field} type='text' value={props.value} onInput={handleInput} required />
 				</div>
 				{props.value !== '' && (
-					<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm disabled:opacity-50' onClick={handleClear} disabled={props.disabled}>
+					<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm' onClick={handleClear}>
 						<Icon.Xmark />
 					</button>)}
 
@@ -56,6 +55,6 @@ export const AmountField = (props: Props) => {
 }
 
 const baseClasses = {
-	root: 'border bg-transparent focus-within:bg-white/5',
+	root: 'border border-white/50 bg-transparent focus-within:border-white/90 focus-within:bg-white/5',
 	field: 'h-6 bg-transparent outline-none placeholder:text-white/20' 
 }

@@ -592,6 +592,10 @@ img,
   margin-bottom: 2rem;
 }
 
+.mt-8 {
+  margin-top: 2rem;
+}
+
 .mb-3 {
   margin-bottom: 0.75rem;
 }
@@ -865,6 +869,10 @@ img,
   grid-template-columns: 1fr 40px;
 }
 
+.grid-cols-\[auto\2c 1fr\] {
+  grid-template-columns: auto 1fr;
+}
+
 .grid-cols-\[75vw\2c 100vw\] {
   grid-template-columns: 75vw 100vw;
 }
@@ -874,10 +882,6 @@ img,
 }
 
 .grid-cols-\[auto_1fr\] {
-  grid-template-columns: auto 1fr;
-}
-
-.grid-cols-\[auto\2c 1fr\] {
   grid-template-columns: auto 1fr;
 }
 
@@ -1019,10 +1023,6 @@ img,
   white-space: nowrap;
 }
 
-.break-all {
-  word-break: break-all;
-}
-
 .rounded {
   border-radius: 0.25rem;
 }
@@ -1064,17 +1064,17 @@ img,
   border-style: dashed;
 }
 
-.border-red-400 {
+.border-red-500 {
   --tw-border-opacity: 1;
-  border-color: rgb(248 113 113 / var(--tw-border-opacity));
-}
-
-.border-white\/50 {
-  border-color: rgb(255 255 255 / 0.5);
+  border-color: rgb(239 68 68 / var(--tw-border-opacity));
 }
 
 .border-transparent {
   border-color: transparent;
+}
+
+.border-white\/50 {
+  border-color: rgb(255 255 255 / 0.5);
 }
 
 .border-white\/20 {
@@ -1108,10 +1108,6 @@ img,
 
 .border-red-400\/30 {
   border-color: rgb(248 113 113 / 0.3);
-}
-
-.border-red-400\/50 {
-  border-color: rgb(248 113 113 / 0.5);
 }
 
 .border-b-white\/20 {
@@ -1202,10 +1198,6 @@ img,
   background-color: rgb(252 165 165 / 0.05);
 }
 
-.bg-red-200\/10 {
-  background-color: rgb(254 202 202 / 0.1);
-}
-
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
@@ -1238,10 +1230,6 @@ img,
 
 .p-1 {
   padding: 0.25rem;
-}
-
-.p-3 {
-  padding: 0.75rem;
 }
 
 .px-4 {
@@ -1425,10 +1413,6 @@ img,
   color: rgb(0 0 0 / 0.2);
 }
 
-.opacity-50 {
-  opacity: 0.5;
-}
-
 .opacity-0 {
   opacity: 0;
 }
@@ -1443,6 +1427,10 @@ img,
 
 .opacity-100 {
   opacity: 1;
+}
+
+.opacity-50 {
+  opacity: 0.5;
 }
 
 .shadow-lg {
@@ -1503,6 +1491,12 @@ img,
 
 .duration-300 {
   transition-duration: 300ms;
+}
+
+.clear:after,
+	.clear:before {
+  content: ' ';
+  display: table;
 }
 
 .scrollbar-hidden {
@@ -1656,9 +1650,9 @@ img,
   color: rgb(254 202 202 / var(--tw-text-opacity));
 }
 
-.focus-within\:border-red-400:focus-within {
+.focus-within\:border-red-500:focus-within {
   --tw-border-opacity: 1;
-  border-color: rgb(248 113 113 / var(--tw-border-opacity));
+  border-color: rgb(239 68 68 / var(--tw-border-opacity));
 }
 
 .focus-within\:border-white\/90:focus-within {
@@ -1715,6 +1709,10 @@ img,
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
 }
 
+.focus\:border-white\/80:focus {
+  border-color: rgb(255 255 255 / 0.8);
+}
+
 .focus\:border-white\/90:focus {
   border-color: rgb(255 255 255 / 0.9);
 }
@@ -1726,6 +1724,10 @@ img,
 
 .focus\:bg-white\/10:focus {
   background-color: rgb(255 255 255 / 0.1);
+}
+
+.focus\:bg-white\/5:focus {
+  background-color: rgb(255 255 255 / 0.05);
 }
 
 .focus\:bg-white\/20:focus {
@@ -1756,6 +1758,10 @@ img,
   outline-offset: 2px;
 }
 
+.disabled\:border-white\/50:disabled {
+  border-color: rgb(255 255 255 / 0.5);
+}
+
 .disabled\:bg-white\/5:disabled {
   background-color: rgb(255 255 255 / 0.05);
 }
@@ -1764,8 +1770,8 @@ img,
   color: rgb(0 0 0 / 0.5);
 }
 
-.disabled\:opacity-50:disabled {
-  opacity: 0.5;
+.disabled\:text-white\/50:disabled {
+  color: rgb(255 255 255 / 0.5);
 }
 
 .disabled\:opacity-30:disabled {
@@ -1797,16 +1803,16 @@ img,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .sm\:grid-cols-\[40vw\2c 100vw\] {
-    grid-template-columns: 40vw 100vw;
-  }
-
   .sm\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .sm\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-\[40vw\2c 100vw\] {
+    grid-template-columns: 40vw 100vw;
   }
 }
 
@@ -1864,12 +1870,12 @@ img,
     grid-template-columns: 5fr 3fr;
   }
 
-  .md\:grid-cols-\[35vw\2c 100vw\] {
-    grid-template-columns: 35vw 100vw;
-  }
-
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-\[35vw\2c 100vw\] {
+    grid-template-columns: 35vw 100vw;
   }
 
   .md\:place-items-end {
@@ -1970,12 +1976,12 @@ img,
     grid-template-columns: 6fr 2fr;
   }
 
-  .lg\:grid-cols-\[2fr\2c 5fr\] {
-    grid-template-columns: 2fr 5fr;
-  }
-
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-\[2fr\2c 5fr\] {
+    grid-template-columns: 2fr 5fr;
   }
 
   .lg\:place-items-end {

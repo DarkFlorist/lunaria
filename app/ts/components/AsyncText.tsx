@@ -1,5 +1,5 @@
 import { ComponentChildren } from 'preact'
-import { getRandomNumberBetween, removeNonStringsAndTrim } from '../library/utilities.js'
+import { removeNonStringsAndTrim } from '../library/utilities.js'
 
 export type AsyncTextProps = {
 	placeholderLength?: number
@@ -7,7 +7,7 @@ export type AsyncTextProps = {
 	class?: string
 }
 
-export const AsyncText = ({ placeholderLength = getRandomNumberBetween(10, 20), children, class: classNames }: AsyncTextProps) => {
+export const AsyncText = ({ placeholderLength = 8, children, class: classNames }: AsyncTextProps) => {
 	const classes = removeNonStringsAndTrim('text-empty', classNames)
 	return (
 		<span class={classes} data-placeholder={'0'.repeat(placeholderLength)}>

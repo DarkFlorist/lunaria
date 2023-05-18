@@ -447,5 +447,5 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 .text-empty:empty:before {
 	content: attr(data-placeholder);
-	@apply bg-white/10 text-transparent animate-pulse rounded-sm;
+	@apply bg-white/20 text-transparent animate-pulse;
 }

@@ -10,25 +10,28 @@ export function useAccount() {
 	const providers = useProviders()
 	const { value: query, waitFor } = useAsyncState<string>()
 
-	const connect = (attemptOnly?: boolean) => {
+	const connect = () => {
 		waitFor(async () => {
 			const browserProvider = providers.getbrowserProvider()
-
-			if (attemptOnly === true) {
-				try {
-					const signer = browserProvider.getSigner()
-					return await signer.getAddress()
-				} catch (unknownError) {
-					let error = new ConnectAttemptError(`Unknown error ${unknownError}`)
-					if (typeof unknownError === 'string') error = new ConnectAttemptError(unknownError)
-					if (unknownError instanceof Error) error = new ConnectAttemptError(error.message)
-					throw error
-				}
-			}
-
 			await browserProvider.send('eth_requestAccounts', [])
 			const signer = browserProvider.getSigner()
 			return await signer.getAddress()
+		})
+	}
+
+	const attemptToConnect = () => {
+		waitFor(async () => {
+			const browserProvider = providers.getbrowserProvider()
+
+			try {
+				const signer = browserProvider.getSigner()
+				return await signer.getAddress()
+			} catch (unknownError) {
+				let error = new ConnectAttemptError(`Unknown error ${unknownError}`)
+				if (typeof unknownError === 'string') error = new ConnectAttemptError(unknownError)
+				if (unknownError instanceof Error) error = new ConnectAttemptError(error.message)
+				throw error
+			}
 		})
 	}
 
@@ -40,12 +43,16 @@ export function useAccount() {
 
 	useSignalEffect(listenForQueryChanges)
 
-	return { address, connect }
+	return { address, connect, attemptToConnect }
 }
 
-const handleAccountChanged = (newAddress: string) => {
+const handleAccountChanged = ([newAddress]: string[]) => {
 	if (address.value.state !== 'resolved') return
 	removeAccountChangedListener()
+	if (newAddress === undefined) {
+		address.value = { state: 'inactive' }
+		return;
+	}
 	address.value = { ...address.value, value: newAddress }
 }
 

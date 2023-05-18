@@ -1019,6 +1019,10 @@ img,
   white-space: nowrap;
 }
 
+.break-all {
+  word-break: break-all;
+}
+
 .rounded {
   border-radius: 0.25rem;
 }
@@ -1104,6 +1108,10 @@ img,
 
 .border-red-400\/30 {
   border-color: rgb(248 113 113 / 0.3);
+}
+
+.border-red-400\/50 {
+  border-color: rgb(248 113 113 / 0.5);
 }
 
 .border-b-white\/20 {
@@ -1194,6 +1202,10 @@ img,
   background-color: rgb(252 165 165 / 0.05);
 }
 
+.bg-red-200\/10 {
+  background-color: rgb(254 202 202 / 0.1);
+}
+
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
@@ -1226,6 +1238,10 @@ img,
 
 .p-1 {
   padding: 0.25rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
 }
 
 .px-4 {
@@ -1409,6 +1425,10 @@ img,
   color: rgb(0 0 0 / 0.2);
 }
 
+.opacity-50 {
+  opacity: 0.5;
+}
+
 .opacity-0 {
   opacity: 0;
 }
@@ -1423,10 +1443,6 @@ img,
 
 .opacity-100 {
   opacity: 1;
-}
-
-.opacity-50 {
-  opacity: 0.5;
 }
 
 .shadow-lg {
@@ -1746,10 +1762,6 @@ img,
   outline-offset: 2px;
 }
 
-.disabled\:border-white\/50:disabled {
-  border-color: rgb(255 255 255 / 0.5);
-}
-
 .disabled\:bg-white\/5:disabled {
   background-color: rgb(255 255 255 / 0.05);
 }
@@ -1758,8 +1770,8 @@ img,
   color: rgb(0 0 0 / 0.5);
 }
 
-.disabled\:text-white\/50:disabled {
-  color: rgb(255 255 255 / 0.5);
+.disabled\:opacity-50:disabled {
+  opacity: 0.5;
 }
 
 .disabled\:opacity-30:disabled {

@@ -1,8 +1,8 @@
 import { assertsWithEthereum } from '../library/ethereum.js'
-import { ConnectAttemptError } from '../library/exceptions.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
+import { ConnectAttemptError } from '../library/exceptions.js'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
 

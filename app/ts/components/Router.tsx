@@ -64,7 +64,7 @@ export function useRoute() {
 	}
 
 	return {
-		pathname: routerState.value,
+		router: routerState,
 		navigate,
 	}
 }

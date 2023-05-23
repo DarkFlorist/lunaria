@@ -193,7 +193,6 @@ const TransferStatus = ({ transaction }: { transaction: Signal<AsyncProperty<Tra
 		case 'resolved':
 			return <></>
 		case 'rejected':
-			console.log(typeof transaction.value.error)
 			return (
 				<div class='grid gap-2 border border-red-400/50 px-4 py-3 bg-red-200/10'>
 					<div class='font-bold text-lg'>Failed to complete transfer</div>

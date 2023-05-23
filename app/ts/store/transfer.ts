@@ -16,7 +16,7 @@ type TransferData = {
 const transferDataDefaults: TransferData = { recipientAddress: '', amount: '', token: undefined }
 
 export function useTransfer() {
-	const recentTxns = useRecentTransfers()
+	const { add } = useRecentTransfers()
 	const providers = useProviders()
 	const transaction = useSignal<AsyncProperty<TransactionResponse>>({ state: 'inactive' })
 	const data = useSignal<TransferData>(transferDataDefaults)
@@ -55,7 +55,7 @@ export function useTransfer() {
 	useSignalEffect(() => {
 		if (query.value.state === 'resolved') {
 			console.log('store recent', query.value.value)
-			recentTxns.value = [...recentTxns.peek(), { hash: query.value.value.hash, date: Date.now() }]
+			add({ hash: query.value.value.hash, date: Date.now() })
 		}
 	})
 

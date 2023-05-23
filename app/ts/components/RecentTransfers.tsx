@@ -1,16 +1,18 @@
+import { useComputed } from "@preact/signals"
 import { useRecentTransfers } from "../store/recent-transfers.js"
 
 export const RecentTransfers = () => {
-	const txnHashes = useRecentTransfers()
+	const { recentTxns } = useRecentTransfers()
 
-	if (txnHashes.value.length < 1) return null
+	const sortedTxns = useComputed(() => recentTxns.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
 
+	if (recentTxns.value.length < 1) return null
 
 	return (
 		<div class='pl-4 mb-4'>
 			<div class='text-white/30 text-sm mb-2'>Recent Transfers</div>
 			<div>
-				{txnHashes.value.map(txn => {
+				{sortedTxns.value.map(txn => {
 
 					const date = new Date(txn.date)
 					const dateTime = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`

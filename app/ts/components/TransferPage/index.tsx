@@ -44,11 +44,15 @@ const MainPanel = () => {
 		send()
 	}
 
+	const handleSuccess = () => {
+		clearData()
+	}
+
 	const isFormSubmitting = useComputed(() => transaction.value.state === 'pending')
 
 	useSignalEffect(() => {
 		if (transaction.value.state !== 'resolved') return;
-		clearData()
+		handleSuccess()
 	})
 
 	return (

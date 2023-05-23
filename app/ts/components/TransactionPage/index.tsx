@@ -1,6 +1,8 @@
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
 import { RecentTransfers } from '../RecentTransfers.js'
+import { useRouter } from '../HashRouter.js'
+import { TransactionResponseQuery } from './TransactionResponse.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -17,6 +19,7 @@ export const TransactionPage = () => {
 
 const MainPanel = () => {
 	const { nav, main } = usePanels()
+	const router = useRouter<{ transaction_hash: string }>()
 
 	return (
 		<Main>
@@ -35,8 +38,7 @@ const MainPanel = () => {
 			</div>
 
 			<div class='px-4'>
-				test
-
+				<TransactionResponseQuery transactionHash={router.value.params.transaction_hash} />
 			</div>
 		</Main>
 	)
@@ -66,7 +68,7 @@ const LeftPanel = () => {
 				<a href="/">
 					<div class='grid grid-cols-[auto,1fr] items-center gap-4 mb-4'>
 						<div class='bg-white/30 w-10 h-10 rounded-full' />
-						<div class='py-2 border-b border-b-white/20 leading-tight'>
+						<div class='py-2 leading-tight'>
 							<div class='font-bold'>New Transfer</div>
 							<div class='text-white/50'>Send and Manage Tokens</div>
 						</div>

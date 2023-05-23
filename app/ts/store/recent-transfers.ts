@@ -16,9 +16,12 @@ const recentTxns = signal(getSessionStorageCache());
 
 export const useRecentTransfers = () => {
 	const syncCacheChange = (event: StorageEvent) => {
-		console.log('storage event called', event)
 		const newValue =	event.newValue !== null ? JSON.parse(event.newValue) as RecentTransaction[] : []
 		recentTxns.value = newValue
+	}
+
+	const add = (txn: RecentTransaction) => {
+		recentTxns.value = [...recentTxns.peek(), txn]
 	}
 
 	useSignalEffect(() => {
@@ -31,6 +34,6 @@ export const useRecentTransfers = () => {
 		return () => window.removeEventListener('storage', syncCacheChange)
 	}, [])
 
-	return recentTxns
+	return { recentTxns, add }
 };
 

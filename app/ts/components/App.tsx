@@ -10,9 +10,15 @@ export function App() {
 		<SplashScreen>
 			<Router>
 				<h1>invalid</h1>
-				<Route path='#assets' component={AssetsPage} />
-				<Route path='' component={TransferPage} />
-				<Route path='#tx/:transaction_hash' component={TransactionPage} />
+				<Route path='#assets'>
+					<AssetsPage />
+				</Route>
+				<Route path=''>
+					<TransferPage />
+				</Route>
+				<Route path='#tx/:transaction_hash'>
+					<TransactionPage />
+				</Route>
 			</Router>
 			<Notices />
 		</SplashScreen>

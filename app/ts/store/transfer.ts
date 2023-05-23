@@ -12,7 +12,7 @@ type TransferData = {
 	token?: TokenMeta
 }
 
-const transferDataDefaults:TransferData = { recipientAddress: '', amount: '', token: undefined }
+const transferDataDefaults: TransferData = { recipientAddress: '', amount: '', token: undefined }
 
 export function useTransfer() {
 	const providers = useProviders()

@@ -44,15 +44,16 @@ const MainPanel = () => {
 		send()
 	}
 
-	const handleSuccess = () => {
+	const handleSuccess = (transactionResponse: TransactionResponse) => {
 		clearData()
+		window.location.hash = `#tx/${transactionResponse.hash}`
 	}
 
 	const isFormSubmitting = useComputed(() => transaction.value.state === 'pending')
 
 	useSignalEffect(() => {
 		if (transaction.value.state !== 'resolved') return;
-		handleSuccess()
+		handleSuccess(transaction.value.value)
 	})
 
 	return (

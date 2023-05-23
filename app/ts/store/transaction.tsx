@@ -1,6 +1,6 @@
 import { useSignal, useSignalEffect } from "@preact/signals"
 import { AsyncProperty, useAsyncState } from "../library/preact-utilities.js"
-import { TransactionResponse } from "../types.js"
+import { TransactionReceipt, TransactionResponse } from "../types.js"
 import { useProviders } from "./provider.js"
 
 export function useTransactionResponse() {
@@ -22,5 +22,25 @@ export function useTransactionResponse() {
 	useSignalEffect(listenForQueryChanges)
 
 	return { transactionResponse, getTransactionResponse }
+
+}
+
+export function useTransactionReceipt() {
+	const transactionReceipt = useSignal<AsyncProperty<TransactionReceipt>>({ state: 'inactive' })
+	const { value: query, waitFor } = useAsyncState<TransactionReceipt>()
+
+	const getTransactionReceipt = (transactionResponse: TransactionResponse) => {
+		waitFor(async () => {
+			return await transactionResponse.wait()
+		})
+	}
+
+	const listenForQueryChanges = () => {
+		transactionReceipt.value = query.value
+	}
+
+	useSignalEffect(listenForQueryChanges)
+
+	return { transactionReceipt, getTransactionReceipt }
 
 }

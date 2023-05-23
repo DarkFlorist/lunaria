@@ -54,7 +54,6 @@ export function useTransfer() {
 	useSignalEffect(listenForQueryChanges)
 	useSignalEffect(() => {
 		if (query.value.state === 'resolved') {
-			console.log('store recent', query.value.value)
 			add({ hash: query.value.value.hash, date: Date.now() })
 		}
 	})

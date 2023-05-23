@@ -26,7 +26,7 @@ export const AmountField = (props: Props) => {
 		const inputField = inputRef.current
 		const value = e.currentTarget.value
 
-		if (inputField === null) return;
+		if (inputField === null) return
 
 		// clear errors and update field value
 		inputField.setCustomValidity('')

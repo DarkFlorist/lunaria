@@ -13,6 +13,7 @@ export const TransactionReceiptQuery = (props: TransactionReceiptQueryProps) => 
 	if (props.transactionResponse === undefined) return <></>
 
 	useEffect(() => {
+		if (props.transactionResponse === undefined) return;
 		getTransactionReceipt(props.transactionResponse)
 	}, [props.transactionHash])
 

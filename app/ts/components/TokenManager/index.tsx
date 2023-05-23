@@ -101,7 +101,6 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 			<div class='relative'>
 				<img class='w-12 h-12 mb-2' src={`/img/${token.address}.svg`} />
 				<div class='font-bold'>{token.name}</div>
-				<div class='text-white/50'>Balance: 123.456</div>
 			</div>
 			<div class='absolute inset-0 hidden group-hover:block group-focus:block'>
 				{removal.value ? (
@@ -150,7 +149,6 @@ const NativeCard = ({ onSelect }: { onSelect: () => void }) => {
 		<div class='relative'>
 			<img class='w-12 h-12 mb-2' src={`/img/ethereum.svg`} />
 			<div class='font-bold'>ETH</div>
-			<div class='text-white/50'>Balance: 123.456</div>
 		</div>
 		<div class='absolute inset-0 hidden group-hover:block group-focus:block'>
 			<>

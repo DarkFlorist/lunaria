@@ -1064,11 +1064,6 @@ img,
   border-color: transparent;
 }
 
-.border-red-500 {
-  --tw-border-opacity: 1;
-  border-color: rgb(239 68 68 / var(--tw-border-opacity));
-}
-
 .border-white\/20 {
   border-color: rgb(255 255 255 / 0.2);
 }
@@ -1650,11 +1645,6 @@ img,
 
 .focus-within\:border-white\/90:focus-within {
   border-color: rgb(255 255 255 / 0.9);
-}
-
-.focus-within\:border-red-500:focus-within {
-  --tw-border-opacity: 1;
-  border-color: rgb(239 68 68 / var(--tw-border-opacity));
 }
 
 .focus-within\:border-white:focus-within {

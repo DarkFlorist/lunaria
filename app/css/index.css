@@ -1505,12 +1505,6 @@ img,
   transition-duration: 300ms;
 }
 
-.clear:after,
-	.clear:before {
-  content: ' ';
-  display: table;
-}
-
 .scrollbar-hidden {
   -ms-overflow-style: none;
   scrollbar-width: none;

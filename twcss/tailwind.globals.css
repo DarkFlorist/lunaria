@@ -371,12 +371,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 
 @layer utilities {
-	.clear:after,
-	.clear:before {
-		content: ' ';
-		display: table;
-	}
-
 	.scrollbar-hidden {
 		-ms-overflow-style: none;
 		scrollbar-width: none;

@@ -9,7 +9,6 @@ export function App() {
 	return (
 		<SplashScreen>
 			<Router>
-				<h1>invalid</h1>
 				<Route path='#assets'>
 					<AssetsPage />
 				</Route>

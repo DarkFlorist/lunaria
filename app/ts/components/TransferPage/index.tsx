@@ -217,7 +217,7 @@ const TransferStatus = ({ transaction }: { transaction: Signal<AsyncProperty<Tra
 			return (
 				<div class='grid gap-2 border border-red-400/50 px-4 py-3 bg-red-200/10'>
 					<div class='font-bold text-lg'>Failed to complete transfer</div>
-					<div>Your wallet returned with the following message</div>
+					<div>Error: </div>
 					<div class='break-all p-3 text-sm bg-white/10 text-white/50'>{transaction.value.error.message}</div>
 				</div>
 			)

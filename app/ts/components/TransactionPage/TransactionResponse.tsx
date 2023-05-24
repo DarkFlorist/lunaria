@@ -31,7 +31,7 @@ const QueryRejected = ({ message }: { message: string }) => {
 	return (
 		<div class='grid gap-2 border border-red-400/50 px-4 py-3 bg-red-200/10'>
 			<div class='font-bold text-lg'>Unable to load transaction details</div>
-			<div>You provider returned the following error:</div>
+			<div>Error:</div>
 			<div class='break-all p-3 text-sm bg-white/10 text-white/50'>{message}</div>
 		</div>
 	)

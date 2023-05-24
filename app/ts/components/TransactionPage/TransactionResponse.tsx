@@ -57,7 +57,7 @@ type TransactionDetailsProps = {
 }
 
 const QueryResolved = (props: TransactionDetailsProps) => {
-	if (props.transactionResponse === null) return <div class='px-4 py-3 border border-red-500/50 text-red-500'>Unable to find transaction in chain!</div>
+	if (props.transactionResponse === null) return <div class='px-4 py-3 border border-red-500/50 text-red-500'>Unable to find transaction on chain!</div>
 
 	return (
 		<div class='grid gap-2'>

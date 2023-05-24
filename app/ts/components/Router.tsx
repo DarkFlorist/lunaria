@@ -44,7 +44,7 @@ export const Router = ({ children }: RouterProps) => {
 	}, [])
 
 	const childrenArray = toChildArray(children) as VNode<RouteProps>[]
-	const visibleChildren = childrenArray.filter((child) => child.props.path === routerState.value.pathname)
+	const visibleChildren = childrenArray.filter(child => child.props.path === routerState.value.pathname)
 
 	return <>{visibleChildren}</>
 }
@@ -64,7 +64,7 @@ export function useRoute() {
 	}
 
 	return {
-		pathname: routerState.value,
+		router: routerState,
 		navigate,
 	}
 }

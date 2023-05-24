@@ -1,17 +1,10 @@
-import { useEffect } from 'preact/hooks'
 import { useSignal } from '@preact/signals'
 import { TokenList } from './TokenList.js'
 import { TokenSearchField } from './TokenSearchField.js'
-import { useAccount } from '../../store/account.js'
 import { TokenMenu } from './TokenMenu.js'
 
 export const AssetsPage = () => {
 	const query = useSignal('')
-	const { connect } = useAccount()
-
-	useEffect(() => {
-		connect(true)
-	}, [])
 
 	return (
 		<div class='fixed inset-0 overflow-y-scroll bg-black/5'>

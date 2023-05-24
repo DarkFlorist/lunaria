@@ -135,3 +135,5 @@ export function getAssetMetadata(chainId: string, address?: string) {
 	if (match === undefined) throw new Error('Specified asset is unsupported')
 	return match
 }
+
+export const STORAGE_KEY_RECENTS = 'txns'

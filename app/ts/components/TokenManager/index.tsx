@@ -107,7 +107,7 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 					<>
 						<div class='absolute inset-0 w-full flex items-center justify-center bg-black/80 border border-white/50'>
 							<div class='text-center p-4'>
-								<div class='mb-2'>This will remove Dai from your token list, continue?</div>
+								<div class='mb-2'>This will remove {token.name} from your token list, continue?</div>
 								<button class='border border-white/50 px-3 py-1' onClick={() => (removal.value = false)}>
 									Yes
 								</button>

@@ -1,4 +1,4 @@
-import { Signal, useComputed, useSignal } from '@preact/signals'
+import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { TokenMeta } from '../../store/tokens.js'
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { TokenManager } from '../TokenManager/index.js'
@@ -10,6 +10,8 @@ import { removeNonStringsAndTrim } from '../../library/utilities.js'
 import { useAccount } from '../../store/account.js'
 import { AsyncProperty } from '../../library/preact-utilities.js'
 import { TransactionResponse } from '../../types.js'
+import { RecentTransfers } from '../RecentTransfers.js'
+import { DiscordInvite } from '../DiscordInvite.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -27,7 +29,7 @@ export const TransferPage = () => {
 const MainPanel = () => {
 	const tokenManager = useSignal<boolean>(false)
 	const { nav, main } = usePanels()
-	const { transaction, data, send } = useTransfer()
+	const { transaction, data, send, clearData } = useTransfer()
 
 	const handleTokenSelect = (token?: TokenMeta) => {
 		data.value = { ...data.value, token }
@@ -43,7 +45,17 @@ const MainPanel = () => {
 		send()
 	}
 
+	const handleSuccess = (transactionResponse: TransactionResponse) => {
+		clearData()
+		window.location.hash = `#tx/${transactionResponse.hash}`
+	}
+
 	const isFormSubmitting = useComputed(() => transaction.value.state === 'pending')
+
+	useSignalEffect(() => {
+		if (transaction.value.state !== 'resolved') return;
+		handleSuccess(transaction.value.value)
+	})
 
 	return (
 		<Main>
@@ -88,7 +100,7 @@ const LeftPanel = () => {
 				<HeaderNav show={nav?.isIntersecting} iconLeft={CloseIcon} onClick={() => main?.target.scrollIntoView(SCROLL_OPTIONS)} text='Close Menu' />
 			</Header>
 
-			<div class='mb-2 p-4'>
+			<div class='mb-4 p-4'>
 				<div class='flex items-center gap-2'>
 					<img class='w-10 h-10' src='/img/icon-lunaria.svg' />
 					<div>
@@ -98,12 +110,12 @@ const LeftPanel = () => {
 				</div>
 			</div>
 
-			<div class='pl-4 mb-2'>
+			<div class='pl-4 mb-4'>
 				<div class='text-white/30 text-sm'>Actions</div>
 				<a href="/">
 					<div class='grid grid-cols-[auto,1fr] items-center gap-4 mb-4'>
 						<div class='bg-white/30 w-10 h-10 rounded-full' />
-						<div class='py-2 border-b border-b-white/20 leading-tight'>
+						<div class='py-2 leading-tight'>
 							<div class='font-bold'>New Transfer</div>
 							<div class='text-white/50'>Send and Manage Tokens</div>
 						</div>
@@ -111,12 +123,10 @@ const LeftPanel = () => {
 				</a>
 			</div>
 
-			<div class='pl-4 mb-2'>
-				<div class='text-white/30 text-sm mb-3'>Support</div>
-				<div class='p-4 text-sm bg-white/5 border border-white/10 text-white/50'>
-					Join our discord channel to get support from our active community members and stay up-to-date with the latest news, events, and announcements.
-				</div>
-			</div>
+			<RecentTransfers />
+
+			<DiscordInvite />
+
 		</Navigation>
 	)
 }
@@ -186,7 +196,7 @@ const TransferStatus = ({ transaction }: { transaction: Signal<AsyncProperty<Tra
 		case 'pending':
 			return (
 				<div class='grid gap-2 grid-cols-[auto,1fr] items-center border border-white/50 px-4 py-3 bg-white/5'>
-						<svg width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" class="animate-spin"><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z" opacity=".2" /><path d="M7.25.75A.75.75 0 0 1 8 0a8 8 0 0 1 8 8 .75.75 0 0 1-1.5 0A6.5 6.5 0 0 0 8 1.5a.75.75 0 0 1-.75-.75z" /></g></svg>
+					<svg width="1em" height="1em" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" class="animate-spin"><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z" opacity=".2" /><path d="M7.25.75A.75.75 0 0 1 8 0a8 8 0 0 1 8 8 .75.75 0 0 1-1.5 0A6.5 6.5 0 0 0 8 1.5a.75.75 0 0 1-.75-.75z" /></g></svg>
 					<div>Confirming transaction in wallet...</div>
 				</div>
 			)

@@ -6,6 +6,7 @@ import { TransactionResponseQuery } from './TransactionResponse.js'
 import { useSignal } from '@preact/signals'
 import { TransactionReceiptQuery } from './TransactionReceipt.js'
 import { TransactionResponse } from '../../types.js'
+import { DiscordInvite } from '../DiscordInvite.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -85,12 +86,7 @@ const LeftPanel = () => {
 
 			<RecentTransfers />
 
-			<div class='pl-4 mb-4'>
-				<div class='text-white/30 text-sm mb-2'>Support</div>
-				<div class='p-4 text-sm bg-white/5 border border-white/10 text-white/50'>
-					Join our discord channel to get support from our active community members and stay up-to-date with the latest news, events, and announcements.
-				</div>
-			</div>
+			<DiscordInvite />
 
 		</Navigation>
 	)

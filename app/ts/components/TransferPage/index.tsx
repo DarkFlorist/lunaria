@@ -208,7 +208,7 @@ const TransferStatus = ({ transaction }: { transaction: Signal<AsyncProperty<Tra
 							<path d='M7.25.75A.75.75 0 0 1 8 0a8 8 0 0 1 8 8 .75.75 0 0 1-1.5 0A6.5 6.5 0 0 0 8 1.5a.75.75 0 0 1-.75-.75z' />
 						</g>
 					</svg>
-					<div>Confirming transaction in wallet...</div>
+					<div>Confirming transaction...</div>
 				</div>
 			)
 		case 'resolved':

@@ -54,7 +54,7 @@ const QueryRefected = ({ message }: { message: string }) => {
 }
 
 const QueryResolved = (props: { receipt: TransactionReceipt }) => {
-	if (props.receipt === null) return <div class='px-4 py-3 border border-red-500/50 text-red-500'>Unable to find transaction in chain!</div>
+	if (props.receipt === null) return <div class='px-4 py-3 border border-red-500/50 text-red-500'>Unable to find transaction on chain!</div>
 	const { effectiveGasPrice, gasUsed } = props.receipt
 
 	return (

@@ -99,7 +99,7 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 	return (
 		<div class='aspect-square bg-neutral-800 p-4 flex items-end relative group outline-none' tabIndex={1}>
 			<div class='relative'>
-				<img class='w-12 h-12 mb-2' src={`/img/${token.address}.svg`} />
+				<img class='w-12 h-12 mb-2' src={`/img/${token.address.toLowerCase()}.svg`} />
 				<div class='font-bold'>{token.name}</div>
 			</div>
 			<div class='absolute inset-0 hidden group-hover:block group-focus:block'>

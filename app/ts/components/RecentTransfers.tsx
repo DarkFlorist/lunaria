@@ -6,7 +6,7 @@ export const RecentTransfers = () => {
 
 	const sortedTxns = useComputed(() => recentTxns.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
 
-	if (recentTxns.value.length < 1) return null
+	if (recentTxns.value.length < 1) return <></>
 
 	return (
 		<div class='pl-4 mb-4'>

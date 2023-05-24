@@ -31,7 +31,7 @@ export const Router = ({ children }: { children: unknown | unknown[] }) => {
 		const routeChildrenOnly = children.filter(isRouteComponent)
 		for (const child of routeChildrenOnly) {
 			const pathMatch = matchPathToLocation(child.props.path, window.location.hash)
-			if (pathMatch === null) continue
+			if (pathMatch === undefined) continue
 			router.value = { activeRoute: child, params: pathMatch }
 		}
 	}
@@ -70,7 +70,7 @@ export function matchPathToLocation(pattern: string, location: string) {
 			const variableName = patternSegment.slice(1)
 			params[variableName] = locationSegment || undefined
 		} else if (patternSegment !== locationSegment) {
-			return null
+			return undefined
 		}
 	}
 

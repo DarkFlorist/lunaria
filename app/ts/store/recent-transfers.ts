@@ -10,7 +10,7 @@ type RecentTransaction = {
 const getSessionStorageCache = () => {
 	const valueFromStorage = sessionStorage.getItem(STORAGE_KEY_RECENTS);
 	return valueFromStorage ? JSON.parse(valueFromStorage) as RecentTransaction[] : [];
-};
+}
 
 const recentTxns = signal(getSessionStorageCache());
 
@@ -35,5 +35,4 @@ export const useRecentTransfers = () => {
 	}, [])
 
 	return { recentTxns, add }
-};
-
+}

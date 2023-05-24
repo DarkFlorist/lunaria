@@ -1,7 +1,7 @@
-import { useSignal, useSignalEffect } from "@preact/signals"
-import { AsyncProperty, useAsyncState } from "../library/preact-utilities.js"
-import { TransactionReceipt, TransactionResponse } from "../types.js"
-import { useProviders } from "./provider.js"
+import { useSignal, useSignalEffect } from '@preact/signals'
+import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { TransactionReceipt, TransactionResponse } from '../types.js'
+import { useProviders } from './provider.js'
 
 export function useTransactionResponse() {
 	const providers = useProviders()
@@ -22,7 +22,6 @@ export function useTransactionResponse() {
 	useSignalEffect(listenForQueryChanges)
 
 	return { transactionResponse, getTransactionResponse }
-
 }
 
 export function useTransactionReceipt() {
@@ -42,5 +41,4 @@ export function useTransactionReceipt() {
 	useSignalEffect(listenForQueryChanges)
 
 	return { transactionReceipt, getTransactionReceipt }
-
 }

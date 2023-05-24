@@ -1,5 +1,5 @@
-import { useComputed } from "@preact/signals"
-import { useRecentTransfers } from "../store/recent-transfers.js"
+import { useComputed } from '@preact/signals'
+import { useRecentTransfers } from '../store/recent-transfers.js'
 
 export const RecentTransfers = () => {
 	const { recentTxns } = useRecentTransfers()
@@ -13,7 +13,6 @@ export const RecentTransfers = () => {
 			<div class='text-white/30 text-sm mb-2'>Recent Transfers</div>
 			<div>
 				{sortedTxns.value.map(txn => {
-
 					const date = new Date(txn.date)
 					const dateTime = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
 					return (
@@ -22,8 +21,7 @@ export const RecentTransfers = () => {
 							<div class='text-sm text-white/50'>{dateTime}</div>
 						</a>
 					)
-				})
-				}
+				})}
 			</div>
 		</div>
 	)

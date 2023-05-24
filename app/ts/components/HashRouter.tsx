@@ -1,6 +1,6 @@
-import { signal, useComputed } from "@preact/signals";
-import { ComponentChildren, JSX } from "preact";
-import { useEffect } from "preact/hooks";
+import { signal, useComputed } from '@preact/signals'
+import { ComponentChildren, JSX } from 'preact'
+import { useEffect } from 'preact/hooks'
 
 type RouteProps = {
 	path: string
@@ -9,18 +9,19 @@ type RouteProps = {
 
 export const Route = ({ children }: RouteProps) => <>{children}</>
 
-type RouterModel = {
-	activeRoute: JSX.Element[] | JSX.Element
-	params: { [key: string]: string | undefined } | undefined
-} | {
-	activeRoute: undefined
-	params: undefined
-}
+type RouterModel =
+	| {
+			activeRoute: JSX.Element[] | JSX.Element
+			params: { [key: string]: string | undefined } | undefined
+	  }
+	| {
+			activeRoute: undefined
+			params: undefined
+	  }
 
 const router = signal<RouterModel>({ activeRoute: undefined, params: undefined })
 
 export const Router = ({ children }: { children: unknown | unknown[] }) => {
-
 	const getValidChildren = () => {
 		if (!Array.isArray(children)) {
 			router.value = { activeRoute: isRouteComponent(children) ? children : <></>, params: undefined }
@@ -57,21 +58,21 @@ function isRouteComponent(child: unknown): child is ReturnType<typeof Route> {
 }
 
 export function matchPathToLocation(pattern: string, location: string) {
-	const patternSegments: string[] = stripLeadingSlash(pattern).split('/');
-	const locationSegments: string[] = stripLeadingSlash(location).split('/');
+	const patternSegments: string[] = stripLeadingSlash(pattern).split('/')
+	const locationSegments: string[] = stripLeadingSlash(location).split('/')
 
-	const params: { [key: string]: string | undefined } = {};
+	const params: { [key: string]: string | undefined } = {}
 
 	for (const [index, patternSegment] of patternSegments.entries()) {
-		const locationSegment = locationSegments[index];
+		const locationSegment = locationSegments[index]
 
 		if (patternSegment.startsWith(':')) {
-			const variableName = patternSegment.slice(1);
-			params[variableName] = locationSegment || undefined;
+			const variableName = patternSegment.slice(1)
+			params[variableName] = locationSegment || undefined
 		} else if (patternSegment !== locationSegment) {
-			return null;
+			return null
 		}
 	}
 
-	return params;
+	return params
 }

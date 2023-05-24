@@ -8,12 +8,12 @@ type Panel = {
 }
 
 type Panels = {
-	nav: Panel | null
-	main: Panel | null
+	nav: Panel | undefined
+	main: Panel | undefined
 }
 
 const panelsObserver = signal<IntersectionObserver | undefined>(undefined)
-const panels = signal<Panels>({ nav: null, main: null })
+const panels = signal<Panels>({ nav: undefined, main: undefined })
 
 export const Root = ({ children }: { children: ComponentChildren }) => {
 	const rootRef = useRef<HTMLDivElement>(null)
@@ -81,9 +81,9 @@ type HeaderNavProps = {
 }
 
 export const HeaderNav = (props: HeaderNavProps) => {
-	const LeftIcon = props.iconLeft || (() => null)
-	const RightIcon = props.iconRight || (() => null)
-	const NavText = (() => <>{props.text}</>) || (() => null)
+	const LeftIcon = props.iconLeft || (() => <></>)
+	const RightIcon = props.iconRight || (() => <></>)
+	const NavText = (() => <>{props.text}</>) || (() => <></>)
 
 	return (
 		<button class={`px-4 h-12 flex items-center gap-2 transition-opacity duration-500 ${props.show ? `opacity-1` : `opacity-0 pointer-events-none`}`} onClick={props.onClick}>

@@ -1,6 +1,6 @@
-import { signal, useSignalEffect } from '@preact/signals';
-import { useEffect } from 'preact/hooks';
-import { STORAGE_KEY_RECENTS } from '../library/constants.js';
+import { signal, useSignalEffect } from '@preact/signals'
+import { useEffect } from 'preact/hooks'
+import { STORAGE_KEY_RECENTS } from '../library/constants.js'
 
 type RecentTransaction = {
 	hash: string
@@ -8,15 +8,15 @@ type RecentTransaction = {
 }
 
 const getSessionStorageCache = () => {
-	const valueFromStorage = sessionStorage.getItem(STORAGE_KEY_RECENTS);
-	return valueFromStorage ? JSON.parse(valueFromStorage) as RecentTransaction[] : [];
+	const valueFromStorage = sessionStorage.getItem(STORAGE_KEY_RECENTS)
+	return valueFromStorage ? (JSON.parse(valueFromStorage) as RecentTransaction[]) : []
 }
 
-const recentTxns = signal(getSessionStorageCache());
+const recentTxns = signal(getSessionStorageCache())
 
 export const useRecentTransfers = () => {
 	const syncCacheChange = (event: StorageEvent) => {
-		const newValue =	event.newValue !== null ? JSON.parse(event.newValue) as RecentTransaction[] : []
+		const newValue = event.newValue !== null ? (JSON.parse(event.newValue) as RecentTransaction[]) : []
 		recentTxns.value = newValue
 	}
 

@@ -10,7 +10,7 @@ type TransactionQueryProps = {
 export const TransactionResponseQuery = (props: TransactionQueryProps) => {
 	const { transactionResponse: txn, getTransactionResponse } = useTransactionResponse()
 
-useEffect(() => {
+	useEffect(() => {
 		getTransactionResponse(props.transactionHash)
 	}, [props.transactionHash])
 
@@ -41,7 +41,8 @@ const QueryPending = () => {
 	return (
 		<div class='grid gap-2 grid-cols-[auto,1fr] items-center border border-white/20 px-4 py-3 bg-white/5'>
 			<svg width='1em' height='1em' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg' fill='none' class='animate-spin'>
-				<g fill='currentColor' fill-rule='evenodd' clip-rule='evenodd'>s
+				<g fill='currentColor' fill-rule='evenodd' clip-rule='evenodd'>
+					s
 					<path d='M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z' opacity='.2' />
 					<path d='M7.25.75A.75.75 0 0 1 8 0a8 8 0 0 1 8 8 .75.75 0 0 1-1.5 0A6.5 6.5 0 0 0 8 1.5a.75.75 0 0 1-.75-.75z' />
 				</g>

@@ -51,7 +51,7 @@ const handleAccountChanged = ([newAddress]: string[]) => {
 	removeAccountChangedListener()
 	if (newAddress === undefined) {
 		address.value = { state: 'inactive' }
-		return;
+		return
 	}
 	address.value = { ...address.value, value: newAddress }
 }

@@ -8,8 +8,8 @@ import { useRecentTransfers } from './recent-transfers.js'
 import { TokenMeta } from './tokens.js'
 
 type TransferData = {
-	recipientAddress: string,
-	amount: string,
+	recipientAddress: string
+	amount: string
 	token?: TokenMeta
 }
 
@@ -43,7 +43,9 @@ export function useTransfer() {
 		})
 	}
 
-	const clearData = () => { data.value = transferDataDefaults }
+	const clearData = () => {
+		data.value = transferDataDefaults
+	}
 
 	const listenForQueryChanges = () => {
 		// do not reset shared state for other instances of this hooks

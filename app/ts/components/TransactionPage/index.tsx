@@ -44,7 +44,7 @@ const MainPanel = () => {
 
 			<div class='px-4'>
 				<div class='grid gap-2'>
-					<TransactionResponseQuery transactionHash={router.value.params.transaction_hash} onSuccess={response => transactionResponse.value = response} />
+					<TransactionResponseQuery transactionHash={router.value.params.transaction_hash} onSuccess={response => (transactionResponse.value = response)} />
 					<TransactionReceiptQuery transactionHash={router.value.params.transaction_hash} transactionResponse={transactionResponse.value} />
 				</div>
 			</div>
@@ -73,7 +73,7 @@ const LeftPanel = () => {
 
 			<div class='pl-4 mb-4'>
 				<div class='text-white/30 text-sm'>Actions</div>
-				<a href="/">
+				<a href='/'>
 					<div class='grid grid-cols-[auto,1fr] items-center gap-4 mb-4'>
 						<div class='bg-white/30 w-10 h-10 rounded-full' />
 						<div class='py-2 leading-tight'>
@@ -87,12 +87,18 @@ const LeftPanel = () => {
 			<RecentTransfers />
 
 			<DiscordInvite />
-
 		</Navigation>
 	)
 }
 
-const MenuIcon = () => <svg width='1em' height='1em' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'><path fill='currentColor' d='M0 636.362h448v64H0zm0 160h448v64H0zm0 160h448v64H0z' transform='translate(0 -604.362)' /></svg>
+const MenuIcon = () => (
+	<svg width='1em' height='1em' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'>
+		<path fill='currentColor' d='M0 636.362h448v64H0zm0 160h448v64H0zm0 160h448v64H0z' transform='translate(0 -604.362)' />
+	</svg>
+)
 
-const CloseIcon = () => <svg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M11.444.067a.895.895 0 0 0-.984.206l-4.465 4.47L1.529.273A.895.895 0 1 0 .262 1.541l4.466 4.47-4.466 4.47a.897.897 0 0 0 1.266 1.268l4.467-4.471 4.466 4.47a.896.896 0 0 0 1.267-1.267L7.26 6.01l4.466-4.47a.899.899 0 0 0-.284-1.474Z' fill='currentColor' /></svg>
-
+const CloseIcon = () => (
+	<svg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'>
+		<path d='M11.444.067a.895.895 0 0 0-.984.206l-4.465 4.47L1.529.273A.895.895 0 1 0 .262 1.541l4.466 4.47-4.466 4.47a.897.897 0 0 0 1.266 1.268l4.467-4.471 4.466 4.47a.896.896 0 0 0 1.267-1.267L7.26 6.01l4.466-4.47a.899.899 0 0 0-.284-1.474Z' fill='currentColor' />
+	</svg>
+)

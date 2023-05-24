@@ -1,6 +1,6 @@
-import { ComponentChildren, ComponentType } from "preact"
-import { useEffect, useRef } from "preact/hooks"
-import { signal } from "@preact/signals"
+import { ComponentChildren, ComponentType } from 'preact'
+import { useEffect, useRef } from 'preact/hooks'
+import { signal } from '@preact/signals'
 
 type Panel = {
 	target: Element
@@ -18,13 +18,13 @@ const panels = signal<Panels>({ nav: null, main: null })
 export const Root = ({ children }: { children: ComponentChildren }) => {
 	const rootRef = useRef<HTMLDivElement>(null)
 
-	const onIntersect: IntersectionObserverCallback = (entries) => {
-		entries.map(entry => panels.value = { ...panels.value, [entry.target.id]: entry })
+	const onIntersect: IntersectionObserverCallback = entries => {
+		entries.map(entry => (panels.value = { ...panels.value, [entry.target.id]: entry }))
 	}
 
 	useEffect(() => {
 		const options = { root: rootRef.current, rootMargin: '0px', threshold: 0.9 }
-		panelsObserver.value = new IntersectionObserver(onIntersect, options);
+		panelsObserver.value = new IntersectionObserver(onIntersect, options)
 		return () => panelsObserver.value?.disconnect()
 	}, [rootRef.current])
 
@@ -69,15 +69,11 @@ export const Main = ({ children }: { children: ComponentChildren }) => {
 }
 
 export const Header = ({ children }: { children: ComponentChildren }) => {
-	return (
-		<div class='sticky top-0 bg-black/50 lg:hidden'>
-			{children}
-		</div>
-	)
+	return <div class='sticky top-0 bg-black/50 lg:hidden'>{children}</div>
 }
 
 type HeaderNavProps = {
-	text?: string,
+	text?: string
 	onClick: () => void
 	show?: boolean
 	iconLeft?: ComponentType
@@ -90,12 +86,14 @@ export const HeaderNav = (props: HeaderNavProps) => {
 	const NavText = (() => <>{props.text}</>) || (() => null)
 
 	return (
-		<button class={`px-4 h-12 flex items-center gap-2 transition-opacity duration-500 ${props.show ? `opacity-1` : `opacity-0 pointer-events-none`}`} onClick={props.onClick}><LeftIcon /><NavText /><RightIcon /></button>
+		<button class={`px-4 h-12 flex items-center gap-2 transition-opacity duration-500 ${props.show ? `opacity-1` : `opacity-0 pointer-events-none`}`} onClick={props.onClick}>
+			<LeftIcon />
+			<NavText />
+			<RightIcon />
+		</button>
 	)
 }
 
 export function usePanels() {
 	return panels.value
 }
-
-

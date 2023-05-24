@@ -1,12 +1,12 @@
-import { ComponentChildren } from "preact";
-import { useEffect } from "preact/hooks";
+import { ComponentChildren } from 'preact'
+import { useEffect } from 'preact/hooks'
 
 type Props = {
 	children: ComponentChildren
 }
 
 export const SplashScreen = ({ children }: Props) => {
-	executeSplashExit();
+	executeSplashExit()
 	return <>{children}</>
 }
 

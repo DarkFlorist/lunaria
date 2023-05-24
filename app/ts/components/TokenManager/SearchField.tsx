@@ -20,7 +20,7 @@ export const SearchField = ({ value }: Props) => {
 
 	return (
 		<div class='flex items-center bg-black border border-white/50 group focus-within:border-white'>
-			<input ref={inputRef} class='px-4 h-12 w-full bg-black outline-none placeholder:text-white/30' placeholder='Search Tokens' value={value.value} onInput={event => value.value = event.currentTarget.value} />
+			<input ref={inputRef} class='px-4 h-12 w-full bg-black outline-none placeholder:text-white/30' placeholder='Search Tokens' value={value.value} onInput={event => (value.value = event.currentTarget.value)} />
 			{value.value !== '' && <ClearButton onClick={handleClear} />}
 		</div>
 	)

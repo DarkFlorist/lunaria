@@ -26,7 +26,7 @@ export const AddressField = (props: Props) => {
 		const inputField = inputRef.current
 		const value = e.currentTarget.value
 
-		if (inputField === null) return;
+		if (inputField === null) return
 
 		// clear errors and update field value
 		inputField.setCustomValidity('')
@@ -48,8 +48,8 @@ export const AddressField = (props: Props) => {
 				{props.value !== '' && (
 					<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm disabled:opacity-50' onClick={handleClear} disabled={props.disabled}>
 						<Icon.Xmark />
-					</button>)}
-
+					</button>
+				)}
 			</div>
 		</div>
 	)
@@ -57,5 +57,5 @@ export const AddressField = (props: Props) => {
 
 const baseClasses = {
 	root: 'border bg-transparent focus-within:bg-white/5',
-	field: 'h-6 bg-transparent outline-none placeholder:text-white/20' 
+	field: 'h-6 bg-transparent outline-none placeholder:text-white/20',
 }

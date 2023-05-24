@@ -1,8 +1,8 @@
-import { useSignal } from "@preact/signals"
-import { useRef } from "preact/hooks"
-import { JSX } from "preact/jsx-runtime"
-import { removeNonStringsAndTrim } from "../library/utilities.js"
-import * as Icon from "./Icon/index.js"
+import { useSignal } from '@preact/signals'
+import { useRef } from 'preact/hooks'
+import { JSX } from 'preact/jsx-runtime'
+import { removeNonStringsAndTrim } from '../library/utilities.js'
+import * as Icon from './Icon/index.js'
 
 type Props = {
 	label: string
@@ -48,8 +48,8 @@ export const AmountField = (props: Props) => {
 				{props.value !== '' && (
 					<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm disabled:opacity-50' onClick={handleClear} disabled={props.disabled}>
 						<Icon.Xmark />
-					</button>)}
-
+					</button>
+				)}
 			</div>
 		</div>
 	)
@@ -57,5 +57,5 @@ export const AmountField = (props: Props) => {
 
 const baseClasses = {
 	root: 'border bg-transparent focus-within:bg-white/5',
-	field: 'h-6 bg-transparent outline-none placeholder:text-white/20' 
+	field: 'h-6 bg-transparent outline-none placeholder:text-white/20',
 }

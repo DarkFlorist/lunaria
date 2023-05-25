@@ -3,6 +3,7 @@ import { ComponentChild, ComponentChildren } from 'preact'
 import { useNetwork } from '../../store/network.js'
 import { TokenMeta, useAccountTokens } from '../../store/tokens.js'
 import { SearchField } from './SearchField.js'
+import { TokenBalance } from './TokenBalance.js'
 
 export type SelectAssetModalProps = {
 	show: boolean
@@ -101,6 +102,7 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 			<div class='relative'>
 				<img class='w-12 h-12 mb-2' src={`/img/${token.address.toLowerCase()}.svg`} />
 				<div class='font-bold'>{token.name}</div>
+				<TokenBalance token={token} />
 			</div>
 			<div class='absolute inset-0 hidden group-hover:block group-focus:block'>
 				{removal.value ? (

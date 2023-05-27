@@ -8,6 +8,7 @@ export type SelectAssetModalProps = {
 	show: boolean
 	onClose: () => void
 	onSelect: (token?: TokenMeta) => void
+	onAddToken: () => void
 }
 
 export const TokenManager = (props: SelectAssetModalProps) => {
@@ -21,6 +22,11 @@ export const TokenManager = (props: SelectAssetModalProps) => {
 	const tokenList = useComputed(() => tokens.value.filter(tokensInChain).filter(tokensMatchingQuery))
 
 	if (props.show === false) return <></>
+
+	const handleAddToken = () => {
+		props.onClose()
+		props.onAddToken()
+	}
 
 	return (
 		<div class='fixed inset-0 overflow-y-scroll scrollbar-hidden'>
@@ -36,7 +42,7 @@ export const TokenManager = (props: SelectAssetModalProps) => {
 					{tokenList.value.map(token => (
 						<TokenCard token={token} onSelect={props.onSelect} onClose={() => props.onClose()} />
 					))}
-					{query.value === '' && <AddTokenCard />}
+					{query.value === '' && <AddTokenCard onClick={handleAddToken} />}
 				</TokenGrid>
 			</Dialog>
 
@@ -95,6 +101,12 @@ export type TokenCardProps = {
 
 const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 	const removal = useSignal<boolean>(false)
+	const { removeToken } = useAccountTokens()
+
+	const handleRemoveToken = (tokenAddress: string) => {
+		removeToken(tokenAddress)
+		removal.value = false
+	}
 
 	return (
 		<div class='aspect-square bg-neutral-800 p-4 flex items-end relative group outline-none' tabIndex={1}>
@@ -108,7 +120,7 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 						<div class='absolute inset-0 w-full flex items-center justify-center bg-black/80 border border-white/50'>
 							<div class='text-center p-4'>
 								<div class='mb-2'>This will remove {token.name} from your token list, continue?</div>
-								<button class='border border-white/50 px-3 py-1' onClick={() => (removal.value = false)}>
+								<button class='border border-white/50 px-3 py-1' onClick={() => handleRemoveToken(token.address)}>
 									Yes
 								</button>
 							</div>
@@ -136,9 +148,9 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 	)
 }
 
-const AddTokenCard = () => {
+const AddTokenCard = ({ onClick }: { onClick: () => void }) => {
 	return (
-		<div class='aspect-square bg-neutral-900 p-4 flex items-center justify-center'>
+		<div class='aspect-square bg-neutral-900 p-4 flex items-center justify-center' onClick={onClick}>
 			<div class='grid place-items-center'>
 				<div class='bg-black/20 w-20 h-20 rounded-full mb-2 flex items-center justify-center'>
 					<svg class='text-white/50' width='3em' height='3em' viewBox='0 0 15 15' fill='none' xmlns='http://www.w3.org/2000/svg'>

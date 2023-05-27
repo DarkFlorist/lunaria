@@ -4,22 +4,23 @@ import { Signal, useComputed } from '@preact/signals'
 import { TokenMeta, useAccountTokens, useTokenQuery } from '../store/tokens.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
 
-export const QueryToken = () => {
+export const QueryToken = ({ onSave }: { onSave: () => void }) => {
 	const { query, tokenAddress } = useTokenQuery()
 
 	return (
 		<div>
 			<TokenAddressField address={tokenAddress} />
-			<Helper query={query} />
+			<Helper query={query} onTokenSave={onSave} />
 		</div>
 	)
 }
 
 type HelperProps = {
 	query: Signal<AsyncProperty<TokenMeta>>
+	onTokenSave: () => void
 }
 
-const Helper = ({ query }: HelperProps) => {
+const Helper = ({ query, onTokenSave }: HelperProps) => {
 	switch (query.value.state) {
 		case 'inactive':
 			return <></>
@@ -50,7 +51,7 @@ const Helper = ({ query }: HelperProps) => {
 		case 'resolved':
 			return (
 				<Boxed>
-					<AddTokenToAssets token={query.value.value} />
+					<SaveToken token={query.value.value} onSuccess={onTokenSave} />
 				</Boxed>
 			)
 	}
@@ -65,6 +66,7 @@ type TokenAddressFieldProps = {
 }
 
 const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
+
 	const handleChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
 		const target = e.currentTarget
 		target.checkValidity()
@@ -73,27 +75,37 @@ const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
 
 	return (
 		<div>
-			<input pattern='^0x[0-9A-Fa-f]{40}$' placeholder='Enter token address' value={address.value} onInput={handleChange} class='peer border w-full h-10 px-2 invalid:text-red-600 disabled:text-black/50 focus:outline-none' />
+			<input pattern='^0x[0-9A-Fa-f]{40}$' placeholder='Enter token address' value={address.value} onInput={handleChange} class='peer border border-white/50 w-full h-10 px-2 placeholder:text-white/30 invalid:text-red-600 disabled:text-white/50 focus:outline-none bg-transparent' autoFocus={true} />
 			<div class='hidden peer-invalid:block text-sm text-red-600'>Invalid address</div>
 		</div>
 	)
 }
 
-const AddTokenToAssets = ({ token }: { token: TokenMeta }) => {
+type SaveTokenProps = {
+	token: TokenMeta
+	onSuccess: () => void
+}
+
+const SaveToken = ({ token, onSuccess }: SaveTokenProps) => {
 	const { tokens, addToken } = useAccountTokens()
 
 	const accountTokenExists = useComputed(() => Boolean(tokens.value.find(userToken => userToken.address === token.address)))
 
+	const handleTokenSave = () => {
+		addToken(token)
+		onSuccess()
+	}
+
 	return (
 		<div class='flex gap-4 items-center'>
 			<div>
-				<span class='font-bold'>{token.name}</span> <span class='text-black/50'>({token.symbol})</span>
+				<span class='font-bold'>{token.name}</span> <span class='text-white/50'>({token.symbol})</span>
 			</div>
 			{accountTokenExists.value ? (
-				<div class='text-black/50'>Saved</div>
+				<div class='text-white/50'>Saved</div>
 			) : (
-				<button onClick={() => addToken(token)} class='border px-4 py-2'>
-					+ Add To Assets
+				<button onClick={handleTokenSave} class='border px-4 py-2'>
+					+ Save
 				</button>
 			)}
 		</div>

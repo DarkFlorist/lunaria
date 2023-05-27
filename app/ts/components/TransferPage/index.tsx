@@ -12,7 +12,7 @@ import { AsyncProperty } from '../../library/preact-utilities.js'
 import { TransactionResponse } from '../../types.js'
 import { RecentTransfers } from '../RecentTransfers.js'
 import { DiscordInvite } from '../DiscordInvite.js'
-import { AddTokenDialog } from '../DefaultLayout/AddTokenModal.js'
+import { AddTokenDialog } from './AddTokenDialog.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 

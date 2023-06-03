@@ -34,11 +34,11 @@ const DataFromResponse = ({ response }: { response: Signal<AsyncProperty<Transac
 		case 'rejected':
 			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
 		case 'resolved':
-			console.log(response.value.value)
 			return (
 				<>
 					<Info label='Hash' value={response.value.value.hash} allowCopy />
 					<Info label='From' value={response.value.value.from} allowCopy />
+					<AccountBalance response={response.value.value} />
 				</>
 			)
 	}
@@ -53,23 +53,21 @@ const DataFromReceipt = ({ receipt }: { receipt: Signal<AsyncProperty<Transactio
 		case 'rejected':
 			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
 		case 'resolved':
-			console.log('receipt block', receipt.value.value.blockNumber)
 			const transactionFee = calculateGasFee(receipt.value.value.effectiveGasPrice, receipt.value.value.gasUsed)
 			return (
 				<>
 					<Info label='Transaction Fee' value={`${transactionFee} ETH`} />
-					<AccountBalance receipt={receipt.value.value} />
 				</>
 			)
 	}
 }
 
-const AccountBalance = ({ receipt }: { receipt: TransactionReceipt }) => {
+const AccountBalance = ({ response }: { response: TransactionResponse }) => {
 	const providers = useProviders()
 	const { value: asyncBalance, waitFor } = useAsyncState<BigNumber>()
 
 	const getBalance = () => {
-		const { from, blockNumber } = receipt
+		const { from, blockNumber } = response
 		waitFor(async () => {
 			const provider = providers.getbrowserProvider()
 			return await provider.getBalance(from, blockNumber)
@@ -78,7 +76,7 @@ const AccountBalance = ({ receipt }: { receipt: TransactionReceipt }) => {
 
 	useEffect(() => {
 		getBalance()
-	}, [receipt.blockNumber])
+	}, [response.blockNumber])
 
 	switch (asyncBalance.value.state) {
 		case 'inactive':
@@ -89,7 +87,7 @@ const AccountBalance = ({ receipt }: { receipt: TransactionReceipt }) => {
 			return <InfoError displayText='Failed to load information' message={asyncBalance.value.error.message} />
 		case 'resolved':
 			const balance = ethers.utils.formatEther(asyncBalance.value.value)
-			return <Info label='Balance' value={balance} suffix=' ETH' />
+			return <Info label='Balance Before Transaction' value={balance} suffix=' ETH' />
 	}
 }
 

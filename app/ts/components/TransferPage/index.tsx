@@ -34,7 +34,7 @@ const MainPanel = () => {
 	const { transaction, data, send, clearData } = useTransfer()
 
 	const handleTokenSelect = (token?: TokenMeta) => {
-		data.value = { ...data.value, token }
+		data.value = { ...data.value, token, amount: '' }
 		tokenManager.value = undefined
 	}
 
@@ -80,7 +80,7 @@ const MainPanel = () => {
 					<div class='grid gap-4'>
 						<div class='grid md:grid-cols-2 gap-4'>
 							<TokenField token={data.value.token} onClick={() => (tokenManager.value = 'select')} disabled={isFormSubmitting.value} />
-							<AmountField label='Amount' placeholder='1.00' value={data.value.amount} onInput={value => (data.value = { ...data.value, amount: value })} onClear={() => (data.value = { ...data.value, amount: '' })} disabled={isFormSubmitting.value} />
+							<AmountField label='Amount' placeholder='1.00' value={data.value.amount} onInput={value => (data.value = { ...data.value, amount: value })} onClear={() => (data.value = { ...data.value, amount: '' })} disabled={isFormSubmitting.value} token={data.value.token} />
 						</div>
 						<AddressField label='Address' placeholder='0x123...789' value={data.value.recipientAddress} onInput={handleAddressChange} onClear={handleAddressChange} disabled={isFormSubmitting.value} />
 						<TransferStatus transaction={transaction} />
@@ -89,8 +89,8 @@ const MainPanel = () => {
 					</div>
 				</form>
 			</div>
-			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={handleTokenSelect} onAddToken={() => (tokenManager.value = 'add') } />
-			<AddTokenDialog show={tokenManager}  />
+			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={handleTokenSelect} onAddToken={() => (tokenManager.value = 'add')} />
+			<AddTokenDialog show={tokenManager} />
 		</Main>
 	)
 }

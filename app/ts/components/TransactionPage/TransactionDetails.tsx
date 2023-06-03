@@ -1,13 +1,12 @@
 import { Signal, useSignalEffect } from '@preact/signals'
 import { BigNumber, ethers } from 'ethers'
 import { useEffect } from 'preact/hooks'
-import { AsyncText } from '../AsyncText.js'
 import { useRouter } from '../HashRouter.js'
 import { TransactionReceipt, TransactionResponse } from '../../types.js'
 import { AsyncProperty, useAsyncState } from '../../library/preact-utilities.js'
 import { useProviders } from '../../store/provider.js'
 import { calculateGasFee } from '../../library/utilities.js'
-import { CopyButton } from '../CopyButton.js'
+import { Info, InfoError, InfoPending } from './Info.js'
 
 export const TransactionDetails = () => {
 	const router = useRouter<{ transaction_hash: string }>()
@@ -28,13 +27,14 @@ const DataFromResponse = ({ response }: { response: Signal<AsyncProperty<Transac
 		case 'pending':
 			return (
 				<>
-					<InfoSkeleton />
-					<InfoSkeleton />
+					<InfoPending />
+					<InfoPending />
 				</>
 			)
 		case 'rejected':
-			return <div>error</div>
+			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
 		case 'resolved':
+			console.log(response.value.value)
 			return (
 				<>
 					<Info label='Hash' value={response.value.value.hash} allowCopy />
@@ -49,9 +49,9 @@ const DataFromReceipt = ({ receipt }: { receipt: Signal<AsyncProperty<Transactio
 		case 'inactive':
 			return <></>
 		case 'pending':
-			return <InfoSkeleton />
+			return <InfoPending />
 		case 'rejected':
-			return <div>error</div>
+			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
 		case 'resolved':
 			console.log('receipt block', receipt.value.value.blockNumber)
 			const transactionFee = calculateGasFee(receipt.value.value.effectiveGasPrice, receipt.value.value.gasUsed)
@@ -66,10 +66,9 @@ const DataFromReceipt = ({ receipt }: { receipt: Signal<AsyncProperty<Transactio
 
 const AccountBalance = ({ receipt }: { receipt: TransactionReceipt }) => {
 	const providers = useProviders()
-	const { value, waitFor } = useAsyncState<BigNumber>()
+	const { value: asyncBalance, waitFor } = useAsyncState<BigNumber>()
 
 	const getBalance = () => {
-		console.log('fetching balance...')
 		const { from, blockNumber } = receipt
 		waitFor(async () => {
 			const provider = providers.getbrowserProvider()
@@ -81,47 +80,17 @@ const AccountBalance = ({ receipt }: { receipt: TransactionReceipt }) => {
 		getBalance()
 	}, [receipt.blockNumber])
 
-	switch (value.value.state) {
+	switch (asyncBalance.value.state) {
 		case 'inactive':
 			return <></>
 		case 'pending':
-			return <InfoSkeleton />
+			return <InfoPending />
 		case 'rejected':
-			return <div>Error</div>
+			return <InfoError displayText='Failed to load information' message={asyncBalance.value.error.message} />
 		case 'resolved':
-			const balance = ethers.utils.formatEther(value.value.value)
+			const balance = ethers.utils.formatEther(asyncBalance.value.value)
 			return <Info label='Balance' value={balance} suffix=' ETH' />
 	}
-}
-
-type InfoProps = {
-	label: string
-	value: string
-	prefix?: string
-	suffix?: string
-	allowCopy?: boolean
-}
-
-const Info = (props: InfoProps) => {
-	const { label, value, prefix = '', suffix = '', allowCopy } = props
-	return (
-		<div class='grid grid-cols-[1fr,auto] items-center px-4 py-2 border border-white/20 min-w-0'>
-			<div>
-				<div class='text-sm text-white/50'>{label}</div>
-				<div class='overflow-hidden text-ellipsis whitespace-nowrap'>{`${prefix}${value}${suffix}`}</div>
-			</div>
-			{allowCopy ? <CopyButton value={value} label='Copy' /> : <></>}
-		</div>
-	)
-}
-
-const InfoSkeleton = () => {
-	return (
-		<div class='grid px-4 py-2 border border-white/20 min-w-0'>
-			<AsyncText class='text-sm' placeholderLength={8} />
-			<AsyncText placeholderLength={40} />
-		</div>
-	)
 }
 
 function useTransaction(transactionHash: string) {
@@ -132,7 +101,10 @@ function useTransaction(transactionHash: string) {
 	const getTransactionResponse = (transactionHash: string) => {
 		waitForResponse(async () => {
 			const provider = providers.getbrowserProvider()
-			return await provider.getTransaction(transactionHash)
+			const result = await provider.getTransaction(transactionHash)
+			// TransactionResult can actually be null?
+			if (result === null) throw new Error('Transaction was not found in chain!')
+			return result
 		})
 	}
 

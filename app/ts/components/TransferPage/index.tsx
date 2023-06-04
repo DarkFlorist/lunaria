@@ -13,6 +13,7 @@ import { TransactionResponse } from '../../types.js'
 import { RecentTransfers } from '../RecentTransfers.js'
 import { DiscordInvite } from '../DiscordInvite.js'
 import { AddTokenDialog } from './AddTokenDialog.js'
+import { TransferValidation } from './Validation.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -83,6 +84,7 @@ const MainPanel = () => {
 						</div>
 						<AddressField label='Address' placeholder='0x123...789' value={data.value.recipientAddress} onInput={handleAddressChange} onClear={handleAddressChange} disabled={isFormSubmitting.value} />
 						<TransferStatus transaction={transaction} />
+						<TransferValidation data={data} />
 						<SubmitButton disabled={isFormSubmitting.value} />
 					</div>
 				</form>

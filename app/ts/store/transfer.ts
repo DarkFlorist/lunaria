@@ -7,7 +7,7 @@ import { useProviders } from './provider.js'
 import { useRecentTransfers } from './recent-transfers.js'
 import { TokenMeta } from './tokens.js'
 
-type TransferData = {
+export type TransferData = {
 	recipientAddress: string
 	amount: string
 	token?: TokenMeta

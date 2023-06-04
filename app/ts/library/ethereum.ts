@@ -38,13 +38,13 @@ export function isTransferTransaction(txResponse: TransactionResponse): txRespon
 
 export function getTransferTokenValue(transactionReceipt: TransactionReceipt) {
 	const erc20Interface = new ethers.utils.Interface(ERC20ABI)
-	const transferLog = transactionReceipt.logs.find(isTransferLog)
+	const transferLog = transactionReceipt.logs.find(isTokenTransferLog)
 	if (transferLog === undefined) return undefined
 	const logArgs = erc20Interface.parseLog(transferLog).args
 	return isTransferResult(logArgs) ? logArgs.value : undefined
 }
 
-export function isTransferLog(log: ethers.providers.Log) {
+export function isTokenTransferLog(log: ethers.providers.Log) {
 	const [topic] = log.topics
 	const transferTopic = ethers.utils.id('Transfer(address,address,uint256)')
 	return topic === transferTopic

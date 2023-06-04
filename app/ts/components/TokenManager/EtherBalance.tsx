@@ -6,6 +6,7 @@ import { useAccount } from '../../store/account.js'
 import { useNetwork } from '../../store/network.js'
 import { useProviders } from '../../store/provider.js'
 import { AsyncText } from '../AsyncText.js'
+import * as Icon from '../Icon/index.js'
 
 export const EtherBalance = () => {
 	const { network } = useNetwork()
@@ -31,8 +32,7 @@ export const EtherBalance = () => {
 		case 'inactive':
 			return <></>
 		case 'rejected':
-		console.log(query.value.error.message)
-			return <></>
+			return <div class='text-white/50' title={query.value.error.message}><Icon.Info /></div>
 		case 'pending':
 			return (
 				<div class='text-white/50'>

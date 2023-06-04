@@ -1,12 +1,8 @@
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
 import { RecentTransfers } from '../RecentTransfers.js'
-import { useRouter } from '../HashRouter.js'
-import { TransactionResponseQuery } from './TransactionResponse.js'
-import { useSignal } from '@preact/signals'
-import { TransactionReceiptQuery } from './TransactionReceipt.js'
-import { TransactionResponse } from '../../types.js'
 import { DiscordInvite } from '../DiscordInvite.js'
+import { TransactionDetails } from './TransactionDetails.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -23,8 +19,6 @@ export const TransactionPage = () => {
 
 const MainPanel = () => {
 	const { nav, main } = usePanels()
-	const router = useRouter<{ transaction_hash: string }>()
-	const transactionResponse = useSignal<TransactionResponse | undefined>(undefined)
 
 	return (
 		<Main>
@@ -43,10 +37,7 @@ const MainPanel = () => {
 			</div>
 
 			<div class='px-4'>
-				<div class='grid gap-2'>
-					<TransactionResponseQuery transactionHash={router.value.params.transaction_hash} onSuccess={response => (transactionResponse.value = response)} />
-					<TransactionReceiptQuery transactionHash={router.value.params.transaction_hash} transactionResponse={transactionResponse.value} />
-				</div>
+				<TransactionDetails />
 			</div>
 		</Main>
 	)

@@ -7,7 +7,7 @@ https://lunaria.dark.florist/
 For a more complete workflow on managing your assets, checkout these projects!
 
 - [TheInterceptor](https://github.com/DarkFlorist/TheInterceptor)
-- [Boquet](https://github.com/DarkFlorist/bouquet)
+- [Bouquet](https://github.com/DarkFlorist/bouquet)
 
 ## Commands
 

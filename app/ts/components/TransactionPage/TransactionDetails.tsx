@@ -120,7 +120,6 @@ function useTransaction(transactionHash: string) {
 
 	// reset async states
 	useEffect(() => {
-		resetResponse()
 		resetReceipt()
 		getTransactionResponse(transactionHash)
 	}, [transactionHash])

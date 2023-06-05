@@ -46,7 +46,7 @@ export const AmountField = (props: Props) => {
 
 	const isCalculatingMax = useComputed(() => tokenBalance.value.state === 'pending')
 
-	const handleMax = () => {
+	const setTokenBalanceAsAmount = () => {
 		if (props.token === undefined) return
 		if (address.value.state !== 'resolved') return
 		getTokenBalance(address.value.value, props.token.address)
@@ -68,7 +68,7 @@ export const AmountField = (props: Props) => {
 					<input ref={inputRef} placeholder={props.placeholder} inputMode='numeric' pattern='^[\d, ]*\.?\d*$' class={baseClasses.field} type='text' value={props.value} onInput={handleInput} disabled={props.disabled || isCalculatingMax.value} required />
 				</div>
 				<ClearButton show={props.value !== ''} onClick={handleClear} disabled={props.disabled} />
-				<MaxButton show={props.token !== undefined && address.value.state === 'resolved' && props.value === ''} isBusy={isCalculatingMax.value} onClick={handleMax} />
+				<MaxButton show={props.token !== undefined && address.value.state === 'resolved' && props.value === ''} isBusy={isCalculatingMax.value} onClick={setTokenBalanceAsAmount} />
 			</div>
 		</div>
 	)

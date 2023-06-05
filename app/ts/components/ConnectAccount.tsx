@@ -2,7 +2,7 @@ import { useEffect } from 'preact/hooks'
 import { useAccount } from '../store/account.js'
 import { useNetwork } from '../store/network.js'
 import { AsyncText } from './AsyncText.js'
-import Blockie from './Blockie.js'
+import SVGBlockie from './SVGBlockie.js'
 
 export const ConnectAccount = () => {
 	const { address, connect, attemptToConnect } = useAccount()
@@ -65,13 +65,13 @@ const AccountAvatar = () => {
 	switch (address.value.state) {
 		case 'inactive':
 		case 'rejected':
-			return <div class='aspect-square w-10 bg-white/20' />
+			return <div class='aspect-square w-10 outline-2 outline-white/20 bg-white/20' />
 		case 'pending':
-			return <div class='aspect-square w-10 bg-white/20 animate-pulse' />
+			return <div class='aspect-square w-10 outline outline-white/20 bg-white/20 animate-pulse' />
 		case 'resolved':
 			return (
-				<div class='aspect-square w-10 overflow-hidden'>
-					<Blockie seed={address.value.value} scale={5} />
+				<div style={{ fontSize: '2.5em' }}>
+					<SVGBlockie address={address.value.value} />
 				</div>
 			)
 	}

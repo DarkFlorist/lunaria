@@ -1372,6 +1372,18 @@ video {
 	outline-offset: 2px;
 }
 
+.outline {
+	outline-style: solid;
+}
+
+.outline-2 {
+	outline-width: 2px;
+}
+
+.outline-white\/20 {
+	outline-color: rgb(255 255 255 / 0.2);
+}
+
 .filter {
 	filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }

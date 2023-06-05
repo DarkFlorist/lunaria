@@ -1,4 +1,4 @@
-import { Signal, useSignalEffect } from '@preact/signals'
+import { Signal } from '@preact/signals'
 import { BigNumber, ethers } from 'ethers'
 import { useEffect } from 'preact/hooks'
 import { useRouter } from '../HashRouter.js'
@@ -7,6 +7,7 @@ import { AsyncProperty, useAsyncState } from '../../library/preact-utilities.js'
 import { useProviders } from '../../store/provider.js'
 import { calculateGasFee } from '../../library/utilities.js'
 import { Info, InfoError, InfoPending } from './Info.js'
+import { useTransaction } from '../../store/transaction.js'
 
 export const TransactionDetails = () => {
 	const router = useRouter<{ transaction_hash: string }>()
@@ -89,40 +90,4 @@ const AccountBalance = ({ response }: { response: TransactionResponse }) => {
 			const balance = ethers.utils.formatEther(asyncBalance.value.value)
 			return <Info label='Balance Before Transaction' value={balance} suffix=' ETH' />
 	}
-}
-
-function useTransaction(transactionHash: string) {
-	const providers = useProviders()
-	const { value: transactionResponse, waitFor: waitForResponse, reset: resetResponse } = useAsyncState<TransactionResponse>()
-	const { value: transactionReceipt, waitFor: waitForReceipt, reset: resetReceipt } = useAsyncState<TransactionReceipt>()
-
-	const getTransactionResponse = (transactionHash: string) => {
-		waitForResponse(async () => {
-			const provider = providers.getbrowserProvider()
-			const result = await provider.getTransaction(transactionHash)
-			// TransactionResult can actually be null?
-			if (result === null) throw new Error('Transaction was not found in chain!')
-			return result
-		})
-	}
-
-	const getTransactionReceipt = (txResponse: TransactionResponse) => {
-		waitForReceipt(async () => {
-			return await txResponse.wait()
-		})
-	}
-
-	// automatically get transaction receipt
-	useSignalEffect(() => {
-		if (transactionResponse.value.state !== 'resolved') return
-		getTransactionReceipt(transactionResponse.value.value)
-	})
-
-	// reset async states
-	useEffect(() => {
-		resetReceipt()
-		getTransactionResponse(transactionHash)
-	}, [transactionHash])
-
-	return { transactionResponse, transactionReceipt, reset: resetResponse }
 }

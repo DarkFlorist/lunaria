@@ -1,44 +1,41 @@
-import { useSignal, useSignalEffect } from '@preact/signals'
-import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { useSignalEffect } from '@preact/signals'
+import { useEffect } from 'preact/hooks'
+import { useAsyncState } from '../library/preact-utilities.js'
 import { TransactionReceipt, TransactionResponse } from '../types.js'
 import { useProviders } from './provider.js'
 
-export function useTransactionResponse() {
+export function useTransaction(transactionHash: string) {
 	const providers = useProviders()
-	const transactionResponse = useSignal<AsyncProperty<TransactionResponse>>({ state: 'inactive' })
-	const { value: query, waitFor } = useAsyncState<TransactionResponse>()
+	const { value: transactionResponse, waitFor: waitForResponse, reset: resetResponse } = useAsyncState<TransactionResponse>()
+	const { value: transactionReceipt, waitFor: waitForReceipt, reset: resetReceipt } = useAsyncState<TransactionReceipt>()
 
 	const getTransactionResponse = (transactionHash: string) => {
-		waitFor(async () => {
+		waitForResponse(async () => {
 			const provider = providers.getbrowserProvider()
-			return await provider.getTransaction(transactionHash)
+			const result = await provider.getTransaction(transactionHash)
+			// TransactionResult can actually be null?
+			if (result === null) throw new Error('Transaction was not found in chain!')
+			return result
 		})
 	}
 
-	const listenForQueryChanges = () => {
-		transactionResponse.value = query.value
-	}
-
-	useSignalEffect(listenForQueryChanges)
-
-	return { transactionResponse, getTransactionResponse }
-}
-
-export function useTransactionReceipt() {
-	const transactionReceipt = useSignal<AsyncProperty<TransactionReceipt>>({ state: 'inactive' })
-	const { value: query, waitFor } = useAsyncState<TransactionReceipt>()
-
-	const getTransactionReceipt = (transactionResponse: TransactionResponse) => {
-		waitFor(async () => {
-			return await transactionResponse.wait()
+	const getTransactionReceipt = (txResponse: TransactionResponse) => {
+		waitForReceipt(async () => {
+			return await txResponse.wait()
 		})
 	}
 
-	const listenForQueryChanges = () => {
-		transactionReceipt.value = query.value
-	}
+	// automatically get transaction receipt
+	useSignalEffect(() => {
+		if (transactionResponse.value.state !== 'resolved') return
+		getTransactionReceipt(transactionResponse.value.value)
+	})
 
-	useSignalEffect(listenForQueryChanges)
+	// reset async states
+	useEffect(() => {
+		resetReceipt()
+		getTransactionResponse(transactionHash)
+	}, [transactionHash])
 
-	return { transactionReceipt, getTransactionReceipt }
+	return { transactionResponse, transactionReceipt, reset: resetResponse }
 }

@@ -33,7 +33,7 @@ const MainPanel = () => {
 	const { nav, main } = usePanels()
 	const { transaction, data, send, clearData } = useTransfer()
 
-	const handleTokenSelect = (token?: TokenMeta) => {
+	const setUserSelectedToken = (token?: TokenMeta) => {
 		data.value = { ...data.value, token, amount: '' }
 		tokenManager.value = undefined
 	}
@@ -89,7 +89,7 @@ const MainPanel = () => {
 					</div>
 				</form>
 			</div>
-			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={handleTokenSelect} onAddToken={() => (tokenManager.value = 'add')} />
+			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={setUserSelectedToken} onAddToken={() => (tokenManager.value = 'add')} />
 			<AddTokenDialog show={tokenManager} />
 		</Main>
 	)

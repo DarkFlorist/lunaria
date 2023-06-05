@@ -3,7 +3,7 @@ import { useAccount } from './account.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
-import { errors, ethers, logger, utils } from 'ethers'
+import { BigNumber, errors, ethers, logger, utils } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 
 const CACHEID_PREFIX = '_ut'
@@ -171,4 +171,19 @@ export function useTokensCache(cacheKey: string) {
 		if (typeof unknownError === 'string') error = new Error(unknownError)
 		return { error }
 	}
+}
+
+export function useTokenBalance() {
+	const providers = useProviders()
+	const { value: tokenBalance, waitFor } = useAsyncState<BigNumber>()
+
+	const getTokenBalance = (accountAddress: string, tokenAddress: string) => {
+		waitFor(async () => {
+			const provider = providers.getbrowserProvider()
+			const contract = new ethers.Contract(tokenAddress, ERC20ABI, provider)
+			return await contract.balanceOf(accountAddress)
+		})
+	}
+
+	return { tokenBalance, getTokenBalance }
 }

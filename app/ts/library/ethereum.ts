@@ -36,17 +36,19 @@ export function isTransferTransaction(txResponse: TransactionResponse): txRespon
 	return txResponse.data.toLowerCase().startsWith('0xa9059cbb')
 }
 
-export function getTransferTokenValue(transactionReceipt: TransactionReceipt) {
-	const erc20Interface = new ethers.utils.Interface(ERC20ABI)
-	const transferLog = transactionReceipt.logs.find(isTokenTransferLog)
+export const erc20Interface = new ethers.utils.Interface(ERC20ABI)
+
+export function parseLogArgsFromReceipt(transactionReceipt: TransactionReceipt) {
+	const transferLog = transactionReceipt.logs.find(isTransferLog)
 	if (transferLog === undefined) return undefined
 	const logArgs = erc20Interface.parseLog(transferLog).args
-	return isTransferResult(logArgs) ? logArgs.value : undefined
+	return isTransferResult(logArgs) ? logArgs : undefined
 }
 
-export function isTokenTransferLog(log: ethers.providers.Log) {
+export const transferTopic = ethers.utils.id('Transfer(address,address,uint256)')
+
+export function isTransferLog(log: ethers.providers.Log) {
 	const [topic] = log.topics
-	const transferTopic = ethers.utils.id('Transfer(address,address,uint256)')
 	return topic === transferTopic
 }
 

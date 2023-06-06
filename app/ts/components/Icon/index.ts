@@ -1,5 +1,6 @@
 export * from './AnimatedDots.js'
 export * from './ArrowRight.js'
+export * from './ArrowUp.js'
 export * from './Check.js'
 export * from './Copy.js'
 export * from './Ethereum.js'

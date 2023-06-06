@@ -14,6 +14,7 @@ import { RecentTransfers } from '../RecentTransfers.js'
 import { DiscordInvite } from '../DiscordInvite.js'
 import { AddTokenDialog } from './AddTokenDialog.js'
 import { TransferValidation } from './Validation.js'
+import { Favorites } from '../Favorites.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -128,6 +129,8 @@ const LeftPanel = () => {
 			</div>
 
 			<RecentTransfers />
+
+			<Favorites />
 
 			<DiscordInvite />
 		</Navigation>

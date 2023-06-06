@@ -1,5 +1,6 @@
-import { useSignal, useSignalEffect } from '@preact/signals'
+import { effect, signal, useSignal, useSignalEffect } from '@preact/signals'
 import { ethers } from 'ethers'
+import { useEffect } from 'preact/hooks'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { ERC20, TransactionResponse } from '../types.js'
@@ -61,4 +62,69 @@ export function useTransfer() {
 	})
 
 	return { transaction, data, send, clearData }
+}
+
+export type FavoriteModel = {
+	label: string
+	source: string
+	recipientAddress: string
+	token?: TokenMeta
+	amount?: string
+}
+
+const FAVORITES_CACHE_ID = 'favorites'
+
+const getCachedFavorites = () => {
+	const cached = localStorage.getItem(FAVORITES_CACHE_ID)
+	if (cached === null) return []
+	try {
+		return JSON.parse(cached)
+	} catch (error) {
+		console.warn('Cache is corrupted')
+		return []
+	}
+}
+
+const favorites = signal<FavoriteModel[]>(getCachedFavorites())
+
+effect(() => {
+	const uniqueTxns = Array.from(new Set(favorites.value))
+	localStorage.setItem(FAVORITES_CACHE_ID, JSON.stringify(uniqueTxns))
+})
+
+export function useFavorities() {
+	const syncCacheChange = (event: StorageEvent) => {
+		console.count('sync storage')
+		const newValue = event.newValue !== null ? (JSON.parse(event.newValue) as FavoriteModel[]) : []
+		favorites.value = newValue
+	}
+
+	const add = (data: Omit<FavoriteModel, 'index'>) => {
+		const current = favorites.peek()
+		favorites.value = [...current, data]
+	}
+
+	const remove = (label: string) => {
+		favorites.value = favorites.value.filter(favorite => favorite.label !== label)
+	}
+
+	const swapIndex = (indexA: number, indexB: number) => {
+		// ignore same indices swap
+		if (indexA === indexB) return
+
+		const orderedFavorites = [...favorites.peek()]
+
+		const tempA = orderedFavorites[indexA]
+		orderedFavorites[indexA] = orderedFavorites[indexB]
+		orderedFavorites[indexB] = tempA
+
+		favorites.value = orderedFavorites
+	}
+
+	useEffect(() => {
+		window.addEventListener('storage', syncCacheChange)
+		return () => window.removeEventListener('storage', syncCacheChange)
+	}, [])
+
+	return { favorites, add, remove, swapIndex }
 }

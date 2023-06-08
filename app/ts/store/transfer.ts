@@ -56,7 +56,11 @@ export function useTransfer() {
 	useSignalEffect(listenForQueryChanges)
 	useSignalEffect(() => {
 		if (query.value.state === 'resolved') {
-			add({ hash: query.value.value.hash, date: Date.now() })
+			add({
+				hash: query.value.value.hash,
+				date: Date.now(),
+				isToken: query.value.value.value.eq(0)
+			})
 		}
 	})
 

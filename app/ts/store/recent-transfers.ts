@@ -5,6 +5,7 @@ import { STORAGE_KEY_RECENTS } from '../library/constants.js'
 type RecentTransaction = {
 	hash: string
 	date: number
+	isToken?: boolean
 }
 
 const getSessionStorageCache = () => {

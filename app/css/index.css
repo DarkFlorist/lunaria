@@ -592,6 +592,10 @@ video {
 	margin-top: 0.75rem;
 }
 
+.mt-40 {
+	margin-top: 10rem;
+}
+
 .block {
 	display: block;
 }
@@ -656,6 +660,10 @@ video {
 	height: 1.5rem;
 }
 
+.h-8 {
+	height: 2rem;
+}
+
 .h-\[100dvh\] {
 	height: 100dvh;
 }
@@ -698,6 +706,10 @@ video {
 
 .w-40 {
 	width: 10rem;
+}
+
+.w-8 {
+	width: 2rem;
 }
 
 .w-full {
@@ -805,6 +817,10 @@ video {
 	appearance: none;
 }
 
+.grid-cols-1 {
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
 .grid-cols-2 {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -825,12 +841,20 @@ video {
 	grid-template-columns: auto 1fr;
 }
 
+.grid-cols-\[auto\2c minmax\(0\2c 1fr\)\] {
+	grid-template-columns: auto minmax(0, 1fr);
+}
+
 .grid-cols-\[auto_1fr\] {
 	grid-template-columns: auto 1fr;
 }
 
 .grid-cols-\[auto_minmax\(0\2c 1fr\)_auto\] {
 	grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.grid-cols-\[min-content\2c minmax\(0\2c 1fr\)\2c min-content\] {
+	grid-template-columns: min-content minmax(0, 1fr) min-content;
 }
 
 .grid-cols-\[minmax\(auto\2c max-content\)_minmax\(auto\2c max-content\)_minmax\(auto\2c max-content\)\] {
@@ -1516,6 +1540,10 @@ video {
 
 .hover\:bg-white\/20:hover {
 	background-color: rgb(255 255 255 / 0.2);
+}
+
+.hover\:bg-white\/30:hover {
+	background-color: rgb(255 255 255 / 0.3);
 }
 
 .hover\:text-white:hover {

@@ -5,7 +5,19 @@ import * as Icon from './Icon/index.js'
 
 export const Favorites = () => {
 	const manage = useSignal(false)
-	const { favorites } = useFavorities()
+	const { favorites, add } = useFavorities()
+
+	if (favorites.value.length < 1)
+		return (
+			<div class='pl-4 mb-4'>
+				<div class='flex justify-between'>
+					<div class='text-white/30 text-sm mb-2'>Saved Transfers</div>
+				</div>
+				<div class='border border-white/30 border-dashed px-4 py-3'>
+					<p class='text-white/50 text-sm'>Tip: You can save completed transfers so you don't have to fill out the form everytime.</p>
+				</div>
+			</div>
+		)
 
 	return (
 		<div class='pl-4 mb-4'>
@@ -18,17 +30,24 @@ export const Favorites = () => {
 			<div class='grid gap-2'>
 				{favorites.value.map((favorite, index) => {
 					return (
-						<div class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[auto,1fr,auto]' : 'hover:bg-white/30')} onClick={() => {}}>
+						<div class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} onClick={() => {}}>
 							<MoveUpButton show={manage.value === true} favorite={favorite} index={index} />
-							<div class='text-left'>
-								<div class='overflow-hidden text-ellipsis whitespace-nowrap'>{favorite.label}</div>
-								<div class='text-sm text-white/50'>{favorite.source}</div>
+							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
+								{favorite.token ? <img class='w-8 h-8' src={`/img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
+								<div class='text-left'>
+									<div>{favorite.label}</div>
+									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>{favorite.recipientAddress}</div>
+								</div>
 							</div>
 							<RemoveButton show={manage.value === true} favorite={favorite} />
 						</div>
 					)
 				})}
 			</div>
+
+			<button class='mt-40' onClick={() => add({ label: `Favorite ${Date.now() % 10}`, amount: '1', source: '0x00', recipientAddress: '0x5429858f2842e85b6482459b77d08fBBA59Fd06D' })}>
+				Add
+			</button>
 		</div>
 	)
 }

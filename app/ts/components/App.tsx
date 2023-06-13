@@ -14,6 +14,9 @@ export function App() {
 				<Route path='#tx/:transaction_hash'>
 					<TransactionPage />
 				</Route>
+				<Route path='#saved/:index'>
+					<TransferPage />
+				</Route>
 			</Router>
 			<Notices />
 		</SplashScreen>

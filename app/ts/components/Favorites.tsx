@@ -30,7 +30,7 @@ export const Favorites = () => {
 			<div class='grid gap-2'>
 				{favorites.value.map((favorite, index) => {
 					return (
-						<div class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} onClick={() => {}}>
+						<a class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} href={`#saved/${index}`}>
 							<MoveUpButton show={manage.value === true} favorite={favorite} index={index} />
 							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
 								{favorite.token ? <img class='w-8 h-8' src={`/img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
@@ -40,7 +40,7 @@ export const Favorites = () => {
 								</div>
 							</div>
 							<RemoveButton show={manage.value === true} favorite={favorite} />
-						</div>
+						</a>
 					)
 				})}
 			</div>

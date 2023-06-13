@@ -15,24 +15,44 @@ import { DiscordInvite } from '../DiscordInvite.js'
 import { AddTokenDialog } from './AddTokenDialog.js'
 import { TransferValidation } from './Validation.js'
 import { Favorites } from '../Favorites.js'
+import { useRouter } from '../HashRouter.js'
+import { useFavorities } from '../../store/favorites.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransferPage = () => {
+	const router = useRouter<{ index: string }>()
+	const transferStore = useTransfer()
+	const { favorites } = useFavorities()
+
+	const transferFormData = useComputed(() => {
+		if (router.value.params.index === undefined) return
+		return favorites.value[parseInt(router.value.params.index)]
+	})
+
+	useSignalEffect(() => {
+		if (transferFormData.value === undefined) return
+		transferStore.data.value = transferFormData.value
+	})
+
 	return (
 		<div class='fixed inset-0 bg-black text-white h-[100dvh]'>
 			<Root>
 				<LeftPanel />
-				<MainPanel />
+				<MainPanel transferStore={transferStore} />
 			</Root>
 		</div>
 	)
 }
 
-const MainPanel = () => {
+type MainPanelProps = {
+	transferStore: ReturnType<typeof useTransfer>
+}
+
+const MainPanel = ({ transferStore }: MainPanelProps) => {
+	const { transaction, data, send, clearData } = transferStore
 	const tokenManager = useSignal<'select' | 'add' | undefined>(undefined)
 	const { nav, main } = usePanels()
-	const { transaction, data, send, clearData } = useTransfer()
 
 	const setUserSelectedToken = (token?: TokenMeta) => {
 		data.value = { ...data.value, token, amount: '' }

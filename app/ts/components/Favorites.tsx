@@ -1,11 +1,11 @@
 import { useSignal } from '@preact/signals'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
-import { FavoriteModel, useFavorities } from '../store/transfer.js'
+import { FavoriteModel, useFavorities } from '../store/favorites.js'
 import * as Icon from './Icon/index.js'
 
 export const Favorites = () => {
 	const manage = useSignal(false)
-	const { favorites, add } = useFavorities()
+	const { favorites } = useFavorities()
 
 	if (favorites.value.length < 1)
 		return (
@@ -44,10 +44,6 @@ export const Favorites = () => {
 					)
 				})}
 			</div>
-
-			<button class='mt-40' onClick={() => add({ label: `Favorite ${Date.now() % 10}`, amount: '1', source: '0x00', recipientAddress: '0x5429858f2842e85b6482459b77d08fBBA59Fd06D' })}>
-				Add
-			</button>
 		</div>
 	)
 }

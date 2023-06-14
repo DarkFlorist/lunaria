@@ -38,7 +38,7 @@ effect(() => {
 	localStorage.setItem(FAVORITES_CACHE_ID, JSON.stringify(uniqueTxns))
 })
 
-export function useFavorities() {
+export function useFavorites() {
 	const syncCacheChange = (event: StorageEvent) => {
 		const newValue = event.newValue !== null ? (JSON.parse(event.newValue) as FavoriteModel[]) : []
 		favorites.value = newValue

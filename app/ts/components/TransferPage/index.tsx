@@ -16,14 +16,14 @@ import { AddTokenDialog } from './AddTokenDialog.js'
 import { TransferValidation } from './Validation.js'
 import { Favorites } from '../Favorites.js'
 import { useRouter } from '../HashRouter.js'
-import { useFavorities } from '../../store/favorites.js'
+import { useFavorites } from '../../store/favorites.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransferPage = () => {
 	const router = useRouter<{ index: string }>()
 	const transferStore = useTransfer()
-	const { favorites } = useFavorities()
+	const { favorites } = useFavorites()
 
 	const transferFormData = useComputed(() => {
 		if (router.value.params.index === undefined) return

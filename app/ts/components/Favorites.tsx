@@ -1,11 +1,11 @@
 import { useSignal } from '@preact/signals'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
-import { FavoriteModel, useFavorities } from '../store/favorites.js'
+import { FavoriteModel, useFavorites } from '../store/favorites.js'
 import * as Icon from './Icon/index.js'
 
 export const Favorites = () => {
 	const manage = useSignal(false)
-	const { favorites } = useFavorities()
+	const { favorites } = useFavorites()
 
 	if (favorites.value.length < 1)
 		return (
@@ -55,7 +55,7 @@ type PromoteButtonProps = {
 }
 
 const MoveUpButton = (props: PromoteButtonProps) => {
-	const { swapIndex } = useFavorities()
+	const { swapIndex } = useFavorites()
 
 	if (!props.show) return <></>
 	if (props.index === 0) return <div></div>
@@ -73,7 +73,7 @@ type RemoveButton = {
 }
 
 const RemoveButton = (props: RemoveButton) => {
-	const { remove } = useFavorities()
+	const { remove } = useFavorites()
 
 	if (!props.show) return <></>
 

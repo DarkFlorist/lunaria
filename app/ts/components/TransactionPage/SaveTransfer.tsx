@@ -1,6 +1,6 @@
 import { Signal, useSignal } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
-import { FavoriteModel, isFavorite, useFavorities } from '../../store/favorites.js'
+import { FavoriteModel, isFavorite, useFavorites } from '../../store/favorites.js'
 
 type Props = {
 	show?: boolean
@@ -9,7 +9,7 @@ type Props = {
 
 export const SaveTransfer = ({ show, addFavoriteStore }: Props) => {
 	const isSaved = useSignal(false)
-	const { add } = useFavorities()
+	const { add } = useFavorites()
 
 	const saveTransfer = () => {
 		if (addFavoriteStore.value === undefined || !isFavorite(addFavoriteStore.value)) return

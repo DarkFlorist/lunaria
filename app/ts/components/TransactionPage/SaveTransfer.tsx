@@ -79,7 +79,7 @@ const AcknowledgeFavoriteAdd = () => {
 					</svg>
 					<div>
 						<div class='font-bold text-lg'>Transfer Saved!</div>
-						<div class='text-white/50 leading-tight'>This transfer was added to the sidebar so you can use it as a starting point the next time you transfer.</div>
+						<div class='text-white/50 leading-tight'>This transfer was added to the sidebar so you can use it as a starting point for your next transfer.</div>
 					</div>
 				</div>
 			</div>

@@ -14,7 +14,7 @@ export function useTransaction(transactionHash: string) {
 			const provider = providers.getbrowserProvider()
 			const result = await provider.getTransaction(transactionHash)
 			// TransactionResult can actually be null?
-			if (result === null) throw new Error('Transaction was not found in chain!')
+			if (result === null) throw new Error('Transaction was not found on chain!')
 			return result
 		})
 	}

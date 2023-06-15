@@ -27,7 +27,12 @@ export const TransferValidation = (props: Props) => {
 					<div>
 						<strong>Warning:</strong> Recipient is a Token address
 					</div>
-					<div class='leading-tight text-white/75 text-sm'>The recipient address provided is a known token address and may be unintentional. Tokens sent to this address may be unrecoverable.</div>
+					<div class='leading-tight text-white/75 text-sm mb-4'>The recipient address provided is a known token address and may be unintentional.</div>
+
+					<label class='flex gap-2 items-center'>
+						<input type='checkbox' required />
+						<span>I understand the consequences, let's proceed.</span>
+					</label>
 				</div>
 			</div>
 		)
@@ -40,7 +45,11 @@ export const TransferValidation = (props: Props) => {
 					<div>
 						<strong>Warning:</strong> Recipient is the same as source
 					</div>
-					<div class='leading-tight text-white/75 text-sm'>The recipient address provided the same as the source address and may be unintentional. Proceeding will incur transaction fees.</div>
+					<div class='leading-tight text-white/75 text-sm mb-4'>The recipient address provided the same as the source address and may be unintentional. Proceeding will incur transaction fees.</div>
+					<label class='flex gap-2 items-center'>
+						<input type='checkbox' required />
+						<span>I understand the consequences, let's proceed.</span>
+					</label>
 				</div>
 			</div>
 		)

@@ -31,7 +31,7 @@ export const TransferValidation = (props: Props) => {
 
 					<label class='flex gap-2 items-center'>
 						<input type='checkbox' required />
-						<span>I understand the consequences, let's proceed.</span>
+						<span>I understand that this might result in loss of funds. Proceed anyway.</span>
 					</label>
 				</div>
 			</div>

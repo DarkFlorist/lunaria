@@ -36,7 +36,9 @@ export const Favorites = () => {
 								{favorite.token ? <img class='w-8 h-8' src={`/img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
 								<div class='text-left'>
 									<div>{favorite.label}</div>
-									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>{favorite.recipientAddress}</div>
+									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>
+									{favorite.amount} {favorite.token ? favorite.token.symbol : 'ETH'} to {favorite.recipientAddress}
+									</div>
 								</div>
 							</div>
 							<RemoveButton show={manage.value === true} favorite={favorite} />

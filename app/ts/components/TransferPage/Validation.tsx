@@ -48,7 +48,7 @@ export const TransferValidation = (props: Props) => {
 					<div class='leading-tight text-white/75 text-sm mb-4'>This transactions sends funds to itself and results in loss of ether in form of transaction fees</div>
 					<label class='flex gap-2 items-center'>
 						<input type='checkbox' required />
-						<span>I understand the consequences, let's proceed.</span>
+						<span>I understand that this might result in loss of funds. Proceed anyway.</span>
 					</label>
 				</div>
 			</div>

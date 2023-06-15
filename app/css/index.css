@@ -837,6 +837,10 @@ video {
 	grid-template-columns: 75vw 100vw;
 }
 
+.grid-cols-\[auto\2c 1fr\2c auto\] {
+	grid-template-columns: auto 1fr auto;
+}
+
 .grid-cols-\[auto\2c 1fr\] {
 	grid-template-columns: auto 1fr;
 }

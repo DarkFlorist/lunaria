@@ -3,6 +3,7 @@ import { ConnectAccount } from '../ConnectAccount.js'
 import { RecentTransfers } from '../RecentTransfers.js'
 import { DiscordInvite } from '../DiscordInvite.js'
 import { TransactionDetails } from './TransactionDetails.js'
+import { Favorites } from '../Favorites.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -76,6 +77,8 @@ const LeftPanel = () => {
 			</div>
 
 			<RecentTransfers />
+
+			<Favorites />
 
 			<DiscordInvite />
 		</Navigation>

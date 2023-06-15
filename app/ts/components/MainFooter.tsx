@@ -23,7 +23,7 @@ export const MainFooter = () => {
 				<div class='mt-8'>
 					Lunaria by{' '}
 					<a class='text-white hover:underline' href='https://dark.florist'>
-						DarkFlorist
+						Dark Florist
 					</a>
 				</div>
 				<div class='inline-grid gap-4 grid-cols-3 mb-8'>

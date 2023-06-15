@@ -55,7 +55,7 @@ const DataFromResponse = ({ response, addFavoriteStore }: DataFromResponseProps)
 			addFavoriteStore.value = { ...addFavoriteStore.peek(), source }
 
 			const blockieIcon = () => (
-				<span class='text-3xl'>
+				<span class='text-4xl'>
 					<SVGBlockie address={source} />
 				</span>
 			)
@@ -121,7 +121,7 @@ const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
 
 	const blockieIcon = () => (
-		<span class='text-3xl'>
+		<span class='text-4xl'>
 			<SVGBlockie address={recipientAddress} />
 		</span>
 	)
@@ -137,9 +137,16 @@ const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
 	const logArgs = parseLogArgsFromReceipt(receipt)
 	if (logArgs === undefined) return <></>
 
-	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress: logArgs.to }
+	const recipientAddress = logArgs.to
+	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
 
-	return <Info label='Recipient' value={logArgs.to} icon={() => <SVGBlockie address={logArgs.to} />} allowCopy />
+	const blockieIcon = () => (
+		<span class='text-4xl'>
+			<SVGBlockie address={recipientAddress} />
+		</span>
+	)
+
+	return <Info label='Recipient' value={logArgs.to} icon={blockieIcon} allowCopy />
 }
 
 type TokenAmountProps = {

@@ -85,12 +85,12 @@ export default function SVGBlockie({ address }: { address: string }) {
 	const { imageData, color, spotcolor, bgcolor } = generateIdenticon({ seed: address, size: pixelDensity })
 
 	return (
-		<svg width='1em' height='1em' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+		<svg width='1em' height='1em' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'>
 			{imageData.map((data, index) => {
 				const fill = data === 0 ? bgcolor : data === 1 ? color : spotcolor
-				const pixelSize = 100 / pixelDensity
+				const pixelSize = 64 / pixelDensity
 
-				return <rect width={pixelSize} height={pixelSize} x={((index % pixelDensity) * 100) / pixelDensity} y={Math.floor(index / pixelDensity) * pixelSize} fill={fill} />
+				return <rect width={pixelSize} height={pixelSize} x={((index % pixelDensity) * 64) / pixelDensity} y={Math.floor(index / pixelDensity) * pixelSize} fill={fill} />
 			})}
 		</svg>
 	)

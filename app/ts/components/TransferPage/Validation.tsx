@@ -43,7 +43,7 @@ export const TransferValidation = (props: Props) => {
 				<Icon.Info class='text-4xl' />
 				<div class='py-3'>
 					<div>
-						<strong>Warning:</strong> Recipient is the same as source
+						<strong>Warning:</strong> The recipient is the same as the sender
 					</div>
 					<div class='leading-tight text-white/75 text-sm mb-4'>This transactions sends funds to itself and results in loss of ether in form of transaction fees</div>
 					<label class='flex gap-2 items-center'>

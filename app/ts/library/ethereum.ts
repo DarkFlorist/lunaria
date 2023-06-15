@@ -61,7 +61,3 @@ export interface TransferResult extends Result {
 export function isTransferResult(result: unknown): result is TransferResult {
 	return result !== null && typeof result === 'object' && 'value' in result && typeof result.value === 'object' && 'from' in result && typeof result.from === 'string' && 'to' in result && typeof result.to === 'string'
 }
-
-export function addressString(address: bigint) {
-	return `0x${address.toString(16).padStart(40, '0')}`
-}

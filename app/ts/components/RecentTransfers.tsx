@@ -17,8 +17,12 @@ export const RecentTransfers = () => {
 					const timeStamp = new Date(txn.date).getTime()
 					return (
 						<a class='block bg-white/10 px-4 py-3 mb-1 hover:bg-white/20' href={`#tx/${txn.hash}`}>
-							<div class='overflow-hidden text-ellipsis whitespace-nowrap'>{txn.isToken ? 'Token' : 'Ether'} Transfer</div>
-							<div class='text-sm text-white/50'><TimeAgo since={timeStamp} /></div>
+							<div class='overflow-hidden text-ellipsis whitespace-nowrap'>
+								Sent {txn.amount} {txn.token?.name || 'ETH'} to {txn.recipientAddress}
+							</div>
+							<div class='text-sm text-white/50'>
+								<TimeAgo since={timeStamp} />
+							</div>
 						</a>
 					)
 				})}

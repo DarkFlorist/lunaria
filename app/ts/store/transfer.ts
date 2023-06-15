@@ -32,14 +32,18 @@ export function useTransfer() {
 			// Ether transfer
 			if (data.value.token === undefined) {
 				const value = ethers.utils.parseEther(data.value.amount)
-				return await signer.sendTransaction({ to, value })
+				const response = await signer.sendTransaction({ to, value })
+				add({ hash: response.hash, recipientAddress: to, date: Date.now(), amount: data.value.amount })
+				return response
 			}
 
 			// Token transfer
 			const tokenMetadata = data.value.token
 			const contract = new ethers.Contract(tokenMetadata.address, ERC20ABI, signer) as ERC20
 			const value = ethers.utils.parseUnits(data.value.amount, tokenMetadata.decimals)
-			return await contract.transfer(to, value)
+			const response = await contract.transfer(to, value)
+			add({ hash: response.hash, token: tokenMetadata, recipientAddress: to, date: Date.now(), amount: data.value.amount })
+			return response
 		})
 	}
 
@@ -54,16 +58,6 @@ export function useTransfer() {
 	}
 
 	useSignalEffect(listenForQueryChanges)
-	useSignalEffect(() => {
-		if (query.value.state === 'resolved') {
-			add({
-				hash: query.value.value.hash,
-				date: Date.now(),
-				isToken: query.value.value.value.eq(0)
-			})
-		}
-	})
 
 	return { transaction, data, send, clearData }
 }
-

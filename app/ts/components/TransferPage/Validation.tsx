@@ -45,7 +45,7 @@ export const TransferValidation = (props: Props) => {
 					<div>
 						<strong>Warning:</strong> The recipient is the same as the sender
 					</div>
-					<div class='leading-tight text-white/75 text-sm mb-4'>This transactions sends funds to itself and results in loss of ether in form of transaction fees</div>
+					<div class='leading-tight text-white/75 text-sm mb-4'>This transactions sends funds to itself and will almost certainly result wasting money on transaction fees.</div>
 					<label class='flex gap-2 items-center'>
 						<input type='checkbox' required />
 						<span>I understand that this will almost certainly have no effect but still cost me transactions fees.</span>

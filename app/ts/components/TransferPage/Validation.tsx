@@ -27,7 +27,7 @@ export const TransferValidation = (props: Props) => {
 					<div>
 						<strong>Warning:</strong> Recipient is a Token address
 					</div>
-					<div class='leading-tight text-white/75 text-sm mb-4'>The recipient address provided is a token contract address and may result in a loss of funds.</div>
+					<div class='leading-tight text-white/75 text-sm mb-4'>The recipient address provided is a token contract address and will probably result in a loss of funds.</div>
 
 					<label class='flex gap-2 items-center'>
 						<input type='checkbox' required />

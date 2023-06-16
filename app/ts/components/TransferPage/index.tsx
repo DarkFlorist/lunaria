@@ -17,6 +17,7 @@ import { TransferValidation } from './Validation.js'
 import { Favorites } from '../Favorites.js'
 import { useRouter } from '../HashRouter.js'
 import { useFavorites } from '../../store/favorites.js'
+import { MainFooter } from '../MainFooter.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -112,6 +113,7 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 			</div>
 			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={setUserSelectedToken} onAddToken={() => (tokenManager.value = 'add')} />
 			<AddTokenDialog show={tokenManager} />
+			<MainFooter />
 		</Main>
 	)
 }

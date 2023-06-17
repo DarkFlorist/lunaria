@@ -27,7 +27,12 @@ export const TransferValidation = (props: Props) => {
 					<div>
 						<strong>Warning:</strong> Recipient is a Token address
 					</div>
-					<div class='leading-tight text-white/75 text-sm'>The recipient address provided is a known token address and may be unintentional. Tokens sent to this address may be unrecoverable.</div>
+					<div class='leading-tight text-white/75 text-sm mb-4'>The recipient address provided is a token contract address and will probably result in a loss of funds.</div>
+
+					<label class='flex gap-2 items-center'>
+						<input type='checkbox' required />
+						<span>I understand that this will probably result in the loss of {props.data.value.amount} {props.data.value.symbol}.</span>
+					</label>
 				</div>
 			</div>
 		)
@@ -38,9 +43,13 @@ export const TransferValidation = (props: Props) => {
 				<Icon.Info class='text-4xl' />
 				<div class='py-3'>
 					<div>
-						<strong>Warning:</strong> Recipient is the same as source
+						<strong>Warning:</strong> The recipient is the same as the sender
 					</div>
-					<div class='leading-tight text-white/75 text-sm'>The recipient address provided the same as the source address and may be unintentional. Proceeding will incur transaction fees.</div>
+					<div class='leading-tight text-white/75 text-sm mb-4'>This transactions sends funds to itself and will almost certainly result wasting money on transaction fees.</div>
+					<label class='flex gap-2 items-center'>
+						<input type='checkbox' required />
+						<span>I understand that this will almost certainly have no effect but still cost me transactions fees.</span>
+					</label>
 				</div>
 			</div>
 		)

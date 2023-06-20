@@ -82,7 +82,7 @@ function generateIdenticon(options: { seed: string; size?: number }) {
 // SVGBlockie component is resizable through CSS font size
 export default function SVGBlockie({ address }: { address: string }) {
 	const pixelDensity = 8
-	const { imageData, color, spotcolor, bgcolor } = generateIdenticon({ seed: address, size: pixelDensity })
+	const { imageData, color, spotcolor, bgcolor } = useMemo(() => generateIdenticon({ seed: address, size: pixelDensity }), [address])
 
 	return (
 		<svg width='1em' height='1em' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'>

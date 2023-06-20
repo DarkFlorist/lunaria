@@ -12,6 +12,7 @@ import { parseLogArgsFromReceipt } from '../../library/ethereum.js'
 import { useTokenQuery } from '../../store/tokens.js'
 import { SaveTransfer } from './SaveTransfer.js'
 import { FavoriteModel } from '../../store/favorites.js'
+import SVGBlockie from '../SVGBlockie.js'
 
 export const TransactionDetails = () => {
 	const favorite = useSignal<Partial<FavoriteModel> | undefined>(undefined)
@@ -50,11 +51,18 @@ const DataFromResponse = ({ response, addFavoriteStore }: DataFromResponseProps)
 		case 'rejected':
 			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
 		case 'resolved':
-			addFavoriteStore.value = { ...addFavoriteStore.peek(), source: response.value.value.from }
+			const source = response.value.value.from
+			addFavoriteStore.value = { ...addFavoriteStore.peek(), source }
+
+			const blockieIcon = () => (
+				<span class='text-4xl'>
+					<SVGBlockie address={source} />
+				</span>
+			)
 			return (
 				<>
 					<Info label='Hash' value={response.value.value.hash} allowCopy />
-					<Info label='From' value={response.value.value.from} allowCopy />
+					<Info label='From' value={response.value.value.from} icon={blockieIcon} allowCopy />
 					<EthRecipient response={response.value.value} addFavoriteStore={addFavoriteStore} />
 					<EthAmount response={response.value.value} addFavoriteStore={addFavoriteStore} />
 				</>
@@ -109,9 +117,16 @@ type EthRecipientProps = {
 const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
 	if (response.value.eq(0) || response.to === undefined) return <></>
 
-	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress: response.to }
+	const recipientAddress = response.to
+	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
 
-	return <Info label='Recipient' value={response.to} allowCopy />
+	const blockieIcon = () => (
+		<span class='text-4xl'>
+			<SVGBlockie address={recipientAddress} />
+		</span>
+	)
+
+	return <Info label='Recipient' value={recipientAddress} icon={blockieIcon} allowCopy />
 }
 
 type TokenRecipientProps = {
@@ -122,9 +137,16 @@ const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
 	const logArgs = parseLogArgsFromReceipt(receipt)
 	if (logArgs === undefined) return <></>
 
-	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress: logArgs.to }
+	const recipientAddress = logArgs.to
+	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
 
-	return <Info label='Recipient' value={logArgs.to} allowCopy />
+	const blockieIcon = () => (
+		<span class='text-4xl'>
+			<SVGBlockie address={recipientAddress} />
+		</span>
+	)
+
+	return <Info label='Recipient' value={logArgs.to} icon={blockieIcon} allowCopy />
 }
 
 type TokenAmountProps = {
@@ -150,7 +172,7 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 			const { decimals, symbol } = query.value.value
 			const amount = ethers.utils.formatUnits(logArgs.value, decimals)
 			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
-			return <Info label='Amount' value={`${amount} ${symbol}`} allowCopy />
+			return <Info label='Amount' value={`${amount} ${symbol}`} />
 	}
 }
 

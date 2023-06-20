@@ -1,11 +1,14 @@
 import { signal, useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 import { STORAGE_KEY_RECENTS } from '../library/constants.js'
+import { TokenMeta } from './tokens.js'
 
 type RecentTransaction = {
 	hash: string
 	date: number
-	isToken?: boolean
+	amount: string
+	recipientAddress: string
+	token?: TokenMeta
 }
 
 const getSessionStorageCache = () => {

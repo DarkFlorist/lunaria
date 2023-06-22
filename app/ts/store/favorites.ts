@@ -3,7 +3,7 @@ import { useEffect } from 'preact/hooks'
 import { TokenMeta } from './tokens'
 
 export type FavoriteModel = {
-	label: string
+	label?: string
 	source: string
 	recipientAddress: string
 	token?: TokenMeta

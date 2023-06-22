@@ -61,7 +61,8 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 	}
 
 	const handleAddressChange = (address?: string) => {
-		data.value = { ...data.value, recipientAddress: address || '' }
+		const recipientAddress = address ? address.trim() : ''
+		data.value = { ...data.value, recipientAddress }
 	}
 
 	const handleSubmit = (e: Event) => {

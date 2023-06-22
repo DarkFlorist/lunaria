@@ -37,11 +37,11 @@ export const Favorites = () => {
 								<div class='text-left'>
 									<div>{favorite.label}</div>
 									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>
-									{favorite.amount} {favorite.token ? favorite.token.symbol : 'ETH'} to {favorite.recipientAddress}
+										{favorite.amount} {favorite.token ? favorite.token.symbol : 'ETH'} to {favorite.recipientAddress}
 									</div>
 								</div>
 							</div>
-							<RemoveButton show={manage.value === true} favorite={favorite} />
+							<RemoveButton show={manage.value === true} index={index} />
 						</a>
 					)
 				})}
@@ -69,18 +69,18 @@ const MoveUpButton = (props: PromoteButtonProps) => {
 	)
 }
 
-type RemoveButton = {
+type RemoveButtonProps = {
 	show: boolean
-	favorite: FavoriteModel
+	index: number
 }
 
-const RemoveButton = (props: RemoveButton) => {
+const RemoveButton = (props: RemoveButtonProps) => {
 	const { remove } = useFavorites()
 
 	if (!props.show) return <></>
 
 	return (
-		<button class='text-sm' onClick={() => remove(props.favorite.label)}>
+		<button class='text-sm' onClick={() => remove(props.index)}>
 			<Icon.Xmark />
 		</button>
 	)

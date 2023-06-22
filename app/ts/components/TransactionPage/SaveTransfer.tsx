@@ -53,7 +53,7 @@ const AddFavoriteForm = ({ addFavoriteStore, onSubmit }: SaveFormProps) => {
 					</div>
 					<form class='w-full' onSubmit={submitForm}>
 						<div class='grid gap-2 items-center w-full'>
-							<input class='border border-white/30 px-4 py-2 bg-transparent outline-none min-w-auto' type='text' value={addFavoriteStore.value.label} onInput={event => (addFavoriteStore.value = { ...addFavoriteStore.peek(), label: event.currentTarget.value })} placeholder='Add a label' required />
+							<input class='border border-white/30 px-4 py-2 bg-transparent outline-none min-w-auto' type='text' value={addFavoriteStore.value.label} onInput={event => (addFavoriteStore.value = { ...addFavoriteStore.peek(), label: event.currentTarget.value })} placeholder='Add a label (optional)' />
 							<button type='submit' class='border border-white/50 bg-white/10 px-4 py-3 outline-none focus:bg-white/20 hover:bg-white/20'>
 								Save
 							</button>

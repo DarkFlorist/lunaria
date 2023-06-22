@@ -31,7 +31,7 @@ export const TransferValidation = (props: Props) => {
 
 					<label class='flex gap-2 items-center'>
 						<input type='checkbox' required />
-						<span>I understand that this will probably result in the loss of {props.data.value.amount} {props.data.value.symbol}.</span>
+						<span>I understand that this will probably result in the loss of {props.data.value.amount} {props.data.value.token?.symbol}.</span>
 					</label>
 				</div>
 			</div>

@@ -49,8 +49,8 @@ export function useFavorites() {
 		favorites.value = [...current, data]
 	}
 
-	const remove = (label: string) => {
-		favorites.value = favorites.value.filter(favorite => favorite.label !== label)
+	const remove = (index: number) => {
+		favorites.value = [...favorites.peek().slice(0, index), ...favorites.peek().slice(index + 1)]
 	}
 
 	const swapIndex = (indexA: number, indexB: number) => {

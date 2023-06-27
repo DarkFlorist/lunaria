@@ -43,7 +43,7 @@ export const AddressField = (props: Props) => {
 			<div class='grid grid-cols-[1fr,auto] items-center h-16'>
 				<div class='grid px-4'>
 					<label class='text-sm text-white/50 leading-tight'>{props.label}</label>
-					<input ref={inputRef} placeholder={props.placeholder} pattern='^0x[0-9A-Fa-f]{40}\s*$' class={baseClasses.field} type='text' value={props.value} onInput={handleInput} disabled={props.disabled} required />
+					<input ref={inputRef} placeholder={props.placeholder} pattern='^\s*0x[0-9A-Fa-f]{40}\s*$' class={baseClasses.field} type='text' value={props.value} onInput={handleInput} disabled={props.disabled} required />
 				</div>
 				{props.value !== '' && (
 					<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm disabled:opacity-50' onClick={handleClear} disabled={props.disabled}>

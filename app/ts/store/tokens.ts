@@ -3,7 +3,7 @@ import { useAccount } from './account.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
-import { BigNumber, errors, ethers, logger, utils } from 'ethers'
+import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 
 const CACHEID_PREFIX = '_ut'
@@ -58,21 +58,24 @@ export function useTokenQuery() {
 		reset()
 
 		// check address validity
-		if (!utils.isAddress(tokenAddress.value)) return
+		if (!isAddress(tokenAddress.value)) return
 
 		waitFor(async () => {
-			if (network.value.state !== 'resolved') logger.throwError('Disconnected', errors.NETWORK_ERROR)
+			if (network.value.state !== 'resolved') {
+				throw new Error('Disconnected')
+			}
+
 			const chainId = network.value.value.chainId
 
 			try {
 				const provider = providers.getbrowserProvider()
-				const contract = new ethers.Contract(tokenAddress.value, ERC20ABI, provider)
+				const contract = new Contract(tokenAddress.value, ERC20ABI, provider)
 				const name = await contract.name()
 				const symbol = await contract.symbol()
 				const decimals = await contract.decimals()
 				return { chainId, name, symbol, decimals, address: tokenAddress.value } as const
 			} catch (unknownError) {
-				logger.throwError('Contract call failed.', errors.CALL_EXCEPTION)
+				throw new Error('Contract call failed')
 			}
 		})
 	}
@@ -175,12 +178,12 @@ export function useTokensCache(cacheKey: string) {
 
 export function useTokenBalance() {
 	const providers = useProviders()
-	const { value: tokenBalance, waitFor } = useAsyncState<BigNumber>()
+	const { value: tokenBalance, waitFor } = useAsyncState<BigInt>()
 
 	const getTokenBalance = (accountAddress: string, tokenAddress: string) => {
 		waitFor(async () => {
 			const provider = providers.getbrowserProvider()
-			const contract = new ethers.Contract(tokenAddress, ERC20ABI, provider)
+			const contract = new Contract(tokenAddress, ERC20ABI, provider)
 			return await contract.balanceOf(accountAddress)
 		})
 	}

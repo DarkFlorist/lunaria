@@ -1,10 +1,9 @@
 import { effect, signal } from '@preact/signals'
-import { ethers } from 'ethers'
 import { assertsWithEthereum } from '../library/ethereum.js'
 import { WalletError } from '../library/exceptions.js'
-import { Web3Provider } from '../types.js'
+import { BrowserProvider } from 'ethers'
 
-const provider = signal<Web3Provider | undefined>(undefined)
+const provider = signal<BrowserProvider | undefined>(undefined)
 
 export function useProviders() {
 	const getbrowserProvider = () => {
@@ -12,7 +11,7 @@ export function useProviders() {
 
 		try {
 			assertsWithEthereum(window)
-			provider.value = new ethers.providers.Web3Provider(window.ethereum)
+			provider.value = new BrowserProvider(window.ethereum)
 			return provider.value
 		} catch (error) {
 			if (error instanceof WalletError) {
@@ -35,7 +34,7 @@ const handleChainChange = async () => {
 
 	// reinitialize provider
 	assertsWithEthereum(window)
-	provider.value = new ethers.providers.Web3Provider(window.ethereum)
+	provider.value = new BrowserProvider(window.ethereum)
 }
 
 const removeChainChangeListener = effect(() => {

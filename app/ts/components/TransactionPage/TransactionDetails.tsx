@@ -1,8 +1,7 @@
 import { Signal, useComputed, useSignal } from '@preact/signals'
-import { BigNumber, ethers } from 'ethers'
 import { useEffect } from 'preact/hooks'
 import { useRouter } from '../HashRouter.js'
-import { TransactionReceipt, TransactionResponse } from '../../types.js'
+import { formatEther, TransactionReceiptParams, TransactionResponse } from 'ethers'
 import { AsyncProperty, useAsyncState } from '../../library/preact-utilities.js'
 import { useProviders } from '../../store/provider.js'
 import { calculateGasFee } from '../../library/utilities.js'
@@ -71,7 +70,7 @@ const DataFromResponse = ({ response, addFavoriteStore }: DataFromResponseProps)
 }
 
 type DataFromReceiptProps = {
-	receipt: Signal<AsyncProperty<TransactionReceipt>>
+	receipt: Signal<AsyncProperty<TransactionReceiptParams>>
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 
@@ -102,8 +101,8 @@ type EthAmountProps = {
 }
 
 const EthAmount = ({ response, addFavoriteStore }: EthAmountProps) => {
-	if (response.value.eq(0)) return <></>
-	const ethAmount = ethers.utils.formatEther(response.value)
+	if (response.value === BigInt(0)) return <></>
+	const ethAmount = formatEther(response.value)
 
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), amount: ethAmount }
 
@@ -115,7 +114,7 @@ type EthRecipientProps = {
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
-	if (response.value.eq(0) || response.to === undefined) return <></>
+	if (response.value === BigInt(0) || response.to === undefined) return <></>
 
 	const recipientAddress = response.to
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
@@ -130,7 +129,7 @@ const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
 }
 
 type TokenRecipientProps = {
-	receipt: TransactionReceipt
+	receipt: TransactionReceiptParams
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
@@ -150,7 +149,7 @@ const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
 }
 
 type TokenAmountProps = {
-	receipt: TransactionReceipt
+	receipt: TransactionReceiptParams
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 
@@ -176,9 +175,9 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 	}
 }
 
-const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceipt; onResolve?: (amount: BigNumber) => void }) => {
+const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptParams; onResolve?: (amount: BigInt) => void }) => {
 	const providers = useProviders()
-	const { value: asyncBalance, waitFor } = useAsyncState<BigNumber>()
+	const { value: asyncBalance, waitFor } = useAsyncState<BigInt>()
 
 	const getBalance = () => {
 		const { from, blockNumber } = receipt

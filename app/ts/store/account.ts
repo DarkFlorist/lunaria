@@ -12,9 +12,9 @@ export function useAccount() {
 
 	const connect = () => {
 		waitFor(async () => {
-			const browserProvider = providers.getbrowserProvider()
-			await browserProvider.send('eth_requestAccounts', [])
-			const signer = browserProvider.getSigner()
+			const provider = providers.getbrowserProvider()
+			await provider.send('eth_requestAccounts', [])
+			const signer = await provider.getSigner()
 			return await signer.getAddress()
 		})
 	}
@@ -24,7 +24,7 @@ export function useAccount() {
 			const browserProvider = providers.getbrowserProvider()
 
 			try {
-				const signer = browserProvider.getSigner()
+				const signer = await browserProvider.getSigner()
 				return await signer.getAddress()
 			} catch (unknownError) {
 				let error = new ConnectAttemptError(`Unknown error ${unknownError}`)

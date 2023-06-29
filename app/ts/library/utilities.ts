@@ -33,3 +33,6 @@ export function assertUnreachable(value: never): never {
 	throw new Error(`Unexpected code execution (${value})`)
 }
 
+export function JSONStringify(object: Object) {
+	return JSON.stringify(object, (_, value) => typeof value === 'bigint' ? value.toString() : value)
+}

@@ -1,15 +1,10 @@
-import { useEffect } from 'preact/hooks'
 import { useAccount } from '../store/account.js'
 import { useNetwork } from '../store/network.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
 
 export const ConnectAccount = () => {
-	const { address, connect, attemptToConnect } = useAccount()
-
-	useEffect(() => {
-		attemptToConnect()
-	}, [])
+	const { address, connect } = useAccount()
 
 	switch (address.value.state) {
 		case 'inactive':
@@ -20,7 +15,7 @@ export const ConnectAccount = () => {
 						<span class='font-bold'>Get started quickly</span>
 						<span class='text-sm text-white/50'>by connecting your wallet</span>
 					</div>
-					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={() => connect()}>
+					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connect}>
 						Connect
 					</button>
 				</div>
@@ -105,7 +100,7 @@ const NetworkName = () => {
 		case 'pending':
 			return <AsyncText placeholderLength={8} />
 		case 'resolved':
-			const networkName = network.value.value.chainId === 1 ? 'mainnet' : network.value.value.name
+			const networkName = network.value.value.chainId === 1n ? 'mainnet' : network.value.value.name
 			return <span class='capitalize leading-tight'>{networkName}</span>
 		case 'rejected':
 			return <span class='capitalize leading-tight'>Unable to connect to wallet</span>

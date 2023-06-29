@@ -1,4 +1,4 @@
-import { assertsWithEthereum } from '../library/ethereum.js'
+import { assertsEthereumObservable } from '../library/ethereum.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
@@ -12,26 +12,18 @@ export function useAccount() {
 
 	const connect = () => {
 		waitFor(async () => {
-			const provider = providers.getbrowserProvider()
-			await provider.send('eth_requestAccounts', [])
-			const signer = await provider.getSigner()
+			const provider = providers.browserProvider
+			const signer = await provider.value.getSigner()
 			return await signer.getAddress()
 		})
 	}
 
 	const attemptToConnect = () => {
 		waitFor(async () => {
-			const browserProvider = providers.getbrowserProvider()
-
-			try {
-				const signer = await browserProvider.getSigner()
-				return await signer.getAddress()
-			} catch (unknownError) {
-				let error = new ConnectAttemptError(`Unknown error ${unknownError}`)
-				if (typeof unknownError === 'string') error = new ConnectAttemptError(unknownError)
-				if (unknownError instanceof Error) error = new ConnectAttemptError(error.message)
-				throw error
-			}
+			if (providers.provider === undefined) throw new ConnectAttemptError()
+			const provider = providers.browserProvider
+			const [signer] = await provider.value.listAccounts()
+			return signer.address
 		})
 	}
 
@@ -58,6 +50,6 @@ const handleAccountChanged = ([newAddress]: string[]) => {
 
 const removeAccountChangedListener = effect(() => {
 	if (address.value.state !== 'resolved') return
-	assertsWithEthereum(window)
+	assertsEthereumObservable(window.ethereum)
 	window.ethereum.on('accountsChanged', handleAccountChanged)
 })

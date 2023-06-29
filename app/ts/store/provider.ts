@@ -1,5 +1,5 @@
-import { effect, signal } from '@preact/signals'
-import { assertsWithEthereum } from '../library/ethereum.js'
+import { effect, signal, useComputed } from '@preact/signals'
+import { assertsEthereumObservable, assertsWithEthereum } from '../library/ethereum.js'
 import { WalletError } from '../library/exceptions.js'
 import { BrowserProvider } from 'ethers'
 
@@ -13,20 +13,17 @@ export function useProviders() {
 			assertsWithEthereum(window)
 			provider.value = new BrowserProvider(window.ethereum)
 			return provider.value
-		} catch (error) {
-			if (error instanceof WalletError) {
-				throw error
-			}
-
-			const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : 'An unknown error occurred.'
+		} catch (exception) {
+			let errorMessage = 'An unknown error occurred.'
+			if (exception instanceof WalletError) errorMessage = exception.message
+			if (typeof exception === 'string') errorMessage = exception
 			throw new Error(errorMessage)
 		}
 	}
 
-	return {
-		browserProvider: provider,
-		getbrowserProvider,
-	}
+	const browserProvider = useComputed(getbrowserProvider)
+
+	return { provider, browserProvider }
 }
 
 const handleChainChange = async () => {
@@ -39,6 +36,6 @@ const handleChainChange = async () => {
 
 const removeChainChangeListener = effect(() => {
 	if (provider.value === undefined) return
-	assertsWithEthereum(window)
+	assertsEthereumObservable(window.ethereum)
 	window.ethereum.on('chainChanged', handleChainChange)
 })

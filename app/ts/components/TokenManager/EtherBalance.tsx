@@ -1,6 +1,5 @@
-
 import { useSignalEffect } from '@preact/signals'
-import { BigNumber, ethers } from 'ethers'
+import { formatEther } from 'ethers'
 import { useAsyncState } from '../../library/preact-utilities.js'
 import { useAccount } from '../../store/account.js'
 import { useNetwork } from '../../store/network.js'
@@ -12,13 +11,13 @@ export const EtherBalance = () => {
 	const { network } = useNetwork()
 	const { address } = useAccount()
 	const providers = useProviders()
-	const { value: query, waitFor } = useAsyncState<BigNumber>()
+	const { value: query, waitFor } = useAsyncState<bigint>()
 
 	const getBalance = () => {
 		if (address.value.state !== 'resolved') return
 		const accountAddress = address.value.value
 		waitFor(async () => {
-			const provider = providers.getbrowserProvider()
+			const provider = providers.browserProvider.value
 			return await provider.getBalance(accountAddress)
 		})
 	}
@@ -32,7 +31,11 @@ export const EtherBalance = () => {
 		case 'inactive':
 			return <></>
 		case 'rejected':
-			return <div class='text-white/50' title={query.value.error.message}><Icon.Info /></div>
+			return (
+				<div class='text-white/50' title={query.value.error.message}>
+					<Icon.Info />
+				</div>
+			)
 		case 'pending':
 			return (
 				<div class='text-white/50'>
@@ -40,11 +43,7 @@ export const EtherBalance = () => {
 				</div>
 			)
 		case 'resolved':
-			const balance = ethers.utils.formatEther(query.value.value)
-			return (
-				<div class='text-white/50'>
-					{balance} ETH
-				</div>
-			)
+			const balance = formatEther(query.value.value)
+			return <div class='text-white/50'>{balance} ETH</div>
 	}
 }

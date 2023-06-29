@@ -1,7 +1,7 @@
 import { signal, useSignalEffect } from '@preact/signals'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
-import { Network } from '../types.js'
+import { Network } from 'ethers'
 
 const network = signal<AsyncProperty<Network>>({ state: 'inactive' })
 
@@ -10,7 +10,7 @@ export function useNetwork() {
 	const { value: query, waitFor } = useAsyncState<Network>()
 
 	const getNetwork = () => {
-		waitFor(async () => await providers.getbrowserProvider().getNetwork())
+		waitFor(async () => await providers.browserProvider.value.getNetwork())
 	}
 
 	const listenForQueryChanges = () => {

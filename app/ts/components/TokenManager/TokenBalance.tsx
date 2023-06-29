@@ -1,5 +1,5 @@
 import { useSignalEffect } from '@preact/signals'
-import { ethers } from 'ethers'
+import { formatUnits } from 'ethers'
 import { useAccount } from '../../store/account.js'
 import { TokenMeta, useTokenBalance } from '../../store/tokens.js'
 import { AsyncText } from '../AsyncText.js'
@@ -35,7 +35,7 @@ export const TokenBalance = ({ token }: Props) => {
 				</div>
 			)
 		case 'resolved':
-			const balance = ethers.utils.formatUnits(tokenBalance.value.value, token.decimals)
+			const balance = formatUnits(tokenBalance.value.value, token.decimals)
 			return (
 				<div class='text-white/50'>
 					{balance} {token.symbol}

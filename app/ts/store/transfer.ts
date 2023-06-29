@@ -1,8 +1,7 @@
 import { useSignal, useSignalEffect } from '@preact/signals'
-import { ethers } from 'ethers'
+import { TransactionResponse, getAddress, parseEther, Contract, parseUnits } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
-import { ERC20, TransactionResponse } from '../types.js'
 import { useProviders } from './provider.js'
 import { useRecentTransfers } from './recent-transfers.js'
 import { TokenMeta } from './tokens.js'
@@ -24,14 +23,14 @@ export function useTransfer() {
 
 	const send = () => {
 		waitFor(async () => {
-			const provider = providers.getbrowserProvider()
+			const provider = providers.browserProvider
 			if (provider === undefined) throw new Error('Web3Provider is not instantiated.')
-			const signer = provider.getSigner()
-			const to = ethers.utils.getAddress(data.value.recipientAddress)
+			const signer = await provider.value.getSigner()
+			const to = getAddress(data.value.recipientAddress)
 
 			// Ether transfer
 			if (data.value.token === undefined) {
-				const value = ethers.utils.parseEther(data.value.amount)
+				const value = parseEther(data.value.amount)
 				const response = await signer.sendTransaction({ to, value })
 				add({ hash: response.hash, recipientAddress: to, date: Date.now(), amount: data.value.amount })
 				return response
@@ -39,8 +38,8 @@ export function useTransfer() {
 
 			// Token transfer
 			const tokenMetadata = data.value.token
-			const contract = new ethers.Contract(tokenMetadata.address, ERC20ABI, signer) as ERC20
-			const value = ethers.utils.parseUnits(data.value.amount, tokenMetadata.decimals)
+			const contract = new Contract(tokenMetadata.address, ERC20ABI, signer)
+			const value = parseUnits(data.value.amount, tokenMetadata.decimals)
 			const response = await contract.transfer(to, value)
 			add({ hash: response.hash, token: tokenMetadata, recipientAddress: to, date: Date.now(), amount: data.value.amount })
 			return response

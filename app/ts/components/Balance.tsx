@@ -1,5 +1,5 @@
 import { useSignal } from '@preact/signals'
-import { BigNumber, ethers } from 'ethers'
+import { Contract, formatEther, formatUnits } from 'ethers'
 import { useEffect } from 'preact/hooks'
 import { useAccountStore } from '../context/Account.js'
 import { useEthereumProvider } from '../context/EthereumProvider.js'
@@ -37,7 +37,7 @@ type BalanceConnectedProps = {
 const AsyncBalance = ({ address, token }: BalanceConnectedProps) => {
 	const ethProvider = useEthereumProvider()
 	const balance = useSignal<string | undefined>(undefined)
-	const { value: query, waitFor, reset } = useAsyncState<BigNumber>()
+	const { value: query, waitFor, reset } = useAsyncState<bigint>()
 
 	const getBalance = () => {
 		reset()
@@ -50,7 +50,7 @@ const AsyncBalance = ({ address, token }: BalanceConnectedProps) => {
 				return await provider.getBalance(address)
 			}
 
-			const contract = new ethers.Contract(token.address, ERC20ABI, provider) as ERC20
+			const contract = new Contract(token.address, ERC20ABI, provider) as ERC20
 			return await contract.balanceOf(address)
 		})
 	}
@@ -76,7 +76,7 @@ const AsyncBalance = ({ address, token }: BalanceConnectedProps) => {
 		case 'rejected':
 			return <span class='italic'>Unable to get balance!</span>
 		case 'resolved': {
-			balance.value = token === undefined ? ethers.utils.formatEther(query.value.value) : ethers.utils.formatUnits(query.value.value, token.decimals)
+			balance.value = token === undefined ? formatEther(query.value.value) : formatUnits(query.value.value, token.decimals)
 			return <span>balance: {balance}</span>
 		}
 		default:

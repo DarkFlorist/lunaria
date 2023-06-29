@@ -1,8 +1,7 @@
 import { useSignal, useSignalEffect } from '@preact/signals'
-import { ethers } from 'ethers'
+import { Network } from 'ethers'
 import { useAccountStore } from '../context/Account.js'
 import { useEthereumProvider } from '../context/EthereumProvider.js'
-import { Network } from '../types.js'
 
 export const ActiveNetwork = () => {
 	const network = useSignal<Network | undefined>(undefined)
@@ -44,8 +43,8 @@ export const ActiveNetwork = () => {
 	return (
 		<div class='flex flex-col items-center justify-center md:items-start md:gap-1 mb-2 px-4'>
 			<div class='capitalize text-white/50 text-xs md:text-sm'>network</div>
-			<div class='text-lg font-bold capitalize' title={ethers.utils.hexlify(network.value.chainId)}>
-				{network.value.chainId === 1 ? 'Ethereum Mainnet' : network.value.name}
+			<div class='text-lg font-bold capitalize' title={network.value.chainId.toString()}>
+				{network.value.chainId === BigInt(1) ? 'Ethereum Mainnet' : network.value.name}
 			</div>
 		</div>
 	)

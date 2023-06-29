@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { formatEther } from 'ethers'
 import { assertUnreachable } from '../library/utilities.js'
 import { useBalanceStore } from '../context/BalanceContext.js'
 
@@ -47,7 +47,7 @@ export const EthBalance = () => {
 				<div class='flex flex-col items-center justify-center md:items-start md:gap-1 mb-2'>
 					<div class='uppercase text-white/50 text-xs md:text-sm flex'>balance (ETH)</div>
 					<div class='flex items-center gap-2'>
-						<div class='text-lg font-bold capitalize'>{ethers.utils.formatEther(balanceStore.value.balance)} ETH</div>
+						<div class='text-lg font-bold capitalize'>{formatEther(balanceStore.value.balance)} ETH</div>
 					</div>
 				</div>
 			)

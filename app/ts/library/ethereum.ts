@@ -1,14 +1,9 @@
-import { Result } from 'ethers/lib/utils.js'
-import { TransactionReceipt, TransactionResponse, Interface, Log, id } from 'ethers'
+import { TransactionResponse, Interface, id, Result, TransactionReceipt, Log, Eip1193Provider, formatEther } from 'ethers'
 import { ERC20ABI } from './ERC20ABI.js'
 import { WalletError } from './exceptions.js'
 
-interface BrowserProvider extends ethers.providers.ExternalProvider {
-	on(eventName: string | symbol, listener: (...args: any[]) => void): void
-}
-
 export interface WithEthereum {
-	ethereum: BrowserProvider
+	ethereum: Eip1193Provider
 }
 
 export function withEthereum(global: unknown): global is WithEthereum {
@@ -31,6 +26,11 @@ export function assertsWithEthereum(global: unknown): asserts global is WithEthe
 	if (!withEthereum(global)) throw new WalletError()
 }
 
+export const calculateGasFee = (effectiveGasPrice: bigint, gasUsed: bigint) => {
+	const gasFeeBigNum = effectiveGasPrice * gasUsed
+	const gasFee = formatEther(gasFeeBigNum)
+	return gasFee
+}
 
 export type TransferTransactionResponse = TransactionResponse & {
 	to: string
@@ -43,9 +43,10 @@ export function isTransferTransaction(txResponse: TransactionResponse): txRespon
 export const erc20Interface = new Interface(ERC20ABI)
 
 export function parseLogArgsFromReceipt(transactionReceipt: TransactionReceipt) {
-	const transferLog = transactionReceipt.logs.find(isTransferLog)
+	// workaround for https://github.com/ethers-io/ethers.js/issues/4029
+	const transferLog = transactionReceipt.logs.find(isTransferLog) as unknown
 	if (transferLog === undefined) return undefined
-	const logArgs = erc20Interface.parseLog(transferLog)?.args
+	const logArgs = erc20Interface.parseLog(transferLog as { topics: string[]; data: string })?.args
 	return isTransferResult(logArgs) ? logArgs : undefined
 }
 
@@ -59,7 +60,7 @@ export function isTransferLog(log: Log) {
 export interface TransferResult extends Result {
 	from: string
 	to: string
-	value: BigInt
+	value: bigint
 }
 
 export function isTransferResult(result: unknown): result is TransferResult {

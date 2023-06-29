@@ -1,13 +1,12 @@
 import { Signal, useComputed, useSignal } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 import { useRouter } from '../HashRouter.js'
-import { formatEther, TransactionReceiptParams, TransactionResponse } from 'ethers'
+import { formatEther, formatUnits, TransactionReceipt, TransactionReceiptParams, TransactionResponse } from 'ethers'
 import { AsyncProperty, useAsyncState } from '../../library/preact-utilities.js'
 import { useProviders } from '../../store/provider.js'
-import { calculateGasFee } from '../../library/utilities.js'
 import { Info, InfoError, InfoPending } from './Info.js'
 import { useTransaction } from '../../store/transaction.js'
-import { parseLogArgsFromReceipt } from '../../library/ethereum.js'
+import { calculateGasFee, parseLogArgsFromReceipt } from '../../library/ethereum.js'
 import { useTokenQuery } from '../../store/tokens.js'
 import { SaveTransfer } from './SaveTransfer.js'
 import { FavoriteModel } from '../../store/favorites.js'
@@ -70,7 +69,7 @@ const DataFromResponse = ({ response, addFavoriteStore }: DataFromResponseProps)
 }
 
 type DataFromReceiptProps = {
-	receipt: Signal<AsyncProperty<TransactionReceiptParams>>
+	receipt: Signal<AsyncProperty<TransactionReceipt | null>>
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 
@@ -83,7 +82,9 @@ const DataFromReceipt = ({ receipt, addFavoriteStore }: DataFromReceiptProps) =>
 		case 'rejected':
 			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
 		case 'resolved':
-			const transactionFee = calculateGasFee(receipt.value.value.effectiveGasPrice, receipt.value.value.gasUsed)
+			if (receipt.value.value === null) return <></>
+
+			const transactionFee = calculateGasFee(receipt.value.value.gasPrice, receipt.value.value.gasUsed)
 			return (
 				<>
 					<TokenRecipient receipt={receipt.value.value} addFavoriteStore={addFavoriteStore} />
@@ -114,7 +115,7 @@ type EthRecipientProps = {
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
-	if (response.value === BigInt(0) || response.to === undefined) return <></>
+	if (response.value === BigInt(0) || response.to === null) return <></>
 
 	const recipientAddress = response.to
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
@@ -129,7 +130,7 @@ const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
 }
 
 type TokenRecipientProps = {
-	receipt: TransactionReceiptParams
+	receipt: TransactionReceipt
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
@@ -149,14 +150,16 @@ const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
 }
 
 type TokenAmountProps = {
-	receipt: TransactionReceiptParams
+	receipt: TransactionReceipt
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 
 const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 	const { query, tokenAddress } = useTokenQuery()
 	const logArgs = parseLogArgsFromReceipt(receipt)
+
 	if (logArgs === undefined) return <></>
+	if (receipt.to === null) return <></>
 
 	tokenAddress.value = receipt.to
 
@@ -169,7 +172,7 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 			return <InfoError displayText='Failed to get token amount' message={query.value.error.message} />
 		case 'resolved':
 			const { decimals, symbol } = query.value.value
-			const amount = ethers.utils.formatUnits(logArgs.value, decimals)
+			const amount = formatUnits(logArgs.value, decimals)
 			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
 			return <Info label='Amount' value={`${amount} ${symbol}`} />
 	}
@@ -177,12 +180,12 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 
 const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptParams; onResolve?: (amount: BigInt) => void }) => {
 	const providers = useProviders()
-	const { value: asyncBalance, waitFor } = useAsyncState<BigInt>()
+	const { value: asyncBalance, waitFor } = useAsyncState<bigint>()
 
 	const getBalance = () => {
 		const { from, blockNumber } = receipt
 		waitFor(async () => {
-			const provider = providers.getbrowserProvider()
+			const provider = providers.browserProvider.value
 			return await provider.getBalance(from, blockNumber)
 		})
 	}
@@ -200,7 +203,7 @@ const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptPar
 			return <InfoError displayText='Failed to load information' message={asyncBalance.value.error.message} />
 		case 'resolved':
 			onResolve?.(asyncBalance.value.value)
-			const balance = ethers.utils.formatEther(asyncBalance.value.value)
+			const balance = formatEther(asyncBalance.value.value)
 			return <Info label='Balance Before Transaction' value={balance} suffix=' ETH' />
 	}
 }

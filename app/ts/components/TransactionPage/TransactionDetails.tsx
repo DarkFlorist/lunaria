@@ -102,7 +102,7 @@ type EthAmountProps = {
 }
 
 const EthAmount = ({ response, addFavoriteStore }: EthAmountProps) => {
-	if (response.value === BigInt(0)) return <></>
+	if (response.value === 0n) return <></>
 	const ethAmount = formatEther(response.value)
 
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), amount: ethAmount }
@@ -115,7 +115,7 @@ type EthRecipientProps = {
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
-	if (response.value === BigInt(0) || response.to === null) return <></>
+	if (response.value === 0n || response.to === null) return <></>
 
 	const recipientAddress = response.to
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
@@ -178,7 +178,7 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 	}
 }
 
-const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptParams; onResolve?: (amount: BigInt) => void }) => {
+const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptParams; onResolve?: (amount: bigint) => void }) => {
 	const providers = useProviders()
 	const { value: asyncBalance, waitFor } = useAsyncState<bigint>()
 

@@ -5,6 +5,7 @@ import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
 import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
+import { JSONStringify } from '../library/utilities.js'
 
 const CACHEID_PREFIX = '_ut'
 
@@ -34,7 +35,7 @@ export function useAccountTokens() {
 
 	const listenForTokensChange = () => {
 		if (cacheKey.value === `${CACHEID_PREFIX}:default`) return
-		const newCache = JSON.stringify(tokens.value)
+		const newCache = JSONStringify(tokens.value)
 		localStorage.setItem(cacheKey.value, newCache)
 	}
 

@@ -18,10 +18,12 @@ import { Favorites } from '../Favorites.js'
 import { useRouter } from '../HashRouter.js'
 import { useFavorites } from '../../store/favorites.js'
 import { MainFooter } from '../MainFooter.js'
+import { useEffect } from 'preact/hooks'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransferPage = () => {
+	const { attemptToConnect } = useAccount()
 	const router = useRouter<{ index: string }>()
 	const transferStore = useTransfer()
 	const { favorites } = useFavorites()
@@ -35,6 +37,10 @@ export const TransferPage = () => {
 		if (transferFormData.value === undefined) return
 		transferStore.data.value = transferFormData.value
 	})
+
+	useEffect(() => {
+		attemptToConnect()
+	}, [])
 
 	return (
 		<div class='fixed inset-0 bg-black text-white h-[100dvh]'>

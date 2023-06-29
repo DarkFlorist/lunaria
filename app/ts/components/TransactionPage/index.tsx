@@ -5,10 +5,18 @@ import { DiscordInvite } from '../DiscordInvite.js'
 import { TransactionDetails } from './TransactionDetails.js'
 import { Favorites } from '../Favorites.js'
 import { MainFooter } from '../MainFooter.js'
+import { useAccount } from '../../store/account.js'
+import { useEffect } from 'preact/hooks'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransactionPage = () => {
+	const { attemptToConnect } = useAccount()
+
+	useEffect(() => {
+		attemptToConnect()
+	}, [])
+
 	return (
 		<div class='fixed inset-0 bg-black text-white h-[100dvh]'>
 			<Root>

@@ -12,8 +12,8 @@ export function useAccount() {
 
 	const connect = () => {
 		waitFor(async () => {
-			const provider = providers.browserProvider
-			const signer = await provider.value.getSigner()
+			const provider = providers.browserProvider.value
+			const signer = await provider.getSigner()
 			return await signer.getAddress()
 		})
 	}
@@ -21,8 +21,8 @@ export function useAccount() {
 	const attemptToConnect = () => {
 		waitFor(async () => {
 			if (providers.provider === undefined) throw new ConnectAttemptError()
-			const provider = providers.browserProvider
-			const [signer] = await provider.value.listAccounts()
+			const provider = providers.browserProvider.value
+			const [signer] = await provider.listAccounts()
 			return signer.address
 		})
 	}

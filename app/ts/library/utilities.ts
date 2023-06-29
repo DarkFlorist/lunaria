@@ -34,5 +34,12 @@ export function assertUnreachable(value: never): never {
 }
 
 export function JSONStringify(object: Object) {
-	return JSON.stringify(object, (_, value) => typeof value === 'bigint' ? value.toString() : value)
+	return JSON.stringify(object, (_, value) => (typeof value === 'bigint' ? `0x${value.toString(16)}n` : value))
 }
+
+export function JSONParse(jsonString: string) {
+	return JSON.parse(jsonString, (_, value) => {
+		return typeof value === 'string' && /^0x[a-fA-F0-9]+n$/.test(value) ? BigInt(value.slice(0, -1)) : value
+	})
+}
+

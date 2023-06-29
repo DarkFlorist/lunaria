@@ -5,7 +5,7 @@ import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
 import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
-import { JSONStringify } from '../library/utilities.js'
+import { JSONParse, JSONStringify } from '../library/utilities.js'
 
 const CACHEID_PREFIX = '_ut'
 
@@ -148,7 +148,7 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 ]
 
 function isTokenMeta(meta: object): meta is TokenMeta {
-	return 'chainId' in meta && typeof meta.chainId === 'number' && 'address' in meta && typeof meta.address === 'string' && 'name' in meta && typeof meta.name === 'string' && 'symbol' in meta && typeof meta.symbol === 'string' && 'decimals' in meta && typeof meta.decimals === 'number'
+	return 'chainId' in meta && typeof meta.chainId === 'bigint' && 'address' in meta && typeof meta.address === 'string' && 'name' in meta && typeof meta.name === 'string' && 'symbol' in meta && typeof meta.symbol === 'string' && 'decimals' in meta && typeof meta.decimals === 'number'
 }
 
 export function useTokensCache(cacheKey: string) {
@@ -160,7 +160,7 @@ export function useTokensCache(cacheKey: string) {
 
 	try {
 		let tokens = []
-		const parsed = JSON.parse(tokensCache)
+		const parsed = JSONParse(tokensCache)
 		if (!Array.isArray(parsed)) throw new Error()
 
 		for (const item of parsed) {

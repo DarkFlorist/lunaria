@@ -18,7 +18,7 @@ export const TokenManager = (props: SelectAssetModalProps) => {
 	const { network } = useNetwork()
 	const query = useSignal('')
 
-	const chainId = useComputed(() => (network.value.state === 'resolved' ? network.value.value.chainId : 1))
+	const chainId = useComputed(() => (network.value.state === 'resolved' ? network.value.value.chainId : 1n))
 	const tokensMatchingQuery = (token: TokenMeta) => token.name.toLowerCase().includes(query.value)
 	const tokensInChain = (token: TokenMeta) => token.chainId === chainId.value
 	const tokenList = useComputed(() => tokens.value.filter(tokensInChain).filter(tokensMatchingQuery))

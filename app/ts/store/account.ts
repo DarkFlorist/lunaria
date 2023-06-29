@@ -14,7 +14,7 @@ export function useAccount() {
 		waitFor(async () => {
 			const provider = providers.browserProvider.value
 			const signer = await provider.getSigner()
-			return await signer.getAddress()
+			return signer.address
 		})
 	}
 

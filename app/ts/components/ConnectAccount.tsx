@@ -93,6 +93,7 @@ const WalletNetwork = () => {
 
 const NetworkName = () => {
 	const { network } = useNetwork()
+	console.log(network.value)
 
 	switch (network.value.state) {
 		case 'inactive':
@@ -100,8 +101,7 @@ const NetworkName = () => {
 		case 'pending':
 			return <AsyncText placeholderLength={8} />
 		case 'resolved':
-			const networkName = network.value.value.chainId === 1n ? 'mainnet' : network.value.value.name
-			return <span class='capitalize leading-tight'>{networkName}</span>
+			return <span class='capitalize leading-tight'>{network.value.value.name}</span>
 		case 'rejected':
 			return <span class='capitalize leading-tight'>Unable to connect to wallet</span>
 	}

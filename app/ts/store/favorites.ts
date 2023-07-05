@@ -1,6 +1,7 @@
 import { effect, signal } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
-import { TokenMeta } from './tokens'
+import { JSONStringify } from '../library/utilities.js'
+import { TokenMeta } from './tokens.js'
 
 export type FavoriteModel = {
 	label?: string
@@ -35,7 +36,7 @@ const favorites = signal<FavoriteModel[]>(getCachedFavorites())
 
 effect(() => {
 	const uniqueTxns = Array.from(new Set(favorites.value))
-	localStorage.setItem(FAVORITES_CACHE_ID, JSON.stringify(uniqueTxns))
+	localStorage.setItem(FAVORITES_CACHE_ID, JSONStringify(uniqueTxns))
 })
 
 export function useFavorites() {

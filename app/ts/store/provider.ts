@@ -1,10 +1,9 @@
-import { effect, signal } from '@preact/signals'
-import { ethers } from 'ethers'
-import { assertsWithEthereum } from '../library/ethereum.js'
+import { effect, signal, useComputed } from '@preact/signals'
+import { assertsEthereumObservable, assertsWithEthereum } from '../library/ethereum.js'
 import { WalletError } from '../library/exceptions.js'
-import { Web3Provider } from '../types.js'
+import { BrowserProvider } from 'ethers'
 
-const provider = signal<Web3Provider | undefined>(undefined)
+const provider = signal<BrowserProvider | undefined>(undefined)
 
 export function useProviders() {
 	const getbrowserProvider = () => {
@@ -12,22 +11,19 @@ export function useProviders() {
 
 		try {
 			assertsWithEthereum(window)
-			provider.value = new ethers.providers.Web3Provider(window.ethereum)
+			provider.value = new BrowserProvider(window.ethereum)
 			return provider.value
-		} catch (error) {
-			if (error instanceof WalletError) {
-				throw error
-			}
-
-			const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : 'An unknown error occurred.'
+		} catch (exception) {
+			let errorMessage = 'An unknown error occurred.'
+			if (exception instanceof WalletError) errorMessage = exception.message
+			if (typeof exception === 'string') errorMessage = exception
 			throw new Error(errorMessage)
 		}
 	}
 
-	return {
-		browserProvider: provider,
-		getbrowserProvider,
-	}
+	const browserProvider = useComputed(getbrowserProvider)
+
+	return { provider, browserProvider }
 }
 
 const handleChainChange = async () => {
@@ -35,11 +31,11 @@ const handleChainChange = async () => {
 
 	// reinitialize provider
 	assertsWithEthereum(window)
-	provider.value = new ethers.providers.Web3Provider(window.ethereum)
+	provider.value = new BrowserProvider(window.ethereum)
 }
 
 const removeChainChangeListener = effect(() => {
 	if (provider.value === undefined) return
-	assertsWithEthereum(window)
+	assertsEthereumObservable(window.ethereum)
 	window.ethereum.on('chainChanged', handleChainChange)
 })

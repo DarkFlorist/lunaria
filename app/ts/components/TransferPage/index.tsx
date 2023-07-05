@@ -9,7 +9,7 @@ import { useTransfer } from '../../store/transfer.js'
 import { removeNonStringsAndTrim } from '../../library/utilities.js'
 import { useAccount } from '../../store/account.js'
 import { AsyncProperty } from '../../library/preact-utilities.js'
-import { TransactionResponse } from '../../types.js'
+import { TransactionResponse } from 'ethers'
 import { RecentTransfers } from '../RecentTransfers.js'
 import { DiscordInvite } from '../DiscordInvite.js'
 import { AddTokenDialog } from './AddTokenDialog.js'
@@ -18,10 +18,12 @@ import { Favorites } from '../Favorites.js'
 import { useRouter } from '../HashRouter.js'
 import { useFavorites } from '../../store/favorites.js'
 import { MainFooter } from '../MainFooter.js'
+import { useEffect } from 'preact/hooks'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransferPage = () => {
+	const { attemptToConnect } = useAccount()
 	const router = useRouter<{ index: string }>()
 	const transferStore = useTransfer()
 	const { favorites } = useFavorites()
@@ -35,6 +37,10 @@ export const TransferPage = () => {
 		if (transferFormData.value === undefined) return
 		transferStore.data.value = transferFormData.value
 	})
+
+	useEffect(() => {
+		attemptToConnect()
+	}, [])
 
 	return (
 		<div class='fixed inset-0 bg-black text-white h-[100dvh]'>

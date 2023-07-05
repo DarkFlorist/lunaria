@@ -1,6 +1,7 @@
 import { signal, useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 import { STORAGE_KEY_RECENTS } from '../library/constants.js'
+import { JSONStringify } from '../library/utilities.js'
 import { TokenMeta } from './tokens.js'
 
 type RecentTransaction = {
@@ -30,7 +31,7 @@ export const useRecentTransfers = () => {
 
 	useSignalEffect(() => {
 		const uniqueTxns = Array.from(new Set(recentTxns.value))
-		sessionStorage.setItem(STORAGE_KEY_RECENTS, JSON.stringify(uniqueTxns))
+		sessionStorage.setItem(STORAGE_KEY_RECENTS, JSONStringify(uniqueTxns))
 	})
 
 	useEffect(() => {

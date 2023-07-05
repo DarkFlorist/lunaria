@@ -1,6 +1,3 @@
-import { ethers } from 'ethers'
-import { ExternalProvider, Web3Provider } from '../types'
-
 export async function sleep(milliseconds: number) {
 	await new Promise(resolve => setTimeout(resolve, milliseconds))
 }
@@ -32,65 +29,17 @@ export function getRandomNumberBetween(from: number, to: number): number {
 	return Math.floor(Math.random() * (to - from + 1)) + from
 }
 
-/**
- * Describe a window ethereum object
- */
-export function isExternalProvider(ethereum: unknown): ethereum is ExternalProvider {
-	return ethereum !== null && ethereum !== undefined && typeof ethereum === 'object'
-}
-
-export function assertsExternalProvider(ethereum: unknown): asserts ethereum is ExternalProvider {
-	if (!isExternalProvider(ethereum)) throw new Error('Ethereum object does not exist')
-}
-
-export type ObservableEthereum = {
-	on(eventName: string | symbol, listener: (...args: any[]) => void): void
-}
-
-export function isEthereumObservable(ethereum: unknown): ethereum is ObservableEthereum {
-	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
-}
-
-export function assertsEthereumObservable(ethereum: unknown): asserts ethereum is ObservableEthereum {
-	if (!isEthereumObservable(ethereum)) throw new Error('Ethereum object is not observable')
-}
-
 export function assertUnreachable(value: never): never {
 	throw new Error(`Unexpected code execution (${value})`)
 }
 
-export function isTransactionHash(hash: string): hash is `0x${string}` {
-	return ethers.utils.hexDataLength(hash) === 32
+export function JSONStringify(object: Object) {
+	return JSON.stringify(object, (_, value) => (typeof value === 'bigint' ? `0x${value.toString(16)}n` : value))
 }
 
-export function assertsTransactionHash(hash: string): asserts hash is `0x${string}` {
-	if (!isTransactionHash(hash)) throw new Error('Invalid transaction hash')
+export function JSONParse(jsonString: string) {
+	return JSON.parse(jsonString, (_, value) => {
+		return typeof value === 'string' && /^0x[a-fA-F0-9]+n$/.test(value) ? BigInt(value.slice(0, -1)) : value
+	})
 }
 
-export const calculateGasFee = (effectiveGasPrice: ethers.BigNumber, gasUsed: ethers.BigNumber) => {
-	const gasFeeBigNum = effectiveGasPrice.mul(gasUsed)
-	const gasFee = ethers.utils.formatEther(gasFeeBigNum)
-	return gasFee
-}
-
-export function isWeb3Provider(provider: unknown): provider is Web3Provider {
-	return (
-		provider !== null &&
-		typeof provider === 'object' &&
-		// provider functions that matter
-		'send' in provider &&
-		typeof provider.send === 'function' &&
-		'getBalance' in provider &&
-		typeof provider.getBalance === 'function' &&
-		'sendTransaction' in provider &&
-		typeof provider.sendTransaction === 'function' &&
-		'getTransaction' in provider &&
-		typeof provider.getTransaction === 'function' &&
-		'waitForTransaction' in provider &&
-		typeof provider.waitForTransaction === 'function'
-	)
-}
-
-export function assertsWeb3Provider(provider: unknown): asserts provider is Web3Provider {
-	if (!isWeb3Provider(provider)) throw new Error('Could not connect to compatible ethereum provider.')
-}

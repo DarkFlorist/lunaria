@@ -1,7 +1,7 @@
 import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { ethers } from 'ethers'
 import { useRef } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
+import { formatUnits } from 'ethers'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
 import { useAccount } from '../store/account.js'
 import { TokenMeta, useTokenBalance } from '../store/tokens.js'
@@ -52,10 +52,9 @@ export const AmountField = (props: Props) => {
 		getTokenBalance(address.value.value, props.token.address)
 	}
 
-
 	useSignalEffect(() => {
 		if (tokenBalance.value.state !== 'resolved') return
-		const balance = ethers.utils.formatUnits(tokenBalance.value.value, props.token?.decimals)
+		const balance = formatUnits(tokenBalance.value.value, props.token?.decimals)
 		props.onInput(balance)
 		inputRef.current?.focus()
 	})
@@ -87,7 +86,12 @@ type MaxButtonProps = {
 
 const MaxButton = (props: MaxButtonProps) => {
 	if (props.show !== true) return <></>
-	if (props.isBusy) return <div class='p-2 mx-2'><Icon.Spinner /></div>
+	if (props.isBusy)
+		return (
+			<div class='p-2 mx-2'>
+				<Icon.Spinner />
+			</div>
+		)
 
 	return (
 		<button type='button' class='mx-2 p-2 outline-none border border-white/50 focus:border-white text-xs text-white/50 focus:text-white hover:text-white hover:border-white disabled:opacity-50' onClick={props.onClick} disabled={props.isBusy}>
@@ -104,7 +108,9 @@ type ClearButtonProps = {
 
 const ClearButton = (props: ClearButtonProps) => {
 	if (!props.show) return <></>
-	return <button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm disabled:opacity-50' onClick={props.onClick} disabled={props.disabled}>
-		<Icon.Xmark />
-	</button>
+	return (
+		<button type='button' class='mx-2 p-2 outline-none border border-transparent focus:border-white text-sm disabled:opacity-50' onClick={props.onClick} disabled={props.disabled}>
+			<Icon.Xmark />
+		</button>
+	)
 }

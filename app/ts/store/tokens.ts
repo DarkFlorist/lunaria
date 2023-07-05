@@ -1,11 +1,11 @@
 import { signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { useAccount } from './account.js'
-import { useAsyncState } from '../library/preact-utilities.js'
+import { useAsyncState } from '../library/async-state.js'
 import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
 import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
-import { JSONParse, JSONStringify } from '../library/utilities.js'
+import { jsonParse, jsonStringify } from '../library/utilities.js'
 
 const CACHEID_PREFIX = '_ut'
 
@@ -35,7 +35,7 @@ export function useAccountTokens() {
 
 	const listenForTokensChange = () => {
 		if (cacheKey.value === `${CACHEID_PREFIX}:default`) return
-		const newCache = JSONStringify(tokens.value)
+		const newCache = jsonStringify(tokens.value)
 		localStorage.setItem(cacheKey.value, newCache)
 	}
 
@@ -160,7 +160,7 @@ export function useTokensCache(cacheKey: string) {
 
 	try {
 		let tokens = []
-		const parsed = JSONParse(tokensCache)
+		const parsed = jsonParse(tokensCache)
 		if (!Array.isArray(parsed)) throw new Error()
 
 		for (const item of parsed) {

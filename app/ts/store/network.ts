@@ -1,5 +1,5 @@
 import { signal, useSignalEffect } from '@preact/signals'
-import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { AsyncProperty, useAsyncState } from '../library/async-state.js'
 import { useProviders } from './provider.js'
 import { Network } from 'ethers'
 

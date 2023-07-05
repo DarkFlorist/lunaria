@@ -33,13 +33,17 @@ export function assertUnreachable(value: never): never {
 	throw new Error(`Unexpected code execution (${value})`)
 }
 
-export function JSONStringify(object: Object) {
-	return JSON.stringify(object, (_, value) => (typeof value === 'bigint' ? `0x${value.toString(16)}n` : value))
-}
-
-export function JSONParse(jsonString: string) {
-	return JSON.parse(jsonString, (_, value) => {
-		return typeof value === 'string' && /^0x[a-fA-F0-9]+n$/.test(value) ? BigInt(value.slice(0, -1)) : value
+export function jsonStringify(object: Object) {
+	return JSON.stringify(object, (_, value) => {
+		if (typeof value === 'bigint') return `0x${value.toString(16)}n`
+		return value
 	})
 }
 
+export function jsonParse(jsonString: string) {
+	return JSON.parse(jsonString, (_, value) => {
+		if (typeof value !== 'string') return value
+		if (/^0x[a-fA-F0-9]+n$/.test(value)) return BigInt(value.slice(0, -1))
+		return value
+	})
+}

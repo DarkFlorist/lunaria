@@ -1,7 +1,7 @@
 import { useSignal, useSignalEffect } from '@preact/signals'
 import { TransactionResponse, getAddress, parseEther, Contract, parseUnits } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
-import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { AsyncProperty, useAsyncState } from '../library/async-state.js'
 import { useProviders } from './provider.js'
 import { useRecentTransfers } from './recent-transfers.js'
 import { TokenMeta } from './tokens.js'

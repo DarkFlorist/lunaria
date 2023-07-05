@@ -1,6 +1,6 @@
 import { useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
-import { useAsyncState } from '../library/preact-utilities.js'
+import { useAsyncState } from '../library/async-state.js'
 import { TransactionReceipt, TransactionResponse } from 'ethers'
 import { useProviders } from './provider.js'
 

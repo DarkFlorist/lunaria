@@ -2,7 +2,7 @@ import { JSX } from 'preact/jsx-runtime'
 import { ComponentChildren } from 'preact'
 import { Signal, useComputed } from '@preact/signals'
 import { TokenMeta, useAccountTokens, useTokenQuery } from '../store/tokens.js'
-import { AsyncProperty } from '../library/preact-utilities.js'
+import { AsyncProperty } from '../library/async-state.js'
 
 export const QueryToken = ({ onSave }: { onSave: () => void }) => {
 	const { query, tokenAddress } = useTokenQuery()

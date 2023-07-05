@@ -1,5 +1,5 @@
 import { assertsEthereumObservable } from '../library/ethereum.js'
-import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { AsyncProperty, useAsyncState } from '../library/async-state.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
 import { ConnectAttemptError } from '../library/exceptions.js'

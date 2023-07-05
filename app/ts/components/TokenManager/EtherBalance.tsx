@@ -1,6 +1,6 @@
 import { useSignalEffect } from '@preact/signals'
 import { formatEther } from 'ethers'
-import { useAsyncState } from '../../library/preact-utilities.js'
+import { useAsyncState } from '../../library/async-state.js'
 import { useAccount } from '../../store/account.js'
 import { useNetwork } from '../../store/network.js'
 import { useProviders } from '../../store/provider.js'

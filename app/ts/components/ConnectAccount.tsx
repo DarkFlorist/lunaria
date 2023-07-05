@@ -93,7 +93,6 @@ const WalletNetwork = () => {
 
 const NetworkName = () => {
 	const { network } = useNetwork()
-	console.log(network.value)
 
 	switch (network.value.state) {
 		case 'inactive':

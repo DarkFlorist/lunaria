@@ -74,7 +74,7 @@ export function useTokenQuery() {
 				const name = await contract.name()
 				const symbol = await contract.symbol()
 				const decimals = await contract.decimals()
-				return { chainId, name, symbol, decimals, address: tokenAddress.value } as const
+				return { chainId, name, symbol, decimals: Number(decimals), address: tokenAddress.value } as const
 			} catch (unknownError) {
 				throw new Error('Contract call failed')
 			}

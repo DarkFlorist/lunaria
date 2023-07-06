@@ -6,14 +6,14 @@ import { EtherBalance } from './EtherBalance.js'
 import { SearchField } from './SearchField.js'
 import { TokenBalance } from './TokenBalance.js'
 
-export type SelectAssetModalProps = {
+export type TokenManagerProps = {
 	show: boolean
 	onClose: () => void
 	onSelect: (token?: TokenMeta) => void
 	onAddToken: () => void
 }
 
-export const TokenManager = (props: SelectAssetModalProps) => {
+export const TokenManager = (props: TokenManagerProps) => {
 	const { tokens } = useAccountTokens()
 	const { network } = useNetwork()
 	const query = useSignal('')

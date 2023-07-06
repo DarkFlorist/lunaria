@@ -74,7 +74,7 @@ export function useTokenQuery() {
 				const name = await contract.name()
 				const symbol = await contract.symbol()
 				const decimals = await contract.decimals()
-				return { chainId, name, symbol, decimals: Number(decimals), address: tokenAddress.value } as const
+				return { chainId, name, symbol, decimals, address: tokenAddress.value } as const
 			} catch (unknownError) {
 				throw new Error('Contract call failed')
 			}
@@ -92,7 +92,7 @@ export type TokenMeta = {
 	name: string
 	address: string
 	symbol: string
-	decimals: number
+	decimals: bigint
 }
 
 export const DEFAULT_TOKENS: TokenMeta[] = [
@@ -101,54 +101,54 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 		address: '0x4c9BBFc1FbD93dFB509E718400978fbEedf590E9',
 		name: 'Rai Reflex Index',
 		symbol: 'RAI',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
 		chainId: 1n,
 		address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
 		name: 'Dai',
 		symbol: 'DAI',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
 		chainId: 1n,
 		address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
 		name: 'Wrapped Ether',
 		symbol: 'WETH',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
 		chainId: 1n,
 		address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 		name: 'USD Coin',
 		symbol: 'USDC',
-		decimals: 6,
+		decimals: 6n,
 	},
 	{
 		chainId: 1n,
 		address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
 		name: 'Wrapped Bitcoin',
 		symbol: 'WBTC',
-		decimals: 8,
+		decimals: 8n,
 	},
 	{
 		chainId: 5n,
 		address: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 		name: 'Wrapped Ether',
 		symbol: 'WETH',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
 		chainId: 5n,
 		address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
 		name: 'USD Coin',
 		symbol: 'USDC',
-		decimals: 6,
+		decimals: 6n,
 	},
 ]
 
 function isTokenMeta(meta: object): meta is TokenMeta {
-	return 'chainId' in meta && typeof meta.chainId === 'bigint' && 'address' in meta && typeof meta.address === 'string' && 'name' in meta && typeof meta.name === 'string' && 'symbol' in meta && typeof meta.symbol === 'string' && 'decimals' in meta && typeof meta.decimals === 'number'
+	return 'chainId' in meta && typeof meta.chainId === 'bigint' && 'address' in meta && typeof meta.address === 'string' && 'name' in meta && typeof meta.name === 'string' && 'symbol' in meta && typeof meta.symbol === 'string' && 'decimals' in meta && typeof meta.decimals === 'bigint'
 }
 
 export function useTokensCache(cacheKey: string) {

@@ -1,4 +1,4 @@
-import { TransactionResponse, Interface, id, Result, TransactionReceipt, Log, Eip1193Provider, formatEther } from 'ethers'
+import { TransactionResponse, Interface, id, TransactionReceipt, Log, Eip1193Provider, formatEther } from 'ethers'
 import { ERC20ABI } from './ERC20ABI.js'
 import { WalletError } from './exceptions.js'
 
@@ -41,28 +41,18 @@ export function isTransferTransaction(txResponse: TransactionResponse): txRespon
 }
 
 export const erc20Interface = new Interface(ERC20ABI)
-
-export function parseLogArgsFromReceipt(transactionReceipt: TransactionReceipt) {
-	// workaround for https://github.com/ethers-io/ethers.js/issues/4029
-	const transferLog = transactionReceipt.logs.find(isTransferLog) as unknown
-	if (transferLog === undefined) return undefined
-	const logArgs = erc20Interface.parseLog(transferLog as { topics: string[]; data: string })?.args
-	return isTransferResult(logArgs) ? logArgs : undefined
-}
-
 export const transferTopic = id('Transfer(address,address,uint256)')
 
-export function isTransferLog(log: Log) {
-	const [topic] = log.topics
-	return topic === transferTopic
+export function extractArgValue<T>({ topics, data }: Log, argKey: string): T | null {
+	// ensure topics conforms to parseLog param type
+	const mutableTopics = topics.map(topic => topic)
+	const parsedLog = erc20Interface.parseLog({ topics: mutableTopics, data })
+	if (!parsedLog) return null
+	return parsedLog.args.getValue(argKey)
 }
 
-export interface TransferResult extends Result {
-	from: string
-	to: string
-	value: bigint
-}
-
-export function isTransferResult(result: unknown): result is TransferResult {
-	return result !== null && typeof result === 'object' && 'value' in result && typeof result.value === 'object' && 'from' in result && typeof result.from === 'string' && 'to' in result && typeof result.to === 'string'
+export function extractTransferLogFromSender(receipt: TransactionReceipt) {
+	const hasTransferTopic = (log: Log) => log.topics.some(topic => topic === transferTopic)
+	const isAddressFromSender = (log: Log) => extractArgValue(log, 'from') === receipt.from
+	return receipt.logs.filter(hasTransferTopic).find(isAddressFromSender) || null
 }

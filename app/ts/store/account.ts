@@ -3,6 +3,7 @@ import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
 import { ConnectAttemptError } from '../library/exceptions.js'
+import { getAddress } from 'ethers'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
 
@@ -14,7 +15,7 @@ export function useAccount() {
 		waitFor(async () => {
 			const provider = providers.browserProvider.value
 			const signer = await provider.getSigner()
-			return signer.address
+			return getAddress(signer.address)
 		})
 	}
 
@@ -23,7 +24,7 @@ export function useAccount() {
 			if (providers.provider === undefined) throw new ConnectAttemptError()
 			const provider = providers.browserProvider.value
 			const [signer] = await provider.listAccounts()
-			return signer.address
+			return getAddress(signer.address)
 		})
 	}
 

@@ -6,7 +6,7 @@ import { AsyncProperty, useAsyncState } from '../../library/preact-utilities.js'
 import { useProviders } from '../../store/provider.js'
 import { Info, InfoError, InfoPending } from './Info.js'
 import { useTransaction } from '../../store/transaction.js'
-import { calculateGasFee, parseLogArgsFromReceipt } from '../../library/ethereum.js'
+import { calculateGasFee, extractArgValue, extractTransferLogFromSender } from '../../library/ethereum.js'
 import { useTokenQuery } from '../../store/tokens.js'
 import { SaveTransfer } from './SaveTransfer.js'
 import { FavoriteModel } from '../../store/favorites.js'
@@ -133,11 +133,14 @@ type TokenRecipientProps = {
 	receipt: TransactionReceipt
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
-const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
-	const logArgs = parseLogArgsFromReceipt(receipt)
-	if (logArgs === undefined) return <></>
 
-	const recipientAddress = logArgs.to
+const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
+	const txLog = extractTransferLogFromSender(receipt)
+	if (txLog === null) return <></>
+
+	const recipientAddress = extractArgValue<string>(txLog, 'to')
+	if (recipientAddress === null) return <></>
+
 	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
 
 	const blockieIcon = () => (
@@ -146,7 +149,7 @@ const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
 		</span>
 	)
 
-	return <Info label='Recipient' value={logArgs.to} icon={blockieIcon} allowCopy />
+	return <Info label='Recipient' value={recipientAddress} icon={blockieIcon} allowCopy />
 }
 
 type TokenAmountProps = {
@@ -156,12 +159,15 @@ type TokenAmountProps = {
 
 const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 	const { query, tokenAddress } = useTokenQuery()
-	const logArgs = parseLogArgsFromReceipt(receipt)
 
-	if (logArgs === undefined) return <></>
 	if (receipt.to === null) return <></>
-
 	tokenAddress.value = receipt.to
+
+	const txLog = extractTransferLogFromSender(receipt)
+	if (txLog === null) return <></>
+
+	const tokenValue = extractArgValue<bigint>(txLog, 'value')
+	if (tokenValue === null) return <></>
 
 	switch (query.value.state) {
 		case 'inactive':
@@ -172,7 +178,7 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 			return <InfoError displayText='Failed to get token amount' message={query.value.error.message} />
 		case 'resolved':
 			const { decimals, symbol } = query.value.value
-			const amount = formatUnits(logArgs.value, decimals)
+			const amount = formatUnits(tokenValue, decimals)
 			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
 			return <Info label='Amount' value={`${amount} ${symbol}`} />
 	}

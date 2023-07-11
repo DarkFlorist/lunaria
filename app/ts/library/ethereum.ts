@@ -43,12 +43,18 @@ export function isTransferTransaction(txResponse: TransactionResponse): txRespon
 export const erc20Interface = new Interface(ERC20ABI)
 export const transferTopic = id('Transfer(address,address,uint256)')
 
-export function extractArgValue<T>({ topics, data }: Log, argKey: string): T | null {
-	// ensure topics conforms to parseLog param type
-	const mutableTopics = topics.map(topic => topic)
-	const parsedLog = erc20Interface.parseLog({ topics: mutableTopics, data })
-	if (!parsedLog) return null
-	return parsedLog.args.getValue(argKey)
+export function parseERC20Log({ topics: [...topics], data }: Log) {
+	// topics is spread to conform to parseLog parameters
+	try {
+		return erc20Interface.parseLog({ topics, data })
+	} catch (error) {
+		return null
+	}
+}
+
+export function extractArgValue<T>(log: Log, argKey: string): T | null {
+	const parsedLog = parseERC20Log(log)
+	return parsedLog ? parsedLog.args.getValue(argKey) : null
 }
 
 export function extractTransferLogFromSender(receipt: TransactionReceipt) {

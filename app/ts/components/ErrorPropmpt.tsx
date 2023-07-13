@@ -1,4 +1,4 @@
-import { useErrors } from "../store/errors"
+import { useErrors } from "../store/errors.js"
 
 export const ErrorPrompt = () => {
 	const { errors, remove } = useErrors()

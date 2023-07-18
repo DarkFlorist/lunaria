@@ -1,8 +1,10 @@
-import { signal } from '@preact/signals'
+import { signal, useComputed } from '@preact/signals'
 
 export const errors = signal<ApplicationError[]>([])
 
 export function useErrors() {
+	const latest = useComputed(() => errors.value.at(0))
+
 	const add = (error: ApplicationError) => {
 		errors.value = [error, ...errors.value]
 	}
@@ -11,7 +13,7 @@ export function useErrors() {
 		errors.value = errors.value.filter(error => error.id !== id)
 	}
 
-	return { errors, remove, add }
+	return { errors, remove, add, latest }
 }
 
 export class ApplicationError extends Error {
@@ -20,6 +22,7 @@ export class ApplicationError extends Error {
 	constructor(id: string, message?: string) {
 		super(message)
 		this.name = 'ApplicationError'
+		this.message = message || 'An application error has occurred.'
 		this.id = id
 	}
 }

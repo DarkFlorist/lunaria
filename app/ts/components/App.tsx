@@ -4,6 +4,7 @@ import { Notices } from './Notice.js'
 import { SplashScreen } from './SplashScreen.js'
 import { TransactionPage } from './TransactionPage/index.js'
 import { ErrorPage } from './ErrorPage/index.js'
+import { ErrorAlert } from './ErrorAlert.js'
 
 export function App() {
 	return (
@@ -23,6 +24,7 @@ export function App() {
 				</Route>
 			</Router>
 			<Notices />
+			<ErrorAlert />
 		</SplashScreen>
 	)
 }

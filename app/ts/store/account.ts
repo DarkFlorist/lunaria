@@ -2,8 +2,8 @@ import { assertsEthereumObservable } from '../library/ethereum.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
-import { ConnectAttemptError } from '../library/exceptions.js'
 import { getAddress } from 'ethers'
+import { ApplicationError } from './errors.js'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
 
@@ -21,7 +21,7 @@ export function useAccount() {
 
 	const attemptToConnect = () => {
 		waitFor(async () => {
-			if (providers.provider === undefined) throw new ConnectAttemptError()
+			if (providers.provider === undefined) throw new ApplicationError('WALLET_MISSING')
 			const provider = providers.browserProvider.value
 			const [signer] = await provider.listAccounts()
 			return getAddress(signer.address)

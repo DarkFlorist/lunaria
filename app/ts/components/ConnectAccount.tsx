@@ -8,7 +8,19 @@ export const ConnectAccount = () => {
 
 	switch (address.value.state) {
 		case 'inactive':
+			return (
+				<div class='grid grid-cols-[1fr,auto] gap-3 px-4 lg:px-0 h-20 border border-white/20 lg:border-none lg:place-items-end place-content-center items-center'>
+					<div class='grid lg:place-items-end'>
+						<span class='font-bold'>Get started quickly</span>
+						<span class='text-sm text-white/50'>by connecting your wallet</span>
+					</div>
+					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connect}>
+						Connect
+					</button>
+				</div>
+			)
 		case 'rejected':
+			console.log(address.value.error)
 			return (
 				<div class='grid grid-cols-[1fr,auto] gap-3 px-4 lg:px-0 h-20 border border-white/20 lg:border-none lg:place-items-end place-content-center items-center'>
 					<div class='grid lg:place-items-end'>

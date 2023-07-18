@@ -14,7 +14,7 @@ export const ErrorAlert = () => {
 
 	const dismissError = () => {
 		if (!latestError.value) return
-		remove(latestError.value.id)
+		remove(latestError.value.code)
 	}
 
 	return (

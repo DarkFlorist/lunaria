@@ -1,11 +1,11 @@
-import { ApplicationError, useErrors } from '../../store/errors.js'
+import { useErrors } from '../../store/errors.js'
 
 export const ErrorPage = () => {
 	const { add } = useErrors()
 
 	const addErrors = () => {
-		add(new ApplicationError('ERROR_UNKNOWN', 'An unknown error has occurred'))
-		add(new ApplicationError('ERROR_WALLET_NOT_INSTALLED', 'A web3 wallet is not detected'))
+		add('UNKNOWN')
+		add('WALLET_MISSING', 'A web3 wallet is not detected')
 	}
 
 	return (

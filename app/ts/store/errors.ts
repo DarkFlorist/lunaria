@@ -5,24 +5,31 @@ export const errors = signal<ApplicationError[]>([])
 export function useErrors() {
 	const latest = useComputed(() => errors.value.at(0))
 
-	const add = (error: ApplicationError) => {
+	const add = (code: keyof typeof ErrorsDictionary, message?: string) => {
+		const error = new ApplicationError(code, message)
 		errors.value = [error, ...errors.value]
 	}
 
-	const remove = (id: string) => {
-		errors.value = errors.value.filter(error => error.id !== id)
+	const remove = (code: keyof typeof ErrorsDictionary) => {
+		errors.value = errors.value.filter(error => error.code !== code)
 	}
 
 	return { errors, remove, add, latest }
 }
 
 export class ApplicationError extends Error {
-	id: string
+	code: keyof typeof ErrorsDictionary
 
-	constructor(id: string, message?: string) {
-		super(message)
+	constructor(code: keyof typeof ErrorsDictionary, customMessage?: string) {
+		super(customMessage)
 		this.name = 'ApplicationError'
-		this.message = message || 'An application error has occurred.'
-		this.id = id
+		this.message = customMessage || ErrorsDictionary[code]
+		this.code = code
 	}
+}
+
+// TODO: create a map of possible errors
+export const ErrorsDictionary = {
+	'UNKNOWN': 'An unknown error has occurred.',
+	'WALLET_MISSING': 'No web 3 compatible wallet detected.'
 }

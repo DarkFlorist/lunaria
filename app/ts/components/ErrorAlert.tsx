@@ -18,17 +18,15 @@ export const ErrorAlert = () => {
 	}
 
 	return (
-		<dialog ref={dialogRef} class='appearance-none bg-white/10 text-white backdrop:bg-red-black/80 px-6 py-4'>
+		<dialog ref={dialogRef} class='appearance-none bg-white/10 text-white backdrop:transparent mt-8 mb-auto ml-auto mr-8 px-6 pt-6 pb-4 relative'>
 			{latestError.value && (
 				<>
-					<div class='font-bold mb-2'>Application Error</div>
-					<div class='text-sm mb-4 text-white/50'>
-						<pre>{latestError.value.message}</pre>
-					</div>
-					<div class='flex justify-center'>
-						<button class='border border-white/30 px-4 h-8 hover:border-white' onClick={dismissError}>
-							Dismiss
+						<button class='absolute left-auto right-0 top-0 px-4 h-8 hover:border-white' onClick={dismissError}>
+						&times;
 						</button>
+					<div class='font-bold mb-2'>Application Error</div>
+					<div class='text-sm text-white/50'>
+						<pre>{latestError.value.message}</pre>
 					</div>
 				</>
 			)}

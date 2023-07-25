@@ -2,12 +2,19 @@ import { signal, useComputed } from '@preact/signals'
 
 export const errors = signal<ApplicationError[]>([])
 
+const scheduleDismiss = () => {
+	setInterval(() => {
+		errors.value = errors.peek().slice(1)
+	}, 1000)
+}
+
 export function useErrors() {
 	const latest = useComputed(() => errors.value.at(0))
 
 	const add = (code: keyof typeof ErrorsDictionary, message?: string) => {
 		const error = new ApplicationError(code, message)
 		errors.value = [error, ...errors.value]
+		scheduleDismiss()
 	}
 
 	const remove = (code: keyof typeof ErrorsDictionary) => {

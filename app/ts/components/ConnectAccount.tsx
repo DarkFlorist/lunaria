@@ -1,10 +1,23 @@
 import { useAccount } from '../store/account.js'
 import { useNetwork } from '../store/network.js'
+import { useNotice } from '../store/notice.js'
+import { useProviders } from '../store/provider.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
 
 export const ConnectAccount = () => {
 	const { address, connect } = useAccount()
+	const providers = useProviders()
+	const { notify } = useNotice()
+
+	const connectAccount = () => {
+		try {
+			providers.browserProvider.value // catch the error in initializing provider
+			connect()
+		} catch {
+			notify({ title: 'Error', message: 'No compatible web3 wallet detected' })
+		}
+	}
 
 	switch (address.value.state) {
 		case 'inactive':
@@ -15,7 +28,7 @@ export const ConnectAccount = () => {
 						<span class='font-bold'>Get started quickly</span>
 						<span class='text-sm text-white/50'>by connecting your wallet</span>
 					</div>
-					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connect}>
+					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connectAccount}>
 						Connect
 					</button>
 				</div>

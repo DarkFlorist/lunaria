@@ -191,7 +191,7 @@ const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptPar
 	const getBalance = () => {
 		const { from, blockNumber } = receipt
 		waitFor(async () => {
-			const provider = providers.browserProvider.value
+			const provider = providers.browserProvider
 			return await provider.getBalance(from, blockNumber)
 		})
 	}

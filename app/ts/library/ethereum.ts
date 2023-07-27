@@ -1,6 +1,6 @@
 import { TransactionResponse, Interface, id, TransactionReceipt, Log, Eip1193Provider, formatEther } from 'ethers'
 import { ERC20ABI } from './ERC20ABI.js'
-import { WalletError } from './exceptions.js'
+import { ApplicationError } from '../store/errors.js'
 
 export interface WithEthereum {
 	ethereum: Eip1193Provider
@@ -23,7 +23,7 @@ export function assertsEthereumObservable(ethereum: unknown): asserts ethereum i
 }
 
 export function assertsWithEthereum(global: unknown): asserts global is WithEthereum {
-	if (!withEthereum(global)) throw new WalletError()
+	if (!withEthereum(global)) throw new ApplicationError('WALLET_MISSING')
 }
 
 export const calculateGasFee = (effectiveGasPrice: bigint, gasUsed: bigint) => {

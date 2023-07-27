@@ -1,34 +1,36 @@
 import { useAccount } from '../store/account.js'
+import { ApplicationError } from '../store/errors.js'
 import { useNetwork } from '../store/network.js'
-import { useNotice } from '../store/notice.js'
-import { useProviders } from '../store/provider.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
 
 export const ConnectAccount = () => {
 	const { address, connect } = useAccount()
-	const providers = useProviders()
-	const { notify } = useNotice()
-
-	const connectAccount = () => {
-		try {
-			providers.browserProvider.value // catch the error in initializing provider
-			connect()
-		} catch {
-			notify({ title: 'Error', message: 'No compatible web3 wallet detected' })
-		}
-	}
 
 	switch (address.value.state) {
 		case 'inactive':
-		case 'rejected':
 			return (
 				<div class='grid grid-cols-[1fr,auto] gap-3 px-4 lg:px-0 h-20 border border-white/20 lg:border-none lg:place-items-end place-content-center items-center'>
 					<div class='grid lg:place-items-end'>
 						<span class='font-bold'>Get started quickly</span>
 						<span class='text-sm text-white/50'>by connecting your wallet</span>
 					</div>
-					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connectAccount}>
+					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connect}>
+						Connect
+					</button>
+				</div>
+			)
+		case 'rejected':
+			if (address.value.error instanceof ApplicationError) {
+				console.log('attempt fail')
+			}
+			return (
+				<div class='grid grid-cols-[1fr,auto] gap-3 px-4 lg:px-0 h-20 border border-white/20 lg:border-none lg:place-items-end place-content-center items-center'>
+					<div class='grid lg:place-items-end'>
+						<span class='font-bold'>Get started quickly</span>
+						<span class='text-sm text-white/50'>by connecting your wallet</span>
+					</div>
+					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connect}>
 						Connect
 					</button>
 				</div>
@@ -106,7 +108,6 @@ const WalletNetwork = () => {
 
 const NetworkName = () => {
 	const { network } = useNetwork()
-	console.log(network.value)
 
 	switch (network.value.state) {
 		case 'inactive':

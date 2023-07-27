@@ -2,7 +2,7 @@ import { assertsEthereumObservable } from '../library/ethereum.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
-import { ConnectAttemptError } from '../library/exceptions.js'
+import { ApplicationError } from '../store/errors.js'
 import { getAddress } from 'ethers'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
@@ -13,7 +13,7 @@ export function useAccount() {
 
 	const connect = () => {
 		waitFor(async () => {
-			const provider = providers.browserProvider.value
+			const provider = providers.browserProvider
 			const signer = await provider.getSigner()
 			return getAddress(signer.address)
 		})
@@ -21,10 +21,13 @@ export function useAccount() {
 
 	const attemptToConnect = () => {
 		waitFor(async () => {
-			if (providers.provider === undefined) throw new ConnectAttemptError()
-			const provider = providers.browserProvider.value
-			const [signer] = await provider.listAccounts()
-			return getAddress(signer.address)
+			try {
+				const provider = providers.browserProvider
+				const [signer] = await provider.listAccounts()
+				return getAddress(signer.address)
+			} catch (e) {
+				throw new ApplicationError('UNKNOWN')
+			}
 		})
 	}
 

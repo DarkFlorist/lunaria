@@ -41,6 +41,7 @@ effect(() => {
 
 export function useFavorites() {
 	const syncCacheChange = (event: StorageEvent) => {
+		if (event.key !== FAVORITES_CACHE_ID) return
 		const newValue = event.newValue !== null ? (JSON.parse(event.newValue) as FavoriteModel[]) : []
 		favorites.value = newValue
 	}

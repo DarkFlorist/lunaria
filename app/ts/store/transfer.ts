@@ -23,9 +23,7 @@ export function useTransfer() {
 
 	const send = () => {
 		waitFor(async () => {
-			const provider = providers.browserProvider
-			if (provider === undefined) throw new Error('Web3Provider is not instantiated.')
-			const signer = await provider.value.getSigner()
+			const signer = await providers.browserProvider.getSigner()
 			const to = getAddress(data.value.recipientAddress)
 
 			// Ether transfer

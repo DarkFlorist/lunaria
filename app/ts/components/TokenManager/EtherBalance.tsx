@@ -17,8 +17,7 @@ export const EtherBalance = () => {
 		if (address.value.state !== 'resolved') return
 		const accountAddress = address.value.value
 		waitFor(async () => {
-			const provider = providers.browserProvider
-			return await provider.getBalance(accountAddress)
+			return await providers.browserProvider.getBalance(accountAddress)
 		})
 	}
 

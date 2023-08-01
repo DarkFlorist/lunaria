@@ -19,7 +19,6 @@ export function useNetwork() {
 	}
 
 	const listenForProviderChanges = () => {
-		if (providers.browserProvider === undefined) return
 		getNetwork()
 	}
 

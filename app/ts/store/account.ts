@@ -1,33 +1,36 @@
-import { assertsEthereumObservable } from '../library/ethereum.js'
+import { assertsEthereumObservable, assertsWithEthereum } from '../library/ethereum.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
+import { ApplicationError } from './errors.js'
+import { useNotice } from './notice.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
-import { ApplicationError } from '../store/errors.js'
 import { getAddress } from 'ethers'
 
 const address = signal<AsyncProperty<string>>({ state: 'inactive' })
 
 export function useAccount() {
-	const providers = useProviders()
+	const { notify } = useNotice()
+	const provider = useProviders()
 	const { value: query, waitFor } = useAsyncState<string>()
 
 	const connect = () => {
 		waitFor(async () => {
-			const provider = providers.browserProvider
-			const signer = await provider.getSigner()
-			return getAddress(signer.address)
+			try {
+				const signer = await provider.browserProvider.getSigner()
+				return getAddress(signer.address)
+			} catch (error) {
+				let errorMessage = 'An unknown error occurred.'
+				if (error instanceof ApplicationError) errorMessage = error.message
+				notify({ message: errorMessage, title: 'Unable to connect' })
+				throw error
+			}
 		})
 	}
 
 	const attemptToConnect = () => {
 		waitFor(async () => {
-			try {
-				const provider = providers.browserProvider
-				const [signer] = await provider.listAccounts()
-				return getAddress(signer.address)
-			} catch (e) {
-				throw new ApplicationError('UNKNOWN')
-			}
+			const [signer] = await provider.browserProvider.listAccounts()
+			return getAddress(signer.address)
 		})
 	}
 
@@ -54,6 +57,7 @@ const handleAccountChanged = ([newAddress]: string[]) => {
 
 const removeAccountChangedListener = effect(() => {
 	if (address.value.state !== 'resolved') return
+	assertsWithEthereum(window)
 	assertsEthereumObservable(window.ethereum)
 	window.ethereum.on('accountsChanged', handleAccountChanged)
 })

@@ -10,12 +10,12 @@
 		"noUnusedParameters": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
-		"lib": [ "ES2020" ],
+		"lib": ["ES2020"],
+		"typeRoots": ["./node_modules/@types"],
+		"types": []
 	},
-	"include": [
-		"./*.ts"
-	],
+	"include": ["./*.ts"],
 	"ts-node": {
-		"esm": true,
+		"esm": true
 	}
 }

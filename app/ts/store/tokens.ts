@@ -69,8 +69,7 @@ export function useTokenQuery() {
 			const chainId = network.value.value.chainId
 
 			try {
-				const provider = providers.browserProvider.value
-				const contract = new Contract(tokenAddress.value, ERC20ABI, provider)
+				const contract = new Contract(tokenAddress.value, ERC20ABI, providers.browserProvider)
 				const name = await contract.name()
 				const symbol = await contract.symbol()
 				const decimals = await contract.decimals()
@@ -183,8 +182,7 @@ export function useTokenBalance() {
 
 	const getTokenBalance = (accountAddress: string, tokenAddress: string) => {
 		waitFor(async () => {
-			const provider = providers.browserProvider.value
-			const contract = new Contract(tokenAddress, ERC20ABI, provider)
+			const contract = new Contract(tokenAddress, ERC20ABI, providers.browserProvider)
 			return await contract.balanceOf(accountAddress)
 		})
 	}

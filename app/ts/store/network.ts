@@ -10,7 +10,7 @@ export function useNetwork() {
 	const { value: query, waitFor } = useAsyncState<Network>()
 
 	const getNetwork = () => {
-		waitFor(async () => await providers.browserProvider.value.getNetwork())
+		waitFor(async () => await providers.browserProvider.getNetwork())
 	}
 
 	const listenForQueryChanges = () => {
@@ -19,7 +19,6 @@ export function useNetwork() {
 	}
 
 	const listenForProviderChanges = () => {
-		if (providers.provider.value === undefined) return
 		getNetwork()
 	}
 

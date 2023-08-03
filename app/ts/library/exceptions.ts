@@ -25,19 +25,3 @@ export class EthereumJsonRpcError extends Error {
 export function isEthereumJsonRpcError(error: unknown): error is EthereumJsonRpcErrorSignature {
 	return error instanceof Object && 'error' in error && error.error instanceof Object && 'code' in error.error && typeof error.error.code === 'number' && 'message' in error.error && typeof error.error.message === 'string'
 }
-
-export class ConnectAttemptError extends Error {
-	constructor(message: string = 'Connection attempt error.') {
-		super()
-		this.message = message
-		Object.setPrototypeOf(this, ConnectAttemptError.prototype)
-	}
-}
-
-export class WalletError extends Error {
-	constructor(message: string = 'Wallet not installed or incompatible.') {
-		super()
-		this.message = message
-		Object.setPrototypeOf(this, WalletError.prototype)
-	}
-}

@@ -11,7 +11,7 @@ export function useTransaction(transactionHash: string) {
 
 	const getTransactionResponse = (transactionHash: string) => {
 		waitForResponse(async () => {
-			const provider = providers.browserProvider.value
+			const provider = providers.browserProvider
 			const result = await provider.getTransaction(transactionHash)
 			// TransactionResult can actually be null?
 			if (result === null) throw new Error('Transaction was not found on chain!')

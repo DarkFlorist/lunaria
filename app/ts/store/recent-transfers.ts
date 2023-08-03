@@ -21,6 +21,7 @@ const recentTxns = signal(getSessionStorageCache())
 
 export const useRecentTransfers = () => {
 	const syncCacheChange = (event: StorageEvent) => {
+		if (event.key !== STORAGE_KEY_RECENTS) return
 		const newValue = event.newValue !== null ? (JSON.parse(event.newValue) as RecentTransaction[]) : []
 		recentTxns.value = newValue
 	}

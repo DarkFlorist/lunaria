@@ -9,7 +9,8 @@
 	"dependencies": {
 		"@preact/signals": "1.1.1",
 		"ethers": "6.6.4",
-		"preact": "10.8.1"
+		"preact": "10.8.1",
+		"zod": "3.21.4"
 	},
 	"scripts": {
 		"build": "tsc",

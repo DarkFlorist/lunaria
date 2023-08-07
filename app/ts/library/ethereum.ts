@@ -1,9 +1,27 @@
 import { TransactionResponse, Interface, id, TransactionReceipt, Log, Eip1193Provider, formatEther } from 'ethers'
 import { ERC20ABI } from './ERC20ABI.js'
 import { ApplicationError } from '../store/errors.js'
+import { z, string, function as func, object, array, record, any, promise } from 'zod'
 
 export interface WithEthereum {
 	ethereum: Eip1193Provider
+}
+
+const eip1193ProviderSchema = object({
+	request: func()
+		.args(object({ method: string(), params: array(any()).or(record(string(), any())) }))
+		.returns(promise(any())),
+})
+
+export const globalWithEthereumSchema = z.object({
+	ethereum: eip1193ProviderSchema,
+})
+
+export type GlobalWithEthereum = z.infer<typeof globalWithEthereumSchema>
+
+export function assertsGlobalHasEthereum(global: unknown): asserts global is GlobalWithEthereum {
+	const result = globalWithEthereumSchema.safeParse(global)
+	if (!result.success) throw new Error()
 }
 
 export function withEthereum(global: unknown): global is WithEthereum {

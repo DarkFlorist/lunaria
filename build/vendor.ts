@@ -11,7 +11,8 @@ const dependencyPaths = [
 	{ packageName: 'preact/hooks', subfolderToVendor: 'dist', entrypointFile: 'hooks.module.js' },
 	{ packageName: 'ethers', subfolderToVendor: 'dist', entrypointFile: 'ethers.js', },
 	{ packageName: '@preact/signals-core', subfolderToVendor: 'dist', entrypointFile: 'signals-core.module.js', },
-	{ packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' }
+	{ packageName: '@preact/signals', subfolderToVendor: 'dist', entrypointFile: 'signals.module.js' },
+	{ packageName: 'zod', subfolderToVendor: 'lib', entrypointFile: 'index.mjs' },
 ]
 
 async function vendorDependencies() {

@@ -1,139 +1,55 @@
-export type TokenAsset = {
-	type: 'token'
-	chainId: string
-	address: string
-	name: string
-	symbol: string
-	decimals: number
-}
+import { TokenMeta } from '../store/tokens'
 
-export type NativeAsset = {
-	type: 'native'
-	chainId: string
-	name: string
-	symbol: string
-}
-
-export type AssetMetadata = TokenAsset | NativeAsset
-
-export const assets: AssetMetadata[] = [
+export const DEFAULT_TOKENS: TokenMeta[] = [
 	{
-		type: 'native',
-		chainId: '0x01',
-		name: 'Ether',
-		symbol: 'ETH',
-	},
-	{
-		type: 'token',
-		chainId: '0x01',
-		address: '0x4c9bbfc1fbd93dfb509e718400978fbeedf590e9',
-		name: 'Rai',
+		chainId: 1n,
+		address: '0x4c9BBFc1FbD93dFB509E718400978fbEedf590E9',
+		name: 'Rai Reflex Index',
 		symbol: 'RAI',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
-		type: 'token',
-		chainId: '0x01',
-		address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+		chainId: 1n,
+		address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
 		name: 'Dai',
 		symbol: 'DAI',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
-		type: 'token',
-		chainId: '0x01',
-		address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-		name: 'WETH',
+		chainId: 1n,
+		address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+		name: 'Wrapped Ether',
 		symbol: 'WETH',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
-		type: 'token',
-		chainId: '0x01',
-		address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+		chainId: 1n,
+		address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 		name: 'USD Coin',
 		symbol: 'USDC',
-		decimals: 6,
+		decimals: 6n,
 	},
 	{
-		type: 'token',
-		chainId: '0x01',
-		address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+		chainId: 1n,
+		address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
 		name: 'Wrapped Bitcoin',
 		symbol: 'WBTC',
-		decimals: 8,
+		decimals: 8n,
 	},
 	{
-		type: 'native',
-		chainId: '0x05',
-		name: 'Goerli Ether',
-		symbol: 'GoerliETH',
-	},
-	{
-		type: 'token',
-		chainId: '0x05',
+		chainId: 5n,
 		address: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
-		name: 'WETH',
+		name: 'Wrapped Ether',
 		symbol: 'WETH',
-		decimals: 18,
+		decimals: 18n,
 	},
 	{
-		type: 'token',
-		chainId: '0x05',
-		address: '0x07865c6e87b9f70255377e024ace6630c1eaa37f',
+		chainId: 5n,
+		address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
 		name: 'USD Coin',
 		symbol: 'USDC',
-		decimals: 6,
+		decimals: 6n,
 	},
 ]
-
-export type NetworkMetaData = {
-	id: string
-	name: string
-}
-
-export const networks: NetworkMetaData[] = [
-	{
-		id: '0x01',
-		name: 'Mainnet',
-	},
-	{
-		id: '0x05',
-		name: 'Goerli',
-	},
-]
-
-export function isTokenAsset(asset: AssetMetadata): asset is TokenAsset {
-	return asset.type === 'token'
-}
-
-export function isNativeAsset(asset: AssetMetadata): asset is NativeAsset {
-	return asset.type === 'native'
-}
-
-export function getTokenByChainId(chainId: string) {
-	return assets.filter(isTokenAsset).filter(asset => asset.chainId === chainId)
-}
-
-export function getNativeCurrencyByChainId(chainId: string): NativeAsset {
-	const match = assets.filter(asset => asset.chainId === chainId).find(isNativeAsset)
-
-	// ETH fallback for unknown network
-	if (match === undefined) return { chainId, type: 'native', name: 'Ether', symbol: 'ETH' }
-
-	return match
-}
-
-export function getAssetMetadata(chainId: string, address?: string) {
-	if (address === undefined) {
-		const match = assets.find(asset => asset.chainId === chainId && asset.type === 'native')
-		if (match === undefined) throw new Error('Specified asset is unsupported')
-		return match
-	}
-
-	const match = assets.find(asset => asset.chainId === chainId && asset.type === 'token' && asset.address === address)
-	if (match === undefined) throw new Error('Specified asset is unsupported')
-	return match
-}
 
 export const STORAGE_KEY_RECENTS = 'txns'

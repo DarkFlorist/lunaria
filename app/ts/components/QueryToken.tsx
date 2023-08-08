@@ -4,7 +4,11 @@ import { Signal, useComputed } from '@preact/signals'
 import { TokenMeta, useAccountTokens, useTokenQuery } from '../store/tokens.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
 
-export const QueryToken = ({ onSave }: { onSave: () => void }) => {
+type QueryTokenProps = {
+	onSave: (token: TokenMeta) => void
+}
+
+export const QueryToken = ({ onSave }: QueryTokenProps) => {
 	const { query, tokenAddress } = useTokenQuery()
 
 	return (
@@ -17,7 +21,7 @@ export const QueryToken = ({ onSave }: { onSave: () => void }) => {
 
 type HelperProps = {
 	query: Signal<AsyncProperty<TokenMeta>>
-	onTokenSave: () => void
+	onTokenSave: (token: TokenMeta) => void
 }
 
 const Helper = ({ query, onTokenSave }: HelperProps) => {
@@ -66,7 +70,6 @@ type TokenAddressFieldProps = {
 }
 
 const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
-
 	const handleChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
 		const target = e.currentTarget
 		target.checkValidity()
@@ -83,7 +86,7 @@ const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
 
 type SaveTokenProps = {
 	token: TokenMeta
-	onSuccess: () => void
+	onSuccess: (token: TokenMeta) => void
 }
 
 const SaveToken = ({ token, onSuccess }: SaveTokenProps) => {
@@ -93,7 +96,7 @@ const SaveToken = ({ token, onSuccess }: SaveTokenProps) => {
 
 	const handleTokenSave = () => {
 		addToken(token)
-		onSuccess()
+		onSuccess(token)
 	}
 
 	return (

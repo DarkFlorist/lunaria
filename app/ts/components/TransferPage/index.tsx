@@ -81,6 +81,11 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 		window.location.hash = `#tx/${transactionResponse.hash}`
 	}
 
+	const selectTokenAndCloseManager = (token: TokenMeta) => {
+		data.value = { ...data.value, token }
+		tokenManager.value = undefined
+	}
+
 	const isFormSubmitting = useComputed(() => transaction.value.state === 'pending')
 
 	useSignalEffect(() => {
@@ -119,7 +124,7 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 				</form>
 			</div>
 			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={setUserSelectedToken} onAddToken={() => (tokenManager.value = 'add')} />
-			<AddTokenDialog show={tokenManager} />
+			<AddTokenDialog show={tokenManager} onSave={selectTokenAndCloseManager} />
 			<MainFooter />
 		</Main>
 	)

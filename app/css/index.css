@@ -1032,6 +1032,11 @@ video {
 	background-color: transparent;
 }
 
+.bg-white {
+	--tw-bg-opacity: 1;
+	background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
 .bg-white\/10 {
 	background-color: rgb(255 255 255 / 0.1);
 }
@@ -1191,6 +1196,11 @@ video {
 
 .leading-tight {
 	line-height: 1.25;
+}
+
+.text-gray-900 {
+	--tw-text-opacity: 1;
+	color: rgb(17 24 39 / var(--tw-text-opacity));
 }
 
 .text-red-600 {

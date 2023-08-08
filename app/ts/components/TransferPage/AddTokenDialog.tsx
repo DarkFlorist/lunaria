@@ -1,11 +1,13 @@
 import { Signal } from '@preact/signals'
 import { QueryToken } from '../QueryToken.js'
+import { TokenMeta } from '../../store/tokens.js'
 
 type Props = {
 	show: Signal<'select' | 'add' | undefined>
+	onSave: (token: TokenMeta) => void
 }
 
-export const AddTokenDialog = ({ show }: Props) => {
+export const AddTokenDialog = ({ show, onSave }: Props) => {
 	if (show.value !== 'add') return <></>
 
 	const handleCancel = () => {
@@ -25,7 +27,7 @@ export const AddTokenDialog = ({ show }: Props) => {
 				<div class='px-6 py-6'>
 					<div class='font-bold mb-2 text-2xl'>Add Token</div>
 					<div class='mb-2'>Enter the token's contract address to retrieve details</div>
-					<QueryToken onSave={() => show.value = 'select' } />
+					<QueryToken onSave={onSave} />
 				</div>
 			</div>
 		</div>

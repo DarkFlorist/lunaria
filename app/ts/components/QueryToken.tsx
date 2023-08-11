@@ -73,12 +73,12 @@ const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
 	const handleChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
 		const target = e.currentTarget
 		target.checkValidity()
-		address.value = target.value
+		address.value = target.value.trim()
 	}
 
 	return (
 		<div>
-			<input pattern='^0x[0-9A-Fa-f]{40}$' placeholder='Enter token address' value={address.value} onInput={handleChange} class='peer border border-white/50 w-full h-10 px-2 placeholder:text-white/30 invalid:text-red-600 disabled:text-white/50 focus:outline-none bg-transparent' autoFocus={true} />
+			<input pattern='^\s*0x[0-9A-Fa-f]{40}\s*$' placeholder='Enter token address' value={address.value} onInput={handleChange} class='peer border border-white/50 w-full h-10 px-2 placeholder:text-white/30 invalid:text-red-600 disabled:text-white/50 focus:outline-none bg-transparent' autoFocus={true} />
 			<div class='hidden peer-invalid:block text-sm text-red-600'>Invalid address</div>
 		</div>
 	)

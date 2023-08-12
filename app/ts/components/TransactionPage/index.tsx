@@ -40,10 +40,8 @@ const MainPanel = () => {
 				<ConnectAccount />
 			</div>
 
-			<div class='px-4'>
-				<div class='py-4'>
-					<div class='text-3xl font-bold'>Transaction Details</div>
-				</div>
+			<div class='px-4 py-4'>
+				<div class='text-3xl font-bold'>Transaction Details</div>
 			</div>
 
 			<div class='px-4'>

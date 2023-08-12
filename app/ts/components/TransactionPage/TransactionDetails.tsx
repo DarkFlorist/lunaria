@@ -1,9 +1,7 @@
 import { Signal, useComputed, useSignal } from '@preact/signals'
-import { useEffect } from 'preact/hooks'
 import { useRouter } from '../HashRouter.js'
-import { formatEther, formatUnits, TransactionReceipt, TransactionReceiptParams, TransactionResponse } from 'ethers'
-import { AsyncProperty, useAsyncState } from '../../library/preact-utilities.js'
-import { useProviders } from '../../store/provider.js'
+import { formatEther, formatUnits, TransactionReceipt, TransactionResponse } from 'ethers'
+import { AsyncProperty } from '../../library/preact-utilities.js'
 import { Info, InfoError, InfoPending } from './Info.js'
 import { useTransaction } from '../../store/transaction.js'
 import { calculateGasFee, extractArgValue, extractTransferLogFromSender } from '../../library/ethereum.js'
@@ -90,7 +88,6 @@ const DataFromReceipt = ({ receipt, addFavoriteStore }: DataFromReceiptProps) =>
 					<TokenRecipient receipt={receipt.value.value} addFavoriteStore={addFavoriteStore} />
 					<TokenAmount receipt={receipt.value.value} addFavoriteStore={addFavoriteStore} />
 					<Info label='Transaction Fee' value={`${transactionFee} ETH`} />
-					<AccountBalance receipt={receipt.value.value} />
 				</>
 			)
 	}
@@ -181,34 +178,5 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 			const amount = formatUnits(tokenValue, decimals)
 			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
 			return <Info label='Amount' value={`${amount} ${symbol}`} />
-	}
-}
-
-const AccountBalance = ({ receipt, onResolve }: { receipt: TransactionReceiptParams; onResolve?: (amount: bigint) => void }) => {
-	const providers = useProviders()
-	const { value: asyncBalance, waitFor } = useAsyncState<bigint>()
-
-	const getBalance = () => {
-		const { from, blockNumber } = receipt
-		waitFor(async () => {
-			return await providers.browserProvider.getBalance(from, blockNumber)
-		})
-	}
-
-	useEffect(() => {
-		getBalance()
-	}, [receipt.blockNumber])
-
-	switch (asyncBalance.value.state) {
-		case 'inactive':
-			return <></>
-		case 'pending':
-			return <InfoPending />
-		case 'rejected':
-			return <InfoError displayText='Failed to load information' message={asyncBalance.value.error.message} />
-		case 'resolved':
-			onResolve?.(asyncBalance.value.value)
-			const balance = formatEther(asyncBalance.value.value)
-			return <Info label='Balance Before Transaction' value={balance} suffix=' ETH' />
 	}
 }

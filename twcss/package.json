@@ -1,6 +1,6 @@
 {
 	"scripts": {
-		"poststyles": "npx prettier --config ../.prettierrc --cache false ../app/css/index.css -w",
-		"styles": "npx tailwindcss -c tailwind.config.js -i tailwind.globals.css -o ../app/css/index.css"
+		"poststyles": "npx prettier@3.0.1 --config ../prettier.config.cjs --cache false ../app/css/index.css -w",
+		"styles": "npx tailwindcss@3.3.3 -c tailwind.config.js -i tailwind.globals.css -o ../app/css/index.css"
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"name": "lunaria",
 	"description": "A decentralized asset manager",
-	"repository": {},
+	"repository": "https://github.com/darkflorist/lunaria",
 	"license": "Unlicense",
 	"devDependencies": {
 		"typescript": "4.9.3"
@@ -13,8 +13,9 @@
 	},
 	"scripts": {
 		"build": "tsc",
-		"serve": "npx http-server ./app",
-		"vendor": "npm install && cd build && npm install && npm run vendor",
-		"styles": "cd twcss && npm run styles"
+		"serve": "npx serve -L ./app",
+		"vendor": "npm install && npm --prefix ./build install && npm --prefix ./build run vendor",
+		"styles": "npm --prefix ./twcss run styles"
 	}
 }
+

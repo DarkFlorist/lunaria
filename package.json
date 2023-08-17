@@ -15,7 +15,6 @@
 		"build": "tsc",
 		"serve": "npx serve -L ./app",
 		"vendor": "npm install && npm --prefix ./build install && npm --prefix ./build run vendor",
-		"styles": "npm --prefix ./twcss run styles"
+		"styles": "npm --prefix ./twcss install && npm --prefix ./twcss run styles"
 	}
 }
-

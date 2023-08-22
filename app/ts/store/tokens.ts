@@ -1,4 +1,5 @@
 import { signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import * as funtypes from 'funtypes'
 import { useAccount } from './account.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
@@ -6,7 +7,9 @@ import { useNetwork } from './network.js'
 import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { JSONParse, JSONStringify } from '../library/utilities.js'
-import { DEFAULT_TOKENS } from '../library/constants.js'
+import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
+import { persistSignalEffect } from '../library/persistent-signal.js'
+import { ManagedTokensCacheParserConfig, TokenSchema } from '../schema.js'
 
 const CACHEID_PREFIX = '_ut'
 
@@ -137,4 +140,14 @@ export function useTokenBalance() {
 	}
 
 	return { tokenBalance, getTokenBalance }
+}
+
+export type Token = funtypes.Static<typeof TokenSchema>
+
+const managedTokens = signal<Token[]>(DEFAULT_TOKENS)
+const cacheKey = signal(MANAGED_TOKENS_CACHE_KEY)
+
+export function useManagedTokens() {
+	persistSignalEffect(cacheKey.value, managedTokens, ManagedTokensCacheParserConfig)
+	return { tokens: managedTokens, cacheKey }
 }

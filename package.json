@@ -13,7 +13,7 @@
 		"preact": "10.8.1"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "rm -rf app/js && tsc",
 		"serve": "npx serve -L ./app",
 		"vendor": "npm install && npm --prefix ./build install && npm --prefix ./build run vendor",
 		"styles": "npm --prefix ./twcss install && npm --prefix ./twcss run styles"

@@ -60,6 +60,7 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 	const { transaction, data, send, clearData } = transferStore
 	const tokenManager = useSignal<'select' | 'add' | undefined>(undefined)
 	const { nav, main } = usePanels()
+	const { address, connect } = useAccount()
 
 	const setUserSelectedToken = (token?: TokenMeta) => {
 		data.value = { ...data.value, token, amount: '' }
@@ -84,6 +85,14 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 	const selectTokenAndCloseManager = (token: TokenMeta) => {
 		data.value = { ...data.value, token }
 		tokenManager.value = undefined
+	}
+
+	const showAddTokenDialogOrConnect = () => {
+		if (address.value.state !== 'resolved') {
+			connect()
+			return
+		}
+		tokenManager.value = 'add'
 	}
 
 	const isFormSubmitting = useComputed(() => transaction.value.state === 'pending')
@@ -123,7 +132,7 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 					</div>
 				</form>
 			</div>
-			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={setUserSelectedToken} onAddToken={() => (tokenManager.value = 'add')} />
+			<TokenManager show={tokenManager.value === 'select'} onClose={() => (tokenManager.value = undefined)} onSelect={setUserSelectedToken} onAddToken={showAddTokenDialogOrConnect} />
 			<AddTokenDialog show={tokenManager} onSave={selectTokenAndCloseManager} />
 			<MainFooter />
 		</Main>

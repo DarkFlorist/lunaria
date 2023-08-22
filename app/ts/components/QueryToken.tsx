@@ -1,7 +1,7 @@
 import { JSX } from 'preact/jsx-runtime'
 import { ComponentChildren } from 'preact'
 import { Signal, useComputed } from '@preact/signals'
-import { TokenMeta, useAccountTokens, useTokenQuery } from '../store/tokens.js'
+import { TokenMeta, useAccountTokens, useManagedTokens, useTokenQuery } from '../store/tokens.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
 
 type QueryTokenProps = {
@@ -90,12 +90,12 @@ type SaveTokenProps = {
 }
 
 const SaveToken = ({ token, onSuccess }: SaveTokenProps) => {
-	const { tokens, addToken } = useAccountTokens()
+	const { tokens } = useManagedTokens()
 
 	const accountTokenExists = useComputed(() => Boolean(tokens.value.find(userToken => userToken.address === token.address)))
 
 	const handleTokenSave = () => {
-		addToken(token)
+		tokens.value = tokens.peek().concat(token)
 		onSuccess(token)
 	}
 

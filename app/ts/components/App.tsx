@@ -3,7 +3,7 @@ import { TransferPage } from './TransferPage/index.js'
 import { Notices } from './Notice.js'
 import { SplashScreen } from './SplashScreen.js'
 import { TransactionPage } from './TransactionPage/index.js'
-import { ErrorPage } from './ErrorPage/index.js'
+import { KitchenSink } from './KitchenSink.js'
 import { ErrorAlert } from './ErrorAlert.js'
 
 export function App() {
@@ -19,8 +19,8 @@ export function App() {
 				<Route path='#saved/:index'>
 					<TransferPage />
 				</Route>
-				<Route path='#errors'>
-					<ErrorPage />
+				<Route path='#test'>
+					<KitchenSink />
 				</Route>
 			</Router>
 			<Notices />

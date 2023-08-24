@@ -1,6 +1,6 @@
 {
 	"name": "prettifycss",
 	"dependencies": {
-		"prettier": "^3.0.2"
+		"prettier": "3.0.2"
 	}
 }

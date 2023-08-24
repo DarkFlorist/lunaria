@@ -1,6 +1,11 @@
 {
+	"name": "lunaria-styles",
 	"scripts": {
-		"poststyles": "npx prettier@3.0.1 --config ../prettier.config.cjs --cache false ../app/css/index.css -w",
-		"styles": "npx tailwindcss@3.3.3 -c tailwind.config.js -i tailwind.globals.css -o ../app/css/index.css"
+		"styles": "npx tailwindcss@3.3.3 -c tailwind.config.js -i tailwind.globals.css -o ../app/css/index.css --postcss ./postcss.config.js"
+	},
+	"dependencies": {
+		"autoprefixer": "10.4.15",
+		"prettifycss": "file:prettifycss",
+		"tailwindcss": "3.3.3"
 	}
 }

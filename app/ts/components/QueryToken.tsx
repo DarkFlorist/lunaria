@@ -1,7 +1,7 @@
 import { JSX } from 'preact/jsx-runtime'
 import { ComponentChildren } from 'preact'
 import { Signal, useComputed } from '@preact/signals'
-import { TokenMeta, useAccountTokens, useManagedTokens, useTokenQuery } from '../store/tokens.js'
+import { TokenMeta, useManagedTokens, useTokenQuery } from '../store/tokens.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
 
 type QueryTokenProps = {

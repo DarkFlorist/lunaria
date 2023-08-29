@@ -54,3 +54,4 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 
 export const STORAGE_KEY_RECENTS = 'txns'
 export const MANAGED_TOKENS_CACHE_KEY = 'managed_tokens-v1'
+export const RECENT_TRANSFERS_CACHE_KEY = 'transfers'

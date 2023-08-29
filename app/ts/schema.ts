@@ -1,6 +1,25 @@
-import { isHexString } from 'ethers'
+import { isHexString, isAddress } from 'ethers'
 import * as funtypes from 'funtypes'
 import { ParsedValueConfig } from 'funtypes/lib/types/ParsedValue'
+
+export function createCacheParser<T>(funType: funtypes.Codec<T>) {
+	const config: ParsedValueConfig<funtypes.String, T> = {
+		parse(value) {
+			const jsonParsed = JSON.parse(value)
+			return funType.safeParse(jsonParsed)
+		},
+		serialize(value) {
+			const serializedValue = funType.safeSerialize(value)
+			if (!serializedValue.success) return { success: false, message: serializedValue.message }
+			const jsonString = JSON.stringify(serializedValue.value)
+			return { success: true, value: jsonString }
+		},
+	}
+	return config
+}
+
+export const AddressSchema = funtypes.String.withGuard(isHexString).withConstraint(isAddress, { name: 'Address' })
+export type Address = funtypes.Static<typeof AddressSchema>
 
 export const BigIntParser: ParsedValueConfig<funtypes.String, bigint> = {
 	parse(value) {
@@ -23,21 +42,15 @@ export const TokenSchema = funtypes.Object({
 	decimals: BigIntHexSchema,
 })
 
-export const TokenListSchema = funtypes.Array(TokenSchema)
+export type Token = funtypes.Static<typeof TokenSchema>
 
-export const ManagedTokensCacheParserConfig: ParsedValueConfig<funtypes.String, funtypes.Static<typeof TokenListSchema>> = {
-	parse(value) {
-		const jsonParsed = JSON.parse(value)
-		return TokenListSchema.safeParse(jsonParsed)
-	},
-	serialize(value) {
-		const serializedValue = TokenListSchema.safeSerialize(value)
-		if (!serializedValue.success) return { success: false, message: serializedValue.message }
-		const jsonString = JSON.stringify(serializedValue.value)
-		return { success: true, value: jsonString }
-	},
-}
+export const TransferSchema = funtypes.Object({
+	hash: funtypes.String,
+	from: AddressSchema,
+	to: AddressSchema,
+	amount: funtypes.String,
+	token: funtypes.Union(TokenSchema, funtypes.Undefined),
+	date: funtypes.Number,
+})
 
-export const ManagedTokensCacheSchema = funtypes.String.withParser(ManagedTokensCacheParserConfig)
-
-export type ManagedTokensCache = funtypes.Static<typeof ManagedTokensCacheSchema>
+export type Transfer = funtypes.Static<typeof TransferSchema>

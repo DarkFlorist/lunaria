@@ -9,7 +9,7 @@ import { ERC20ABI } from '../library/ERC20ABI.js'
 import { JSONParse, JSONStringify } from '../library/utilities.js'
 import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
-import { ManagedTokensCacheParserConfig, TokenSchema } from '../schema.js'
+import { createCacheParser, Token, TokenSchema } from '../schema.js'
 
 const CACHEID_PREFIX = '_ut'
 
@@ -142,12 +142,11 @@ export function useTokenBalance() {
 	return { tokenBalance, getTokenBalance }
 }
 
-export type Token = funtypes.Static<typeof TokenSchema>
-
+const ManagedTokensSchema = funtypes.Array(TokenSchema)
 const managedTokens = signal<Token[]>(DEFAULT_TOKENS)
-const cacheKey = signal(MANAGED_TOKENS_CACHE_KEY)
+const managedTokensCacheKey = signal(MANAGED_TOKENS_CACHE_KEY)
 
 export function useManagedTokens() {
-	persistSignalEffect(cacheKey.value, managedTokens, ManagedTokensCacheParserConfig)
-	return { tokens: managedTokens, cacheKey }
+	persistSignalEffect(managedTokensCacheKey.value, managedTokens, createCacheParser(ManagedTokensSchema))
+	return { tokens: managedTokens, cacheKey: managedTokensCacheKey }
 }

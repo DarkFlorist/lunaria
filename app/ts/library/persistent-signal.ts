@@ -18,13 +18,13 @@ export function persistSignalEffect<T extends ParsedValueConfig<funtypes.String,
 	const syncSignalToCache = () => {
 		const serializedStore = funtypes.String.withParser(funTypeParser).safeSerialize(derivedSignal.value)
 		if (!serializedStore.success) {
-			console.log('Failed to sync signal to cache')
+			console.error('Failed to sync signal to cache', `(${serializedStore.message})`)
 			return
 		}
 
 		const stringCache = funtypes.String.safeParse(serializedStore.value)
 		if (!stringCache.success) {
-			console.log('serializedStore is not a string')
+			console.error('serializedStore is not a string', `${stringCache.message}`)
 			return
 		}
 

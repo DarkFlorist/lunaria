@@ -78,9 +78,8 @@ const RecentTransfersCacheSchema = funtypes.Union(
 
 type RecentTransfers = funtypes.Static<typeof RecentTransfersCacheSchema>
 const recentTransfers = signal<RecentTransfers>({ data: [], version: '1.0.0' })
-const transfersCacheKey = signal(RECENT_TRANSFERS_CACHE_KEY)
 
 export function useTransfers() {
-	persistSignalEffect(transfersCacheKey.value, recentTransfers, createCacheParser(RecentTransfersCacheSchema))
+	persistSignalEffect(RECENT_TRANSFERS_CACHE_KEY, recentTransfers, createCacheParser(RecentTransfersCacheSchema))
 	return recentTransfers
 }

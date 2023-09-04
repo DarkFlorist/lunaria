@@ -1,10 +1,12 @@
-import { useComputed, useSignal } from '@preact/signals'
+import { useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { ComponentChild, ComponentChildren } from 'preact'
-import { useNetwork } from '../../store/network.js'
-import { TokenMeta, useAccountTokens } from '../../store/tokens.js'
 import { EtherBalance } from './EtherBalance.js'
 import { SearchField } from './SearchField.js'
 import { TokenBalance } from './TokenBalance.js'
+import { MANAGED_TOKENS_CACHE_KEY } from '../../library/constants.js'
+import { useAccount } from '../../store/account.js'
+import { useNetwork } from '../../store/network.js'
+import { TokenMeta, useManagedTokens } from '../../store/tokens.js'
 
 export type TokenManagerProps = {
 	show: boolean
@@ -14,7 +16,8 @@ export type TokenManagerProps = {
 }
 
 export const TokenManager = (props: TokenManagerProps) => {
-	const { tokens } = useAccountTokens()
+	const { tokens, cacheKey } = useManagedTokens()
+	const { address } = useAccount()
 	const { network } = useNetwork()
 	const query = useSignal('')
 
@@ -29,6 +32,10 @@ export const TokenManager = (props: TokenManagerProps) => {
 		props.onClose()
 		props.onAddToken()
 	}
+
+	useSignalEffect(() => {
+		cacheKey.value = address.value.state !== 'resolved' ? MANAGED_TOKENS_CACHE_KEY : `${MANAGED_TOKENS_CACHE_KEY}:${address.value.value}`
+	})
 
 	return (
 		<div class='fixed inset-0 overflow-y-scroll scrollbar-hidden'>
@@ -103,10 +110,10 @@ export type TokenCardProps = {
 
 const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 	const removal = useSignal<boolean>(false)
-	const { removeToken } = useAccountTokens()
+	const { tokens } = useManagedTokens()
 
-	const handleRemoveToken = (tokenAddress: string) => {
-		removeToken(tokenAddress)
+	const removeTokenFromList = (tokenAddress: string) => {
+		tokens.value = tokens.peek().filter(token => token.address !== tokenAddress)
 		removal.value = false
 	}
 
@@ -125,7 +132,7 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 						<div class='absolute inset-0 w-full flex items-center justify-center bg-black/80 border border-white/50'>
 							<div class='text-center p-4'>
 								<div class='mb-2'>This will remove {token.name} from your token list, continue?</div>
-								<button class='border border-white/50 px-3 py-1' onClick={() => handleRemoveToken(token.address)}>
+								<button class='border border-white/50 px-3 py-1' onClick={() => removeTokenFromList(token.address)}>
 									Yes
 								</button>
 							</div>
@@ -154,6 +161,11 @@ const TokenCard = ({ token, onSelect }: TokenCardProps) => {
 }
 
 const AddTokenCard = ({ onClick }: { onClick: () => void }) => {
+	const { address } = useAccount()
+	const cardTitle = useComputed(() => {
+		return address.value.state !== 'resolved' ? `Connect Wallet` : `Add Token`
+	})
+
 	return (
 		<div class='aspect-square bg-neutral-900 p-4 flex items-center justify-center' onClick={onClick}>
 			<div class='grid place-items-center'>
@@ -162,7 +174,7 @@ const AddTokenCard = ({ onClick }: { onClick: () => void }) => {
 						<path fill-rule='evenodd' clip-rule='evenodd' d='M8 2.75a.5.5 0 0 0-1 0V7H2.75a.5.5 0 0 0 0 1H7v4.25a.5.5 0 0 0 1 0V8h4.25a.5.5 0 0 0 0-1H8V2.75Z' fill='currentColor' />
 					</svg>
 				</div>
-				<div class='font-bold text-white/50'>Add Token</div>
+				<div class='font-bold text-white/50'>{cardTitle}</div>
 			</div>
 		</div>
 	)

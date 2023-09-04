@@ -1,10 +1,13 @@
-import { useSignal, useSignalEffect } from '@preact/signals'
-import { TransactionResponse, getAddress, parseEther, Contract, parseUnits } from 'ethers'
+import { signal, useSignal, useSignalEffect } from '@preact/signals'
+import * as funtypes from 'funtypes'
+import { TransactionResponse, parseEther, Contract, parseUnits } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
-import { useRecentTransfers } from './recent-transfers.js'
 import { TokenMeta } from './tokens.js'
+import { AddressSchema, createCacheParser, Transfer, TransferSchema } from '../schema.js'
+import { RECENT_TRANSFERS_CACHE_KEY } from '../library/constants.js'
+import { persistSignalEffect } from '../library/persistent-signal.js'
 
 export type TransferData = {
 	recipientAddress: string
@@ -15,22 +18,28 @@ export type TransferData = {
 const transferDataDefaults: TransferData = { recipientAddress: '', amount: '', token: undefined }
 
 export function useTransfer() {
-	const { add } = useRecentTransfers()
+	const transfers = useTransfers()
 	const providers = useProviders()
 	const transaction = useSignal<AsyncProperty<TransactionResponse>>({ state: 'inactive' })
 	const data = useSignal<TransferData>(transferDataDefaults)
 	const { value: query, waitFor } = useAsyncState<TransactionResponse>()
 
+	const addToRecentTransfers = (transfer: Transfer) => {
+		transfers.value = { ...transfers.peek(), data: transfers.peek().data.concat([transfer]) }
+	}
+
 	const send = () => {
 		waitFor(async () => {
 			const signer = await providers.browserProvider.getSigner()
-			const to = getAddress(data.value.recipientAddress)
+			const to = AddressSchema.parse(data.value.recipientAddress)
+			const from = AddressSchema.parse(signer.address)
 
 			// Ether transfer
 			if (data.value.token === undefined) {
 				const value = parseEther(data.value.amount)
 				const response = await signer.sendTransaction({ to, value })
-				add({ hash: response.hash, recipientAddress: to, date: Date.now(), amount: data.value.amount })
+				const newTransfer = { from, to, hash: response.hash, date: Date.now(), amount: data.value.amount, token: undefined }
+				addToRecentTransfers(newTransfer)
 				return response
 			}
 
@@ -39,7 +48,8 @@ export function useTransfer() {
 			const contract = new Contract(tokenMetadata.address, ERC20ABI, signer)
 			const value = parseUnits(data.value.amount, tokenMetadata.decimals)
 			const response = await contract.transfer(to, value)
-			add({ hash: response.hash, token: tokenMetadata, recipientAddress: to, date: Date.now(), amount: data.value.amount })
+			const newTransfer = { from, to, hash: response.hash, date: Date.now(), amount: data.value.amount, token: tokenMetadata }
+			addToRecentTransfers(newTransfer)
 			return response
 		})
 	}
@@ -57,4 +67,19 @@ export function useTransfer() {
 	useSignalEffect(listenForQueryChanges)
 
 	return { transaction, data, send, clearData }
+}
+
+const RecentTransfersCacheSchema = funtypes.Union(
+	funtypes.Object({
+		data: funtypes.Array(TransferSchema),
+		version: funtypes.Literal('1.0.0')
+	})
+)
+
+type RecentTransfers = funtypes.Static<typeof RecentTransfersCacheSchema>
+const recentTransfers = signal<RecentTransfers>({ data: [], version: '1.0.0' })
+
+export function useTransfers() {
+	persistSignalEffect(RECENT_TRANSFERS_CACHE_KEY, recentTransfers, createCacheParser(RecentTransfersCacheSchema))
+	return recentTransfers
 }

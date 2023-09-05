@@ -155,7 +155,6 @@ const TokenBalance = ({ token }: { token?: ERC20Token }) => {
 
 	const getTokenBalance = async () => {
 		if (account.value.state !== 'resolved') return
-		console.log('getTokenBalance', account.value.state)
 		const accountAddress = account.value.value
 		const contract = new Contract(token.address, ERC20ABI, browserProvider)
 		waitFor(async () => await contract.balanceOf(accountAddress))

@@ -46,9 +46,7 @@ export function JSONParse(jsonString: string) {
 }
 
 /**
- *
  * Checks if a search string can be found within the source string
- *
  */
 export function stringIncludes(source: string, search: string, caseSensitive?: boolean) {
 	if (caseSensitive) return source.includes(search)
@@ -57,4 +55,12 @@ export function stringIncludes(source: string, search: string, caseSensitive?: b
 
 export function preventFocus(e: JSX.TargetedEvent<HTMLElement>) {
 	e.currentTarget.blur()
+}
+
+/**
+ * Match string equality
+ */
+export function areEqualStrings(a: string, b: string, caseSensitive?: true) {
+	if (caseSensitive) return a === b
+	return a.toLowerCase() === b.toLowerCase()
 }

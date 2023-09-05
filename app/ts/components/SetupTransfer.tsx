@@ -13,6 +13,7 @@ import { useWallet } from '../context/Wallet.js'
 import { useNotice } from '../store/notice.js'
 import { TokenPicker } from './TokenPicker.js'
 import { TokenAdd } from './TokenAdd.js'
+import { TransferResult } from './TransferResult.js'
 
 export function SetupTransfer() {
 	return (
@@ -23,6 +24,7 @@ export function SetupTransfer() {
 					<TransferAmountField />
 				</div>
 				<TransferAddressField />
+				<TransferResult />
 				<TransferButton />
 				<TransferRecorder />
 				<TokenPicker />
@@ -47,6 +49,7 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 		}
 
 		if (!safeParse.value.success) return
+
 		const transferInput = safeParse.value.value
 
 		waitFor(async () => {

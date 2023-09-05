@@ -562,6 +562,10 @@ input[type='password']:autofill {
 	grid-column: 1 / -1;
 }
 
+.row-span-2 {
+	grid-row: span 2 / span 2;
+}
+
 .row-start-2 {
 	grid-row-start: 2;
 }
@@ -874,6 +878,10 @@ input[type='password']:autofill {
 	grid-template-rows: 1fr min-content;
 }
 
+.grid-rows-\[min-content\2c min-content\] {
+	grid-template-rows: min-content min-content;
+}
+
 .flex-col {
 	flex-direction: column;
 }
@@ -950,6 +958,10 @@ input[type='password']:autofill {
 	row-gap: 0.75rem;
 }
 
+.gap-x-1 {
+	column-gap: 0.25rem;
+}
+
 .overflow-hidden {
 	overflow: hidden;
 }
@@ -1002,6 +1014,10 @@ input[type='password']:autofill {
 	border-style: dashed;
 }
 
+.border-amber-500\/50 {
+	border-color: rgb(245 158 11 / 0.5);
+}
+
 .border-lime-400\/40 {
 	border-color: rgb(163 230 53 / 0.4);
 }
@@ -1040,8 +1056,21 @@ input[type='password']:autofill {
 	border-color: rgb(255 255 255 / 0.5);
 }
 
+.border-red-500\/30 {
+	border-color: rgb(239 68 68 / 0.3);
+}
+
+.border-red-500 {
+	--tw-border-opacity: 1;
+	border-color: rgb(239 68 68 / var(--tw-border-opacity));
+}
+
 .border-b-white\/10 {
 	border-bottom-color: rgb(255 255 255 / 0.1);
+}
+
+.bg-amber-500\/10 {
+	background-color: rgb(245 158 11 / 0.1);
 }
 
 .bg-black {
@@ -1285,6 +1314,11 @@ input[type='password']:autofill {
 
 .text-white\/80 {
 	color: rgb(255 255 255 / 0.8);
+}
+
+.text-red-200 {
+	--tw-text-opacity: 1;
+	color: rgb(254 202 202 / var(--tw-text-opacity));
 }
 
 .opacity-0 {

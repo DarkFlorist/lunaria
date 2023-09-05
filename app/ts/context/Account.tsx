@@ -5,7 +5,7 @@ import { DEFAULT_TOKENS, SETTINGS_CACHE_KEY } from '../library/constants.js'
 import { assertsEthereumObservable, assertsWithEthereum } from '../library/ethereum.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
-import { SettingsCacheSchema, createCacheParser, SettingsCache, EthereumAddress } from '../schema.js'
+import { SettingsCacheSchema, createCacheParser, SettingsCache, EthereumAddress, AccountSettings } from '../schema.js'
 
 export type AccountContext = {
 	settings: Signal<SettingsCache>
@@ -24,10 +24,11 @@ export const AccountProvider = ({ children }: { children: ComponentChildren }) =
 	const initializeSettings = () => {
 		if (account.value.state !== 'resolved') return
 		const accountAddress = account.value.value
-		const accountSettings = settings.value.data.find(setting => setting.address === accountAddress)
+		const accountSettings = settings.value.data.find(data => data.address === accountAddress)
 
-		if (accountSettings && accountSettings.tokens.length) return
-		const newSettings = { address: accountAddress, tokens: DEFAULT_TOKENS.map(token => token.address) }
+		// only run initialization once, when holdings is empty
+		if (accountSettings && accountSettings.holdings.length) return
+		const newSettings = { address: accountAddress, holdings: DEFAULT_TOKENS.map(token => ({ address: token.address, balance: undefined, blockNumber: undefined })) } satisfies AccountSettings
 		settings.value = Object.assign({}, settings.peek(), { data: settings.peek().data.concat([newSettings]) })
 	}
 

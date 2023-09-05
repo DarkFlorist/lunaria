@@ -4,6 +4,7 @@ import { Notices } from './Notice.js'
 import { SplashScreen } from './SplashScreen.js'
 import { TransactionPage } from './TransactionPage/index.js'
 import { ErrorAlert } from './ErrorAlert.js'
+import { Test } from './Test.js'
 
 export function App() {
 	return (
@@ -18,9 +19,13 @@ export function App() {
 				<Route path='#saved/:index'>
 					<TransferPage />
 				</Route>
+				<Route path='#xfer'>
+					<Test />
+				</Route>
 			</Router>
 			<Notices />
 			<ErrorAlert />
 		</SplashScreen>
 	)
 }
+

@@ -32,14 +32,14 @@ export const BigIntParser: ParsedValueConfig<funtypes.String, bigint> = {
 	},
 }
 
-export const BigIntHexSchema = funtypes.String.withParser(BigIntParser)
+export const BigIntSchema = funtypes.String.withParser(BigIntParser)
 
 export const TokenSchema = funtypes.Object({
-	chainId: BigIntHexSchema,
+	chainId: BigIntSchema,
 	name: funtypes.String,
 	address: funtypes.String,
 	symbol: funtypes.String,
-	decimals: BigIntHexSchema,
+	decimals: BigIntSchema,
 })
 
 export type Token = funtypes.Static<typeof TokenSchema>
@@ -54,3 +54,11 @@ export const TransferSchema = funtypes.Object({
 })
 
 export type Transfer = funtypes.Static<typeof TransferSchema>
+
+export const TransferInputSchema = funtypes.Object({
+	to: AddressSchema,
+	amount: BigIntSchema,
+	token: funtypes.Union(TokenSchema, funtypes.Undefined)
+})
+
+export type TransferInput = funtypes.Static<typeof TransferInputSchema>

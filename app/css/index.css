@@ -597,6 +597,10 @@ video {
 	margin-right: 2rem;
 }
 
+.mt-2 {
+	margin-top: 0.5rem;
+}
+
 .mt-8 {
 	margin-top: 2rem;
 }
@@ -837,8 +841,8 @@ video {
 	grid-template-columns: min-content minmax(0, 1fr) min-content;
 }
 
-.grid-rows-\[min-content\2c min-content\] {
-	grid-template-rows: min-content min-content;
+.grid-rows-2 {
+	grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -1453,10 +1457,6 @@ video {
 	text-decoration-line: underline;
 }
 
-.focus\:border:focus {
-	border-width: 1px;
-}
-
 .focus\:border-white:focus {
 	--tw-border-opacity: 1;
 	border-color: rgb(255 255 255 / var(--tw-border-opacity));
@@ -1482,6 +1482,10 @@ video {
 .focus\:outline-none:focus {
 	outline: 2px solid transparent;
 	outline-offset: 2px;
+}
+
+.disabled\:border-white\/50:disabled {
+	border-color: rgb(255 255 255 / 0.5);
 }
 
 .disabled\:text-white\/50:disabled {
@@ -1593,4 +1597,13 @@ video {
 	.xl\:grid-cols-5 {
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 	}
+}
+
+.\[\&\>button\]\:w-8 > button {
+	width: 2rem;
+}
+
+.\[\&\>button\]\:px-2 > button {
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }

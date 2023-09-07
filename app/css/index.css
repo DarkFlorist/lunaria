@@ -837,8 +837,8 @@ video {
 	grid-template-columns: min-content minmax(0, 1fr) min-content;
 }
 
-.grid-rows-2 {
-	grid-template-rows: repeat(2, minmax(0, 1fr));
+.grid-rows-\[min-content\2c min-content\] {
+	grid-template-rows: min-content min-content;
 }
 
 .flex-col {

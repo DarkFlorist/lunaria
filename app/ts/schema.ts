@@ -23,7 +23,7 @@ export type Address = funtypes.Static<typeof AddressSchema>
 
 export const BigIntParser: ParsedValueConfig<funtypes.String, bigint> = {
 	parse(value) {
-		if (!isHexString(value)) return { success: false, message: `${value} is not a hex string encoded number.` }
+		if (!/^0x([a-fA-F0-9]{1,64})$/.test(value)) return { success: false, message: `${value} is not a hex string encoded number.` }
 		return { success: true, value: BigInt(value) }
 	},
 	serialize(value) {

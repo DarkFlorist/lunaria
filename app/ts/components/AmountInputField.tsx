@@ -1,75 +1,89 @@
-import { Signal, useComputed } from "@preact/signals"
-import { formatUnits, Numeric, parseUnits } from "ethers"
-import { ComponentChildren } from "preact"
-import { useRef } from "preact/hooks"
-import { JSX } from "preact/jsx-runtime"
-import { removeNonStringsAndTrim } from "../library/utilities.js"
-import * as Icon from "./Icon/index.js"
+import { Signal, useSignal } from '@preact/signals'
+import { ComponentChildren } from 'preact'
+import { useRef } from 'preact/hooks'
+import * as Icon from './Icon/index.js'
 
 type AmountFieldProps = {
-	id: string
-	signalValue: Signal<bigint | undefined>,
-	decimals?: string | Numeric
-	onSetMaxValue: () => void
+	label: string
+	signalValue: Signal<string>
 	disabled?: true
 }
 
 export const AmountField = (props: AmountFieldProps) => {
+	const isInputPristine = useSignal<true | undefined>(true)
 	const inputRef = useRef<HTMLInputElement>(null)
+	const initialValue = useSignal<AmountFieldProps["signalValue"]["value"]>(props.signalValue.peek())
 
-	const displayValue = useComputed(() => {
-		if (props.signalValue.value === undefined) return ''
-		const floatValue = parseFloat(formatUnits(props.signalValue.value, props.decimals))
-		return (floatValue % 1 === 0 ? Math.floor(floatValue) : floatValue).toString()
-	})
-
-	function updateValue(e: JSX.TargetedEvent<HTMLInputElement, Event>) {
-		const inputField = e.currentTarget
-		const inputValue = inputField.value.trim()
-
-		if (inputField.validity.patternMismatch) {
-			inputField.setCustomValidity('Amount value accepts only numbers.')
-			return
-		}
-
-		inputField.setCustomValidity('')
-		props.signalValue.value = inputValue.length ? parseUnits(inputValue, props.decimals) : undefined
-	}
-
-	function clearValue() {
-		props.signalValue.value = undefined
+	function setValue(newValue: string) {
+		isInputPristine.value = undefined
 
 		if (inputRef.current) {
-			inputRef.current.value = ''
+			if (inputRef.current.validity.patternMismatch) {
+				inputRef.current.setCustomValidity('Only numbers are allowed')
+				return
+			}
+		}
+
+		props.signalValue.value = newValue.trim()
+	}
+
+	const clearValue = () => {
+		if (inputRef.current) {
+			inputRef.current.value = initialValue.value ?? ''
+			const inputEvent = new InputEvent('input')
+			inputRef.current.dispatchEvent(inputEvent)
 			inputRef.current.focus()
 		}
 	}
 
 	return (
-		<Wrapper>
-			<label for={props.id} class='text-sm text-white/50'>Amount</label>
-			<input ref={inputRef} disabled={props.disabled} required id={props.id} placeholder="1.00" value={displayValue.value} inputMode='numeric' pattern='^\s*(\d+(\.\d+)?)?\s*$' onInput={updateValue} class='h-6 bg-transparent outline-none placeholder:text-white/20 peer disabled:border-white/50 disabled:text-white/50' />
-			<Button onClick={props.onSetMaxValue} class='hidden peer-placeholder-shown:flex [&>button]:px-2'>max</Button>
-			<Button onClick={clearValue} class='flex peer-placeholder-shown:hidden [&>button]:w-8'><Icon.Xmark /></Button>
-			<BackDraft />
-		</Wrapper>
+		<Fieldset isPristine={isInputPristine.value} disabled={props.disabled}>
+			<input type="text" ref={inputRef} value={props.signalValue.value} onInput={e => setValue(e.currentTarget.value)} class='peer outline-none pt-6 pb-2 bg-transparent disabled:text-black/30 placeholder:text-white/20' placeholder="1.00" pattern='^\s*(\d+(\.\d+)?)?\s*$' required />
+			<Label text={props.label} />
+			<ClearButton onClick={clearValue} />
+			<MaxButton onSuccess={setValue} />
+		</Fieldset>
 	)
 }
 
-type ButtonProps = {
-	onClick: () => void
-	children: ComponentChildren
-	class?: string
+type FieldsetProps = {
+	children: ComponentChildren, isPristine?: true
+	disabled?:true
 }
 
-const Button = ({ children, onClick, class: className }: ButtonProps) => {
+const Fieldset = ({ children, isPristine, disabled }: FieldsetProps) => {
 	return (
-		<div class={removeNonStringsAndTrim('row-span-2 items-center justify-center', className)}>
-			<button type='button' onClick={onClick} class='h-8 flex items-center justify-center text-xs outline-none uppercase text-white/50 border border-white/50 focus:border-white focus:text-white'>{children}</button>
-		</div>
+		<fieldset class='[&:not([data-pristine]):invalid]:border-red-400 relative grid gap-2 grid-cols-1 grid-flow-col-dense items-center border border-white/50 disabled:bg-gray-100 px-3 focus-within:border-white' data-pristine={isPristine} disabled={disabled}>
+			{children}
+		</fieldset>
 	)
 }
 
-const BackDraft = () => <div class='pointer-events-none absolute inset-0 border border-white/50 peer-invalid:border-red-400 peer-invalid:peer-placeholder-shown:border-white/50 peer-invalid:peer-placeholder-shown:peer-focus:border-white'></div>
+const Label = ({ text }: { text: string }) => {
+	return <label class='absolute top-2 left-3 uppercase text-xs text-white/50'>{text}</label>
+}
 
-const Wrapper = ({ children }: { children: ComponentChildren }) => <div class='relative grid grid-cols-[1fr,min-content] grid-rows-2 grid-flow-col-dense gap-x-3 py-3 px-4'>{children}</div>
+const ClearButton = ({ onClick }: { onClick: () => void }) => {
+	return (
+		<button type="button" onClick={onClick} class='outline-none w-8 h-8 flex items-center justify-center border border-white/50 text-white/50 peer-placeholder-shown:hidden focus:text-white focus:border-white hover:text-white hover:border-white'>&times;</button>
+	)
+}
+
+const MaxButton = ({ onSuccess }: { onSuccess: (maxValue: string) => void }) => {
+	const isFetching = useSignal(false)
+
+	const getMaxValue = async () => {
+		isFetching.value = true
+		const maxValue = await wait()
+		isFetching.value = false
+		onSuccess(maxValue)
+	}
+
+	return (
+		<button type="button" class='outline-none px-2 h-8 flex items-center hidden peer-placeholder-shown:flex border border-white/50 text-white/50 focus:border-white focus:text-white [&:not(:disabled):hover]:border-white [&:not(:disabled):hover]:text-white' onClick={getMaxValue} disabled={isFetching.value}>{isFetching.value ? <Icon.Spinner /> : 'max'}</button>
+	)
+}
+
+const wait = (duration: number = 500) => new Promise<string>((resolve) => {
+	setTimeout(() => resolve('101.1'), duration)
+})

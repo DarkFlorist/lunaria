@@ -18,9 +18,6 @@ export function createCacheParser<T>(funType: funtypes.Codec<T>) {
 	return config
 }
 
-export const AddressSchema = funtypes.String.withGuard(isHexString).withConstraint(isAddress, { name: 'Address' })
-export type Address = funtypes.Static<typeof AddressSchema>
-
 export const BigIntParser: ParsedValueConfig<funtypes.String, bigint> = {
 	parse(value) {
 		if (!/^0x([a-fA-F0-9]{1,64})$/.test(value)) return { success: false, message: `${value} is not a hex string encoded number.` }
@@ -33,6 +30,12 @@ export const BigIntParser: ParsedValueConfig<funtypes.String, bigint> = {
 }
 
 export const BigIntSchema = funtypes.String.withParser(BigIntParser)
+
+export const AddressSchema = funtypes.String.withGuard(isHexString).withConstraint(isAddress, { name: 'Address' })
+export type Address = funtypes.Static<typeof AddressSchema>
+
+export const AmountSchema = funtypes.String.withGuard(isHexString)
+export type Amount = funtypes.Static<typeof AmountSchema>
 
 export const TokenSchema = funtypes.Object({
 	chainId: BigIntSchema,
@@ -48,7 +51,7 @@ export const TransferSchema = funtypes.Object({
 	hash: funtypes.String,
 	from: AddressSchema,
 	to: AddressSchema,
-	amount: funtypes.String,
+	amount: AmountSchema,
 	token: funtypes.Union(TokenSchema, funtypes.Undefined),
 	date: funtypes.Number,
 })
@@ -57,7 +60,7 @@ export type Transfer = funtypes.Static<typeof TransferSchema>
 
 export const TransferInputSchema = funtypes.Object({
 	to: AddressSchema,
-	amount: BigIntSchema,
+	amount: AmountSchema,
 	token: funtypes.Union(TokenSchema, funtypes.Undefined)
 })
 

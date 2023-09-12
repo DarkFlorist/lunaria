@@ -4,7 +4,7 @@ import { Notices } from './Notice.js'
 import { SplashScreen } from './SplashScreen.js'
 import { TransactionPage } from './TransactionPage/index.js'
 import { ErrorAlert } from './ErrorAlert.js'
-import { Test } from './Test.js'
+import { Transfer } from './Transfer.js'
 
 export function App() {
 	return (
@@ -20,7 +20,7 @@ export function App() {
 					<TransferPage />
 				</Route>
 				<Route path='#xfer'>
-					<Test />
+					<Transfer />
 				</Route>
 			</Router>
 			<Notices />

@@ -4,7 +4,6 @@ import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../Default
 import { TokenManager } from '../TokenManager/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
 import { AmountField } from '../AmountField.js'
-import { AmountField as AmountInputField } from '../AmountInputField.js'
 import { AddressField } from '../AddressField.js'
 import { useTransfer } from '../../store/transfer.js'
 import { removeNonStringsAndTrim } from '../../library/utilities.js'
@@ -62,7 +61,6 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 	const tokenManager = useSignal<'select' | 'add' | undefined>(undefined)
 	const { nav, main } = usePanels()
 	const { address, connect } = useAccount()
-	const amount = useSignal<bigint | undefined>(undefined)
 
 	const setUserSelectedToken = (token?: TokenMeta) => {
 		data.value = { ...data.value, token, amount: '' }
@@ -126,7 +124,6 @@ const MainPanel = ({ transferStore }: MainPanelProps) => {
 						<div class='grid md:grid-cols-2 gap-4'>
 							<TokenField token={data.value.token} onClick={() => (tokenManager.value = 'select')} disabled={isFormSubmitting.value} />
 							<AmountField label='Amount' placeholder='1.00' value={data.value.amount} onInput={value => (data.value = { ...data.value, amount: value })} onClear={() => (data.value = { ...data.value, amount: '' })} disabled={isFormSubmitting.value} token={data.value.token} />
-							<AmountInputField id='foo' signalValue={amount} />
 						</div>
 						<AddressField label='Address' placeholder='0x123...789' value={data.value.recipientAddress} onInput={handleAddressChange} onClear={handleAddressChange} disabled={isFormSubmitting.value} />
 						<TransferStatus transaction={transaction} />

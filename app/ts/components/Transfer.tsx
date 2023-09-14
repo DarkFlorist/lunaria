@@ -26,27 +26,27 @@ export function Transfer() {
 const TransferForm = ({ children }: { children: ComponentChildren }) => {
 	const transfer = useTransfer()
 
-	const serializedAmount = useComputed(() => {
+	const to = transfer.input.value.to
+	const token = transfer.input.value.token
+	const normalizedAmount = useComputed(() => {
 		try {
 			const decimals = transfer.input.value.token?.decimals
-			const bigIntValue = parseUnits(transfer.input.value.amount, decimals)
-			const serializedValue = BigIntSchema.serialize(bigIntValue)
-			return String.parse(serializedValue)
+			const bigIntAmount = parseUnits(transfer.input.value.amount, decimals)
+			const serializedAmount = BigIntSchema.serialize(bigIntAmount)
+			return String.parse(serializedAmount)
 		} catch {
 			return ''
 		}
 	})
 
-	const serializedAddress = useComputed(() => {
-		const parsedAddress = AddressSchema.safeParse(transfer.input.value.to)
-		if (!parsedAddress.success) return ''
-		return parsedAddress.value
-	})
-
 	const validateForm = (e: Event) => {
 		e.preventDefault()
-		const parsed = TransferInputSchema.safeParse({ to: serializedAddress.value, amount: serializedAmount.value })
-		if (parsed.success === false) transfer.validationError.value = parsed
+		const address = AddressSchema.safeParse(transfer.input.value.to, )
+		console.log(address)
+		const parsedInput = TransferInputSchema.safeParse({ amount: normalizedAmount.value, token, to })
+		console.log(parsedInput)
+		if (!parsedInput.success) transfer.validationError.value = parsedInput
+		console.log('ok')
 	}
 
 	return (

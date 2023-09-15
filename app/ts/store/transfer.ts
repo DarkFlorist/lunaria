@@ -4,53 +4,40 @@ import { TransactionResponse, parseEther, Contract, parseUnits } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
-import { TokenMeta } from './tokens.js'
-import { AddressSchema, createCacheParser, Transfer, TransferSchema } from '../schema.js'
+import { EthereumAddress, createCacheParser, TransferSchema, TokenContract } from '../schema.js'
 import { RECENT_TRANSFERS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
 
 export type TransferData = {
 	recipientAddress: string
 	amount: string
-	token?: TokenMeta
+	token?: TokenContract
 }
 
 const transferDataDefaults: TransferData = { recipientAddress: '', amount: '', token: undefined }
 
 export function useTransfer() {
-	const transfers = useTransfers()
 	const providers = useProviders()
 	const transaction = useSignal<AsyncProperty<TransactionResponse>>({ state: 'inactive' })
 	const data = useSignal<TransferData>(transferDataDefaults)
 	const { value: query, waitFor } = useAsyncState<TransactionResponse>()
 
-	const addToRecentTransfers = (transfer: Transfer) => {
-		transfers.value = { ...transfers.peek(), data: transfers.peek().data.concat([transfer]) }
-	}
-
 	const send = () => {
 		waitFor(async () => {
 			const signer = await providers.browserProvider.getSigner()
-			const to = AddressSchema.parse(data.value.recipientAddress)
-			const from = AddressSchema.parse(signer.address)
+			const to = EthereumAddress.parse(data.value.recipientAddress)
 
 			// Ether transfer
 			if (data.value.token === undefined) {
 				const value = parseEther(data.value.amount)
-				const response = await signer.sendTransaction({ to, value })
-				const newTransfer = { from, to, hash: response.hash, date: Date.now(), amount: data.value.amount, token: undefined }
-				addToRecentTransfers(newTransfer)
-				return response
+				return await signer.sendTransaction({ to, value })
 			}
 
 			// Token transfer
 			const tokenMetadata = data.value.token
 			const contract = new Contract(tokenMetadata.address, ERC20ABI, signer)
 			const value = parseUnits(data.value.amount, tokenMetadata.decimals)
-			const response = await contract.transfer(to, value)
-			const newTransfer = { from, to, hash: response.hash, date: Date.now(), amount: data.value.amount, token: tokenMetadata }
-			addToRecentTransfers(newTransfer)
-			return response
+			return await contract.transfer(to, value)
 		})
 	}
 

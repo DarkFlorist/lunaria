@@ -6,35 +6,34 @@ import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
 import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
-import { JSONParse, JSONStringify } from '../library/utilities.js'
+import { JSONStringify } from '../library/utilities.js'
 import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
-import { createCacheParser, Token, TokenSchema } from '../schema.js'
+import { createCacheParser, EthereumAddress, TokenContract } from '../schema.js'
 
 const CACHEID_PREFIX = '_ut'
 
-const tokens = signal<TokenMeta[]>([])
+const tokens = signal<TokenContract[]>([])
 
 export function useAccountTokens() {
 	const { address } = useAccount()
+	const managedTokens = useManagedTokens()
 
 	const cacheKey = useComputed(() => {
 		if (address.value.state !== 'resolved') return `${CACHEID_PREFIX}:default`
 		return `${CACHEID_PREFIX}:${address.value.value}`
 	})
 
-	const addToken = (token: TokenMeta) => {
+	const addToken = (token: TokenContract) => {
 		tokens.value = [...tokens.value, token]
 	}
 
-	const removeToken = (address: TokenMeta['address']) => {
+	const removeToken = (address: TokenContract['address']) => {
 		tokens.value = [...tokens.value.filter(token => token.address !== address)]
 	}
 
 	const listenForCacheKeyChange = () => {
-		const tokensCache = useTokensCache(cacheKey.value)
-		if (tokensCache.error !== undefined) throw new Error('Cache data could not be read.')
-		tokens.value = tokensCache.data
+		tokens.value = managedTokens.data
 	}
 
 	const listenForTokensChange = () => {
@@ -54,7 +53,7 @@ export function useAccountTokens() {
 }
 
 export function useTokenQuery() {
-	const { value: query, waitFor, reset } = useAsyncState<TokenMeta>()
+	const { value: query, waitFor, reset } = useAsyncState<TokenContract>()
 	const providers = useProviders()
 	const { network } = useNetwork()
 	const tokenAddress = useSignal('')
@@ -77,7 +76,8 @@ export function useTokenQuery() {
 				const name = await contract.name()
 				const symbol = await contract.symbol()
 				const decimals = await contract.decimals()
-				return { chainId, name, symbol, decimals, address: tokenAddress.value } as const
+				const address = EthereumAddress.parse(tokenAddress.value)
+				return { chainId, name, symbol, decimals, address } as const
 			} catch (unknownError) {
 				throw new Error('Contract call failed')
 			}
@@ -87,45 +87,6 @@ export function useTokenQuery() {
 	useSignalEffect(validateChangedAddress)
 
 	return { query, tokenAddress }
-}
-
-// Move to constants later
-export type TokenMeta = {
-	chainId: bigint
-	name: string
-	address: string
-	symbol: string
-	decimals: bigint
-}
-
-function isTokenMeta(meta: object): meta is TokenMeta {
-	return 'chainId' in meta && typeof meta.chainId === 'bigint' && 'address' in meta && typeof meta.address === 'string' && 'name' in meta && typeof meta.name === 'string' && 'symbol' in meta && typeof meta.symbol === 'string' && 'decimals' in meta && typeof meta.decimals === 'bigint'
-}
-
-export function useTokensCache(cacheKey: string) {
-	const tokensCache = localStorage.getItem(cacheKey)
-
-	if (tokensCache === null) {
-		return { data: DEFAULT_TOKENS }
-	}
-
-	try {
-		let tokens = []
-		const parsed = JSONParse(tokensCache)
-		if (!Array.isArray(parsed)) throw new Error()
-
-		for (const item of parsed) {
-			if (!isTokenMeta(item)) continue
-			tokens.push(item)
-		}
-
-		return { data: tokens }
-	} catch (unknownError) {
-		let error = new Error('An unknown error has occured.')
-		if (unknownError instanceof Error) error = unknownError
-		if (typeof unknownError === 'string') error = new Error(unknownError)
-		return { error }
-	}
 }
 
 export function useTokenBalance() {
@@ -142,8 +103,8 @@ export function useTokenBalance() {
 	return { tokenBalance, getTokenBalance }
 }
 
-const ManagedTokensSchema = funtypes.Array(TokenSchema)
-const managedTokens = signal<Token[]>(DEFAULT_TOKENS)
+const ManagedTokensSchema = funtypes.Array(TokenContract)
+const managedTokens = signal<TokenContract[]>(DEFAULT_TOKENS)
 const managedTokensCacheKey = signal(MANAGED_TOKENS_CACHE_KEY)
 
 export function useManagedTokens() {

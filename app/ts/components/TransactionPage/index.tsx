@@ -1,12 +1,13 @@
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
-import { RecentTransfers } from '../RecentTransfers.js'
+import { TransferHistory } from '../TransferHistory.js'
 import { DiscordInvite } from '../DiscordInvite.js'
 import { TransactionDetails } from './TransactionDetails.js'
 import { Favorites } from '../Favorites.js'
 import { MainFooter } from '../MainFooter.js'
 import { useAccount } from '../../store/account.js'
 import { useEffect } from 'preact/hooks'
+import { TransferHistoryProvider } from '../../context/TransferHistory.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
@@ -20,8 +21,10 @@ export const TransactionPage = () => {
 	return (
 		<div class='fixed inset-0 bg-black text-white h-[100dvh]'>
 			<Root>
-				<LeftPanel />
-				<MainPanel />
+				<TransferHistoryProvider>
+					<LeftPanel />
+					<MainPanel />
+				</TransferHistoryProvider>
 			</Root>
 		</div>
 	)
@@ -84,7 +87,7 @@ const LeftPanel = () => {
 				</a>
 			</div>
 
-			<RecentTransfers />
+			<TransferHistory />
 
 			<Favorites />
 

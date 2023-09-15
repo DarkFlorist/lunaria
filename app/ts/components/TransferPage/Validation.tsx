@@ -1,6 +1,6 @@
 import { Signal, useComputed } from '@preact/signals'
 import { useAccount } from '../../store/account.js'
-import { useAccountTokens } from '../../store/tokens.js'
+import { useManagedTokens } from '../../store/tokens.js'
 import { TransferData } from '../../store/transfer.js'
 import * as Icon from '../Icon/index.js'
 
@@ -10,7 +10,7 @@ type Props = {
 
 export const TransferValidation = (props: Props) => {
 	const { address } = useAccount()
-	const { tokens } = useAccountTokens()
+	const { tokens } = useManagedTokens()
 
 	const isRecipientAToken = useComputed(() => tokens.value.some(token => token.address.toLowerCase() === props.data.value.recipientAddress.toLowerCase()))
 

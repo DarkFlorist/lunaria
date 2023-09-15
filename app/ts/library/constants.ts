@@ -1,6 +1,6 @@
-import { TokenMeta } from '../store/tokens'
+import { TokenContract } from '../schema'
 
-export const DEFAULT_TOKENS: TokenMeta[] = [
+export const DEFAULT_TOKENS: TokenContract[] = [
 	{
 		chainId: 1n,
 		address: '0x4c9BBFc1FbD93dFB509E718400978fbEedf590E9',
@@ -53,5 +53,5 @@ export const DEFAULT_TOKENS: TokenMeta[] = [
 ]
 
 export const STORAGE_KEY_RECENTS = 'txns'
-export const MANAGED_TOKENS_CACHE_KEY = 'managed_tokens-v1'
+export const MANAGED_TOKENS_CACHE_KEY = 'managed_tokens'
 export const RECENT_TRANSFERS_CACHE_KEY = 'transfers'

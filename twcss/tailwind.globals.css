@@ -78,10 +78,15 @@
 		background: linear-gradient(271.22deg, rgba(255, 255, 255, 0.1) 1.03%, rgba(255, 255, 255, 0) 100%);
 	}
 
-
 	.text-empty:empty:before {
 		content: attr(data-placeholder);
 		@apply bg-white/20 text-transparent animate-pulse;
 	}
-}
 
+	.clear-none::-ms-clear { display: none; width : 0; height: 0; }
+	.clear-none::-ms-reveal { display: none; width : 0; height: 0; }
+	.clear-none::-webkit-search-decoration,
+	.clear-none::-webkit-search-cancel-button,
+	.clear-none::-webkit-search-results-button,
+	.clear-none::-webkit-search-results-decoration { display: none; }
+}

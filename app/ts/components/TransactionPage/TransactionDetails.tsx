@@ -178,5 +178,7 @@ const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
 			const amount = formatUnits(tokenValue, decimals)
 			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
 			return <Info label='Amount' value={`${amount} ${symbol}`} />
+		default:
+			return <></>
 	}
 }

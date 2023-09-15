@@ -1,4 +1,4 @@
-import { getAddress } from 'ethers'
+import { getAddress, isAddress, isHexString, parseUnits } from 'ethers'
 import * as funtypes from 'funtypes'
 
 export function createCacheParser<T>(funType: funtypes.Codec<T>) {
@@ -28,50 +28,98 @@ export const BigIntParser: funtypes.ParsedValue<funtypes.String, bigint>['config
 	},
 }
 
-export const BigIntSchema = funtypes.String.withParser(BigIntParser)
+export const BigIntHex = funtypes.String.withParser(BigIntParser)
 
-export const AddressParser: funtypes.ParsedValue<funtypes.String, bigint>['config'] = {
+export const HexString = funtypes.String.withGuard(isHexString)
+export type HexString = funtypes.Static<typeof HexString>
+
+export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtypes.String, HexString>['config'] {
+	return {
+		parse(value) {
+			try {
+				const bigIntAmount = parseUnits(value, decimals)
+				const maybeHexAmount = BigIntHex.serialize(bigIntAmount)
+				return HexString.safeParse(maybeHexAmount)
+			} catch {
+				return { success: false, message: `${value} is not a number.` }
+			}
+		},
+		serialize: funtypes.String.safeParse
+	}
+}
+
+export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		if (!/^0x([a-fA-F0-9]{40})$/.test(value)) return { success: false, message: `${value} is not a hex string encoded address.` }
-		else return { success: true, value: BigInt(value) }
+		const addressString = value.toLowerCase()
+		if (!isAddress(addressString)) return { success: false, message: `${value} is not a valid address string.` }
+		else return { success: true, value: getAddress(addressString) }
 	},
-	serialize: value => {
-		if (typeof value !== 'bigint') return { success: false, message: `${typeof value} is not a bigint.`}
-		return { success: true, value: getAddress(`0x${value.toString(16).padStart(40, '0')}`) }
+	serialize: funtypes.String.safeParse
+}
+
+export const EthereumAddress = funtypes.String.withParser(AddressParser).withGuard(isHexString)
+export type EthereumAddress = funtypes.Static<typeof EthereumAddress>
+
+export const QuantityParser: funtypes.ParsedValue<funtypes.String, bigint>['config'] = {
+	parse(value) {
+		if (!/^0x([a-fA-F0-9]{1,64})$/.test(value)) return { success: false, message: `${value} is not a hex string encoded number.` }
+		return { success: true, value: BigInt(value) }
+	},
+	serialize(value) {
+		if (typeof value !== 'bigint') return { success: false, message: `${typeof value} is not a bigint.` } satisfies funtypes.Failure
+		return { success: true, value: `0x${value.toString(16)}` } satisfies funtypes.Success<string>
 	},
 }
 
-export const AddressSchema = funtypes.String.withParser(AddressParser)
-export type Address = funtypes.Static<typeof AddressSchema>
-
-export const QuantitySchema = funtypes.String.withParser(BigIntParser)
-export type Amount = funtypes.Static<typeof QuantitySchema>
-
-export const TokenSchema = funtypes.Object({
-	chainId: BigIntSchema,
+export const TokenContract = funtypes.Object({
+	chainId: BigIntHex,
 	name: funtypes.String,
-	address: funtypes.String,
+	address: EthereumAddress,
 	symbol: funtypes.String,
-	decimals: BigIntSchema,
+	decimals: BigIntHex,
 })
 
-export type Token = funtypes.Static<typeof TokenSchema>
+export type TokenContract = funtypes.Static<typeof TokenContract>
 
 export const TransferSchema = funtypes.Object({
 	hash: funtypes.String,
-	from: AddressSchema,
-	to: AddressSchema,
-	amount: QuantitySchema,
-	token: funtypes.Union(TokenSchema, funtypes.Undefined),
+	from: EthereumAddress,
+	to: EthereumAddress,
+	amount: BigIntHex,
+	token: TokenContract.Or(funtypes.Undefined),
 	date: funtypes.Number,
 })
 
 export type Transfer = funtypes.Static<typeof TransferSchema>
 
-export const TransferInputSchema = funtypes.Object({
-	to: AddressSchema,
-	amount: QuantitySchema,
-	token: funtypes.Union(TokenSchema, funtypes.Undefined)
+export const TransferRequestInput = funtypes.Object({
+	to: EthereumAddress,
+	amount: BigIntHex,
+	token: TokenContract.Or(funtypes.Undefined)
 })
 
-export type TransferInput = funtypes.Static<typeof TransferInputSchema>
+export type TransferRequestInput = funtypes.Static<typeof TransferRequestInput>
+
+export function serialize<T, U extends funtypes.Codec<T>>(funType: U, value: T) {
+	return funType.serialize(value) as ToWireType<U>
+}
+
+export function safeSerialize<T, U extends funtypes.Codec<T>>(funType: U, value: T) {
+	return funType.safeSerialize(value) as funtypes.Result<ToWireType<U>>
+}
+
+export type UnionToIntersection<T> = (T extends unknown ? (k: T) => void : never) extends (k: infer I) => void ? I : never
+
+export type ToWireType<T> =
+	T extends funtypes.Intersect<infer U> ? UnionToIntersection<{ [I in keyof U]: ToWireType<U[I]> }[number]>
+	: T extends funtypes.Union<infer U> ? { [I in keyof U]: ToWireType<U[I]> }[number]
+	: T extends funtypes.Record<infer U, infer V> ? Record<funtypes.Static<U>, ToWireType<V>>
+	: T extends funtypes.Partial<infer U, infer V> ? V extends true ? { readonly [K in keyof U]?: ToWireType<U[K]> } : { [K in keyof U]?: ToWireType<U[K]> }
+	: T extends funtypes.Object<infer U, infer V> ? V extends true ? { readonly [K in keyof U]: ToWireType<U[K]> } : { [K in keyof U]: ToWireType<U[K]> }
+	: T extends funtypes.Readonly<funtypes.Tuple<infer U>> ? { readonly [P in keyof U]: ToWireType<U[P]> }
+	: T extends funtypes.Tuple<infer U> ? { [P in keyof U]: ToWireType<U[P]> }
+	: T extends funtypes.ReadonlyArray<infer U> ? readonly ToWireType<U>[]
+	: T extends funtypes.Array<infer U> ? ToWireType<U>[]
+	: T extends funtypes.ParsedValue<infer U, infer _> ? ToWireType<U>
+	: T extends funtypes.Codec<infer U> ? U
+	: never

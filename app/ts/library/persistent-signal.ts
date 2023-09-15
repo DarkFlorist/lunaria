@@ -1,9 +1,9 @@
 import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import * as funtypes from 'funtypes'
-import { ParsedValueConfig } from 'funtypes/lib/types/ParsedValue'
 import { useEffect } from 'preact/hooks'
+import { safeSerialize } from '../schema.js'
 
-export function persistSignalEffect<T extends ParsedValueConfig<funtypes.String, R>, R>(cacheKey: string, derivedSignal: Signal<R>, funTypeParser: T, storage?: Storage) {
+export function persistSignalEffect<T extends funtypes.ParsedValue<funtypes.String, R>["config"], R>(cacheKey: string, derivedSignal: Signal<R>, funTypeParser: T, storage?: Storage) {
 	const cacheStorage = storage ?? localStorage
 	const error = useSignal<string | undefined>(undefined)
 
@@ -17,19 +17,13 @@ export function persistSignalEffect<T extends ParsedValueConfig<funtypes.String,
 	}
 
 	const syncSignalToCache = () => {
-		const serializedStore = funtypes.String.withParser(funTypeParser).safeSerialize(derivedSignal.value)
+		const serializedStore = safeSerialize(funtypes.String.withParser(funTypeParser), derivedSignal.value)
 		if (!serializedStore.success) {
 			error.value = serializedStore.message
 			return
 		}
 
-		const stringCache = funtypes.String.safeParse(serializedStore.value)
-		if (!stringCache.success) {
-			error.value = stringCache.message
-			return
-		}
-
-		cacheStorage.setItem(cacheKey, stringCache.value)
+		cacheStorage.setItem(cacheKey, serializedStore.value)
 		error.value = undefined
 	}
 

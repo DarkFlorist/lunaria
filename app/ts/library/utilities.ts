@@ -1,3 +1,5 @@
+import { JSX } from "preact/jsx-runtime"
+
 export async function sleep(milliseconds: number) {
 	await new Promise(resolve => setTimeout(resolve, milliseconds))
 }
@@ -43,3 +45,14 @@ export function JSONParse(jsonString: string) {
 	})
 }
 
+/**
+ *
+ * Checks if a search string can be found within the source string
+ *
+ */
+export function stringIncludes(source:string, search:string, caseSensitive?: boolean) {
+	if (caseSensitive) return source.includes(search)
+	return source.toLowerCase().includes(search.toLowerCase())
+}
+
+export function preventFocus(e: JSX.TargetedEvent<HTMLElement>) { e.currentTarget.blur() }

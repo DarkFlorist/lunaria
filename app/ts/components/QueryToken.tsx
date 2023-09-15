@@ -1,11 +1,12 @@
 import { JSX } from 'preact/jsx-runtime'
 import { ComponentChildren } from 'preact'
 import { Signal, useComputed } from '@preact/signals'
-import { TokenMeta, useManagedTokens, useTokenQuery } from '../store/tokens.js'
+import { useManagedTokens, useTokenQuery } from '../store/tokens.js'
 import { AsyncProperty } from '../library/preact-utilities.js'
+import { TokenContract } from '../schema.js'
 
 type QueryTokenProps = {
-	onSave: (token: TokenMeta) => void
+	onSave: (token: TokenContract) => void
 }
 
 export const QueryToken = ({ onSave }: QueryTokenProps) => {
@@ -20,8 +21,8 @@ export const QueryToken = ({ onSave }: QueryTokenProps) => {
 }
 
 type HelperProps = {
-	query: Signal<AsyncProperty<TokenMeta>>
-	onTokenSave: (token: TokenMeta) => void
+	query: Signal<AsyncProperty<TokenContract>>
+	onTokenSave: (token: TokenContract) => void
 }
 
 const Helper = ({ query, onTokenSave }: HelperProps) => {
@@ -85,8 +86,8 @@ const TokenAddressField = ({ address }: TokenAddressFieldProps) => {
 }
 
 type SaveTokenProps = {
-	token: TokenMeta
-	onSuccess: (token: TokenMeta) => void
+	token: TokenContract
+	onSuccess: (token: TokenContract) => void
 }
 
 const SaveToken = ({ token, onSuccess }: SaveTokenProps) => {

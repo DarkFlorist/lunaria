@@ -1,4 +1,4 @@
-import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { batch, Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { useEffect, useRef } from 'preact/hooks'
 import { stringIncludes, removeNonStringsAndTrim } from '../library/utilities.js'
 import { useTransfer } from '../context/Transfer.js'
@@ -121,7 +121,7 @@ const AssetCardList = () => {
 
 	const gridStyles = useComputed(() => {
 		let classNames = 'grid-cols-1'
-		const length = queriedTokens.value.length
+		const length = queriedTokens.value.length + 2
 		if (length > 1) classNames += ' sm:grid-cols-2'
 		if (length > 2) classNames += ' md:grid-cols-3'
 		if (length > 3) classNames += ' lg:grid-cols-4'
@@ -137,6 +137,8 @@ const AssetCardList = () => {
 		<fieldset class={removeNonStringsAndTrim('px-4 grid gap-4', gridStyles.value)} tabIndex={-1}>
 			{query.value === '' ? <AssetCard /> : <></>}
 			{queriedTokens.value.map(token => <AssetCard token={token} />)}
+			<AddTokenCard />
+
 		</fieldset>
 	)
 }
@@ -164,10 +166,15 @@ const AssetCard = ({ token }: { token?: TokenContract }) => {
 		}
 	}
 
+	const selectAssetAndExitManager = () => batch(() => {
+		input.value = { ...input.peek(), token }
+		isSelecting.value = false
+	})
+
 	return (
 		<div class='relative aspect-[16/9] md:aspect-[4/5] md:min-w-[14em] bg-neutral-900 hover:bg-neutral-800'>
-			<input id={uniqueId} ref={radioRef} type='radio' name={setId} checked={isSelected.value} autofocus={isSelected.value} tabIndex={1} onFocus={inputEventHandler} onKeyDown={inputEventHandler} class='peer absolute w-0 h-0 appearance-none'/>
-			<label for={uniqueId} class='grid grid-rows-[1fr,min-content] h-full p-4 border border-transparent peer-checked:border-white/50 peer-checked:peer-focus:border-white opacity-50 peer-checked:opacity-100 hover:opacity-100 cursor-pointer' onClick={() => isSelecting.value = false}>
+			<input id={uniqueId} ref={radioRef} type='radio' name={setId} checked={isSelected.value} autofocus={isSelected.value} tabIndex={1} onFocus={inputEventHandler} onKeyDown={inputEventHandler} class='peer absolute w-0 h-0 appearance-none' />
+			<label for={uniqueId} class='grid grid-rows-[1fr,min-content] h-full p-4 border border-transparent peer-checked:border-white/50 peer-checked:peer-focus:border-white opacity-50 peer-checked:opacity-100 hover:opacity-100 cursor-pointer' onClick={selectAssetAndExitManager}>
 				<div class='row-start-2 grid grid-cols-[min-content,1fr] gap-x-3 gap-y-2 items-center'>
 					<object class='w-12 h-12 bg-white rounded-full overflow-hidden' data={iconPath} type='image/svg+xml' tabIndex={-1}>
 						<div class='bg-white text-gray-900 font-bold text-lg w-full h-full flex items-center justify-center uppercase'>{token?.name.substring(0, 2)}</div>
@@ -212,6 +219,27 @@ const RemoveAssetDialog = ({ token }: { token: TokenContract }) => {
 					</div>
 				) : <></>
 			}
+		</div>
+	)
+}
+
+const AddTokenCard = () => {
+	const { isSelecting } = useTokenManager()
+
+	const openAddTokenDialog = () => {
+		isSelecting.value = false
+	}
+
+	return (
+		<div class='relative aspect-[16/9] md:aspect-[4/5] md:min-w-[14em] bg-neutral-900'>
+			<button for='transfer_asset_add' class='w-full h-full outline-none border border-transparent opacity-50 focus:opacity-100 hover:opacity-100 focus|hover:bg-neutral-800 cursor-pointer flex items-center justify-center' onClick={openAddTokenDialog} tabIndex={3}>
+				<div>
+					<div class='w-16 h-16 rounded-full bg-neutral-600 flex items-center justify-center mb-2'>
+						<svg class='text-white/50' width='3em' height='3em' viewBox='0 0 15 15' fill='none' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' clip-rule="evenodd" d="M8 2.75a.5.5 0 0 0-1 0V7H2.75a.5.5 0 0 0 0 1H7v4.25a.5.5 0 0 0 1 0V8h4.25a.5.5 0 0 0 0-1H8V2.75Z" fill="currentColor"></path></svg>
+					</div>
+					<div>Add Token</div>
+				</div>
+			</button>
 		</div>
 	)
 }

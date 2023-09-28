@@ -1,31 +1,17 @@
-import { useComputed } from "@preact/signals"
+import { useComputed, useSignalEffect } from "@preact/signals"
 import { JSX } from "preact/jsx-runtime"
 import { removeNonStringsAndTrim } from "../library/utilities.js"
-import { useAccount } from "../store/account.js"
 import { useTransfer } from "../context/Transfer.js"
 import * as Icon from "./Icon/index.js"
+import { useWallet } from "../context/Wallet.js"
+import { useAsyncState } from "../library/preact-utilities.js"
+import { EthereumAddress } from "../schema.js"
+import { useNotice } from "../store/notice.js"
 
 export const TransferButton = () => {
-	const { address, connect } = useAccount()
 	const { transaction } = useTransfer()
 
-	const isConnected = useComputed(() => address.value.state === 'resolved')
-	const isConnecting = useComputed(() => address.value.state === 'pending')
 	const isTransferring = useComputed(() => transaction.value.state === 'pending')
-
-	if (isConnecting.value) return (
-		<Button type='button' disabled>
-			<Icon.Spinner />
-			<span>Connecting wallet...</span>
-		</Button>
-	)
-
-	if (!isConnected.value) return (
-		<Button type='button' onClick={connect}>
-			<ConnectIcon />
-			<span>Connect Wallet</span>
-		</Button>
-	)
 
 	if (isTransferring.value) return (
 		<Button type='button' disabled>
@@ -34,12 +20,60 @@ export const TransferButton = () => {
 		</Button>
 	)
 
-	return (
-		<Button type='submit'>
-			<TransferIcon />
-			<span>Start Transfer</span>
-		</Button>
-	)
+	return <ConnectOrTransferButton />
+}
+
+const ConnectOrTransferButton = () => {
+	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
+	const { account, browserProvider } = useWallet()
+	const { notify } = useNotice()
+
+	const connect = () => {
+		waitFor(async () => {
+			try {
+				const signer = await browserProvider.getSigner()
+				return EthereumAddress.parse(signer.address)
+			} catch (error) {
+				let errorMessage = 'An unknown error occurred.'
+				notify({ message: errorMessage, title: 'Unable to connect' })
+				throw error
+			}
+		})
+	}
+
+	const listenForQueryChanges = () => {
+		// do not reset shared state for other instances of this hooks
+		if (query.value.state === 'inactive') return
+		account.value = query.value
+	}
+
+	useSignalEffect(listenForQueryChanges)
+
+	switch (account.value.state) {
+		case 'inactive':
+		case 'rejected':
+			return (
+				<Button type='button' onClick={connect}>
+					<ConnectIcon />
+					<span>Connect Wallet</span>
+				</Button>
+			)
+		case 'pending':
+			return (
+				<Button type='button' disabled>
+					<Icon.Spinner />
+					<span>Connecting wallet...</span>
+				</Button>
+			)
+		case 'resolved':
+			return (
+				<Button type='submit'>
+					<TransferIcon />
+					<span>Start Transfer</span>
+				</Button>
+			)
+	}
+
 }
 
 const Button = ({ class: className, children, ...props }: JSX.HTMLAttributes<HTMLButtonElement>) => {

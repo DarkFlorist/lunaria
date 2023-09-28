@@ -791,6 +791,10 @@ input[type='password']:autofill {
 	width: 100%;
 }
 
+.w-16 {
+	width: 4rem;
+}
+
 .min-w-0 {
 	min-width: 0px;
 }
@@ -1195,6 +1199,11 @@ input[type='password']:autofill {
 
 .bg-white\/50 {
 	background-color: rgb(255 255 255 / 0.5);
+}
+
+.bg-neutral-600 {
+	--tw-bg-opacity: 1;
+	background-color: rgb(82 82 82 / var(--tw-bg-opacity));
 }
 
 .p-10 {
@@ -1656,6 +1665,10 @@ input[type='password']:autofill {
 	color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.focus\:opacity-100:focus {
+	opacity: 1;
+}
+
 .focus\:outline-none:focus {
 	outline: 2px solid transparent;
 	outline-offset: 2px;
@@ -1730,6 +1743,11 @@ input[type='password']:autofill {
 	display: block;
 }
 
+.peer:focus ~ .peer-focus\:border-white {
+	--tw-border-opacity: 1;
+	border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
 .peer:focus ~ .peer-focus\:opacity-100 {
 	opacity: 1;
 }
@@ -1761,6 +1779,11 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
+.focus\|hover\:bg-neutral-800:focus {
+	--tw-bg-opacity: 1;
+	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
+}
+
 .focus\|hover\:text-white:focus {
 	--tw-text-opacity: 1;
 	color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -1777,6 +1800,11 @@ input[type='password']:autofill {
 
 .focus\|hover\:border:hover {
 	border-width: 1px;
+}
+
+.focus\|hover\:bg-neutral-800:hover {
+	--tw-bg-opacity: 1;
+	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
 }
 
 .focus\|hover\:text-white:hover {

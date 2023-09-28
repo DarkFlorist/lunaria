@@ -42,8 +42,7 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 		const transferInput = safeParse.value.value
 
 		waitFor(async () => {
-			if (!browserProvider.value) return;
-			const signer = await browserProvider.value.getSigner()
+			const signer = await browserProvider.getSigner()
 
 			// Ether transfer
 			if (transferInput.token === undefined) {

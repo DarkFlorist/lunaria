@@ -1,56 +1,13 @@
-import { signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { signal, useSignal, useSignalEffect } from '@preact/signals'
 import * as funtypes from 'funtypes'
-import { useAccount } from './account.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { useProviders } from './provider.js'
 import { useNetwork } from './network.js'
 import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
-import { JSONStringify } from '../library/utilities.js'
 import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
 import { createCacheParser, EthereumAddress, TokenContract } from '../schema.js'
-
-const CACHEID_PREFIX = '_ut'
-
-const tokens = signal<TokenContract[]>([])
-
-export function useAccountTokens() {
-	const { address } = useAccount()
-	const managedTokens = useManagedTokens()
-
-	const cacheKey = useComputed(() => {
-		if (address.value.state !== 'resolved') return `${CACHEID_PREFIX}:default`
-		return `${CACHEID_PREFIX}:${address.value.value}`
-	})
-
-	const addToken = (token: TokenContract) => {
-		tokens.value = [...tokens.value, token]
-	}
-
-	const removeToken = (address: TokenContract['address']) => {
-		tokens.value = [...tokens.value.filter(token => token.address !== address)]
-	}
-
-	const listenForCacheKeyChange = () => {
-		tokens.value = managedTokens.data
-	}
-
-	const listenForTokensChange = () => {
-		if (cacheKey.value === `${CACHEID_PREFIX}:default`) return
-		const newCache = JSONStringify(tokens.value)
-		localStorage.setItem(cacheKey.value, newCache)
-	}
-
-	useSignalEffect(listenForCacheKeyChange)
-	useSignalEffect(listenForTokensChange)
-
-	return {
-		tokens,
-		addToken,
-		removeToken,
-	}
-}
 
 export function useTokenQuery() {
 	const { value: query, waitFor, reset } = useAsyncState<TokenContract>()

@@ -5,6 +5,10 @@ import * as funtypes from 'funtypes'
 import { createCacheParser, EthereumAddress, TokenContract } from '../schema.js'
 import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
+import { useWallet } from './Wallet.js'
+import { useAsyncState } from '../library/preact-utilities.js'
+import { Contract } from 'ethers'
+import { ERC20ABI } from '../library/ERC20ABI.js'
 
 type TokenManagerContext = {
 	tokens: Signal<ManagedTokens>
@@ -44,3 +48,16 @@ export function useTokenManager() {
 	return context
 }
 
+export function useTokenBalance() {
+	const { browserProvider }  = useWallet()
+	const { value: tokenBalance, waitFor } = useAsyncState<bigint>()
+
+	const getTokenBalance = (accountAddress: string, tokenAddress: string) => {
+		waitFor(async () => {
+			const contract = new Contract(tokenAddress, ERC20ABI, browserProvider)
+			return await contract.balanceOf(accountAddress)
+		})
+	}
+
+	return { tokenBalance, getTokenBalance }
+}

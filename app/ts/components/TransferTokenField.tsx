@@ -5,6 +5,7 @@ import { useTransfer } from '../context/Transfer.js'
 import * as Icon from './Icon/index.js'
 import { TokenContract } from '../schema.js'
 import { useTokenManager } from '../context/TokenManager.js'
+import { useWallet } from '../context/Wallet.js'
 
 export const TransferTokenSelector = () => {
 	return (
@@ -107,11 +108,15 @@ const AssetCardList = () => {
 	const { tokens } = useTokenManager()
 	const { input } = useTransfer()
 	const { query } = useTokenManager()
+	const { network } = useWallet()
+
+	const activeChainId = useComputed(() => network.value.state === 'resolved' && network.value.value.chainId)
 
 	const queriedTokens = useComputed(() => {
 		const queryString = query.value.toLowerCase()
-		if (!queryString) return tokens.value.data
-		return tokens.value.data.filter(token => stringIncludes(token.name, queryString) || stringIncludes(token.symbol, queryString))
+		const tokensInChain = tokens.value.data.filter(token => token.chainId === activeChainId.value)
+		if (!queryString) return tokensInChain
+		return tokensInChain.filter(token => stringIncludes(token.name, queryString) || stringIncludes(token.symbol, queryString))
 	})
 
 	const gridStyles = useComputed(() => {

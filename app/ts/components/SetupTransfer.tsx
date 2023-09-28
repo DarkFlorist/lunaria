@@ -4,12 +4,12 @@ import { ComponentChildren } from "preact"
 import { TransferProvider, useTransfer } from "../context/Transfer.js"
 import { ERC20ABI } from "../library/ERC20ABI.js"
 import { useAsyncState } from "../library/preact-utilities.js"
-import { useProviders } from "../store/provider.js"
 import { TransferAddressField } from "./TransferAddressField.js"
 import { TransferAmountField } from "./TransferAmountField.js"
 import { TransferRecorder } from "./TransferRecorder.js"
 import { TransferButton } from "./TransferButton.js"
 import { TransferTokenSelector } from "./TransferTokenField.js"
+import { useWallet } from "../context/Wallet.js"
 
 export function SetupTransfer() {
 	return (
@@ -30,7 +30,7 @@ export function SetupTransfer() {
 }
 
 const TransferForm = ({ children }: { children: ComponentChildren }) => {
-	const providers = useProviders()
+	const { browserProvider } = useWallet()
 	const { transaction, safeParse } = useTransfer()
 	const { value: transactionQuery, waitFor } = useAsyncState<TransactionResponse>()
 
@@ -38,10 +38,12 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 		e.preventDefault()
 
 		if (!safeParse.value.success) return
+
 		const transferInput = safeParse.value.value
 
 		waitFor(async () => {
-			const signer = await providers.browserProvider.getSigner()
+			if (!browserProvider.value) return;
+			const signer = await browserProvider.value.getSigner()
 
 			// Ether transfer
 			if (transferInput.token === undefined) {
@@ -49,8 +51,8 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 			}
 
 			// Token transfer
-			const tokenContract = transferInput.token
-			const contract = new Contract(tokenContract.address, ERC20ABI, signer)
+			const tokenMetadata = transferInput.token
+			const contract = new Contract(tokenMetadata.address, ERC20ABI, signer)
 			return await contract.transfer(transferInput.to, transferInput.amount)
 		})
 	}

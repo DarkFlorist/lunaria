@@ -1,12 +1,38 @@
-import { useAccount } from '../store/account.js'
-import { useNetwork } from '../store/network.js'
+import { useSignalEffect } from '@preact/signals'
+import { useWallet } from '../context/Wallet.js'
+import { useAsyncState } from '../library/preact-utilities.js'
+import { EthereumAddress } from '../schema.js'
+import { useNotice } from '../store/notice.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
 
 export const ConnectAccount = () => {
-	const { address, connect } = useAccount()
+	const { browserProvider, account } = useWallet()
+	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
+	const { notify } = useNotice()
 
-	switch (address.value.state) {
+	const connect = () => {
+		waitFor(async () => {
+			try {
+				const signer = await browserProvider.getSigner()
+				return EthereumAddress.parse(signer.address)
+			} catch (error) {
+				let errorMessage = 'An unknown error occurred.'
+				notify({ message: errorMessage, title: 'Unable to connect' })
+				throw error
+			}
+		})
+	}
+
+	const listenForQueryChanges = () => {
+		// do not reset shared state for other instances of this hooks
+		if (query.value.state === 'inactive') return
+		account.value = query.value
+	}
+
+	useSignalEffect(listenForQueryChanges)
+
+	switch (account.value.state) {
 		case 'inactive':
 		case 'rejected':
 			return (
@@ -35,16 +61,17 @@ export const ConnectAccount = () => {
 }
 
 const AccountAddress = () => {
-	const { address } = useAccount()
+	const { account } = useWallet()
 
-	switch (address.value.state) {
+	switch (account.value.state) {
 		case 'inactive':
+			return <></>
 		case 'rejected':
 			return <div class='whitespace-nowrap overflow-hidden overflow-ellipsis font-bold'>Not connected</div>
 		case 'pending':
 			return <AsyncText placeholderLength={40} />
 		case 'resolved':
-			return <div class='whitespace-nowrap overflow-hidden overflow-ellipsis font-bold'>{address.value.value}</div>
+			return <div class='whitespace-nowrap overflow-hidden overflow-ellipsis font-bold'>{account.value.value}</div>
 	}
 }
 
@@ -55,9 +82,9 @@ const NetworkIcon = () => (
 )
 
 const AccountAvatar = () => {
-	const { address } = useAccount()
+	const { account } = useWallet()
 
-	switch (address.value.state) {
+	switch (account.value.state) {
 		case 'inactive':
 		case 'rejected':
 			return <div class='aspect-square w-10 outline-2 outline-white/20 bg-white/20' />
@@ -66,16 +93,16 @@ const AccountAvatar = () => {
 		case 'resolved':
 			return (
 				<div style={{ fontSize: '2.5em' }}>
-					<SVGBlockie address={address.value.value} />
+					<SVGBlockie address={account.value.value} />
 				</div>
 			)
 	}
 }
 
 const WalletNetwork = () => {
-	const { address } = useAccount()
+	const { account } = useWallet()
 
-	switch (address.value.state) {
+	switch (account.value.state) {
 		case 'inactive':
 		case 'rejected':
 			return <></>
@@ -92,7 +119,7 @@ const WalletNetwork = () => {
 }
 
 const NetworkName = () => {
-	const { network } = useNetwork()
+	const { network } = useWallet()
 
 	switch (network.value.state) {
 		case 'inactive':

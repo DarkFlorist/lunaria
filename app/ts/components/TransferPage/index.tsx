@@ -1,7 +1,6 @@
 import { useSignalEffect } from '@preact/signals'
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
-import { TransactionResponse } from 'ethers'
 import { TransferHistory } from '../TransferHistory.js'
 import { DiscordInvite } from '../DiscordInvite.js'
 import { Favorites } from '../Favorites.js'
@@ -57,13 +56,11 @@ const MainPanel = () => {
 	const { transaction } = useTransfer()
 	const { nav, main } = usePanels()
 
-	const handleSuccess = (transactionResponse: TransactionResponse) => {
-		window.location.hash = `#tx/${transactionResponse.hash}`
-	}
+	const redirectOnSuccess = (path: string) => { window.location.hash = path }
 
 	useSignalEffect(() => {
 		if (transaction.value.state !== 'resolved') return
-		handleSuccess(transaction.value.value)
+		redirectOnSuccess(`#tx/${transaction.value.value.hash}`)
 	})
 
 	return (

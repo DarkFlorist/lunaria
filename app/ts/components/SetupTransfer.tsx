@@ -1,7 +1,7 @@
 import { useSignalEffect } from "@preact/signals"
 import { Contract, TransactionResponse } from "ethers"
 import { ComponentChildren } from "preact"
-import { TransferProvider, useTransfer } from "../context/Transfer.js"
+import { useTransfer } from "../context/Transfer.js"
 import { ERC20ABI } from "../library/ERC20ABI.js"
 import { useAsyncState } from "../library/preact-utilities.js"
 import { TransferAddressField } from "./TransferAddressField.js"
@@ -13,19 +13,17 @@ import { useWallet } from "../context/Wallet.js"
 
 export function SetupTransfer() {
 	return (
-		<TransferProvider>
-			<TransferForm>
-				<div class='grid gap-3'>
-					<div class='grid gap-3 md:grid-cols-2'>
-						<TransferTokenSelector />
-						<TransferAmountField />
-					</div>
-					<TransferAddressField />
-					<TransferButton />
-					<TransferRecorder />
+		<TransferForm>
+			<div class='grid gap-3'>
+				<div class='grid gap-3 md:grid-cols-2'>
+					<TransferTokenSelector />
+					<TransferAmountField />
 				</div>
-			</TransferForm>
-		</TransferProvider>
+				<TransferAddressField />
+				<TransferButton />
+				<TransferRecorder />
+			</div>
+		</TransferForm>
 	)
 }
 

@@ -622,6 +622,10 @@ input[type='password']:autofill {
 	margin-top: 2rem;
 }
 
+.mb-3 {
+	margin-bottom: 0.75rem;
+}
+
 .block {
 	display: block;
 }
@@ -742,6 +746,10 @@ input[type='password']:autofill {
 	width: 100%;
 }
 
+.w-\[10rem\] {
+	width: 10rem;
+}
+
 .min-w-0 {
 	min-width: 0px;
 }
@@ -756,6 +764,14 @@ input[type='password']:autofill {
 
 .max-w-lg {
 	max-width: 32rem;
+}
+
+.max-w-xl {
+	max-width: 36rem;
+}
+
+.max-w-\[30rem\] {
+	max-width: 30rem;
 }
 
 .shrink {
@@ -932,6 +948,14 @@ input[type='password']:autofill {
 
 .gap-y-2 {
 	row-gap: 0.5rem;
+}
+
+.gap-x-2 {
+	column-gap: 0.5rem;
+}
+
+.gap-y-3 {
+	row-gap: 0.75rem;
 }
 
 .overflow-hidden {
@@ -1160,6 +1184,11 @@ input[type='password']:autofill {
 .py-4 {
 	padding-top: 1rem;
 	padding-bottom: 1rem;
+}
+
+.px-8 {
+	padding-left: 2rem;
+	padding-right: 2rem;
 }
 
 .pb-4 {
@@ -1558,6 +1587,10 @@ input[type='password']:autofill {
 	opacity: 1;
 }
 
+.peer:placeholder-shown ~ .peer-placeholder-shown\:flex {
+	display: flex;
+}
+
 .peer:placeholder-shown ~ .peer-placeholder-shown\:hidden {
 	display: none;
 }
@@ -1674,6 +1707,18 @@ input[type='password']:autofill {
 @media (min-width: 1024px) {
 	.lg\:hidden {
 		display: none;
+	}
+
+	.lg\:w-\[30rem\] {
+		width: 30rem;
+	}
+
+	.lg\:w-\[32rem\] {
+		width: 32rem;
+	}
+
+	.lg\:min-w-\[30rem\] {
+		min-width: 30rem;
 	}
 
 	.lg\:grid-cols-4 {

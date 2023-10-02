@@ -12,19 +12,19 @@ import { useWallet } from './Wallet.js'
 export type TokenManagerContext = {
 	cache: Signal<TokensCache>
 	query: Signal<string>
-	isSelecting: Signal<boolean>
+	stage: Signal<'select' | 'add' | undefined>
 }
 
 export const TokenManagerContext = createContext<TokenManagerContext | undefined>(undefined)
 
 export const TokenManagerProvider = ({ children }: { children: ComponentChildren }) => {
 	const query = useSignal('')
-	const isSelecting = useSignal(false)
+	const stage = useSignal(undefined)
 	const cache = useSignal<TokensCache>({ data: DEFAULT_TOKENS, version: '1.0.0' })
 
 	persistSignalEffect(MANAGED_TOKENS_CACHE_KEY, cache, createCacheParser(TokensCacheSchema))
 
-	return <TokenManagerContext.Provider value={{ cache, query, isSelecting }}>{children}</TokenManagerContext.Provider>
+	return <TokenManagerContext.Provider value={{ cache, query, stage }}>{children}</TokenManagerContext.Provider>
 }
 
 export function useTokenManager() {

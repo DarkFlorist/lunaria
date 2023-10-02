@@ -10,6 +10,7 @@ import { TransferRecorder } from './TransferRecorder.js'
 import { TransferButton } from './TransferButton.js'
 import { TransferTokenSelector } from './TransferTokenField.js'
 import { useWallet } from '../context/Wallet.js'
+import { useNotice } from '../store/notice.js'
 
 export function SetupTransfer() {
 	return (
@@ -31,12 +32,17 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 	const { browserProvider } = useWallet()
 	const { transaction, safeParse } = useTransfer()
 	const { value: transactionQuery, waitFor } = useAsyncState<TransactionResponse>()
+	const { notify } = useNotice()
 
 	const sendTransferRequest = (e: Event) => {
 		e.preventDefault()
 
-		if (!safeParse.value.success) return
+		if (!browserProvider) {
+			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
+			return
+		}
 
+		if (!safeParse.value.success) return
 		const transferInput = safeParse.value.value
 
 		waitFor(async () => {

@@ -4,9 +4,9 @@ import * as funtypes from 'funtypes'
 import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
 import { AsyncProperty } from '../library/preact-utilities.js'
-import { createUnitParser, safeSerialize, TokenContract, TransferRequestInput } from '../schema.js'
+import { createUnitParser, safeSerialize, ERC20Token, TransferRequestInput } from '../schema.js'
 
-type PartialInput = { to: string; amount: string; token: TokenContract | undefined }
+type PartialInput = { to: string; amount: string; token: ERC20Token | undefined }
 
 type TransferContext = {
 	input: Signal<PartialInput>
@@ -29,7 +29,7 @@ export const TransferProvider = ({ children }: { children: ComponentChildren }) 
 
 	const serializedToken = useComputed(() => {
 		if (input.value.token === undefined) return { success: true, value: undefined } satisfies funtypes.Success<undefined>
-		return safeSerialize(TokenContract, input.value.token)
+		return safeSerialize(ERC20Token, input.value.token)
 	})
 
 	const safeParse = useComputed(() => {

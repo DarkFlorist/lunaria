@@ -3,20 +3,20 @@ import { useEffect, useRef } from 'preact/hooks'
 import { stringIncludes, removeNonStringsAndTrim } from '../library/utilities.js'
 import { useTransfer } from '../context/Transfer.js'
 import * as Icon from './Icon/index.js'
-import { TokenContract } from '../schema.js'
+import { ERC20Token } from '../schema.js'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useWallet } from '../context/Wallet.js'
 
 export const TransferTokenSelector = () => {
 	return (
 		<>
-			<ToggleManagerButton />
-			<TokenManager />
+			<TokenSelectField />
+			<TokenPicker />
 		</>
 	)
 }
 
-const TokenManager = () => {
+const TokenPicker = () => {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 	const { query, isSelecting } = useTokenManager()
 
@@ -29,10 +29,8 @@ const TokenManager = () => {
 	const toggleManager = () => {
 		const dialogElement = dialogRef.current
 		const isDialogOpen = isSelecting.value
-
 		if (!dialogElement) return
 		dialogElement.onclose = closeManager
-
 		if (!isDialogOpen) return dialogElement.close()
 		return dialogElement.showModal()
 	}
@@ -59,7 +57,7 @@ const TokenManager = () => {
 	)
 }
 
-const ToggleManagerButton = () => {
+const TokenSelectField = () => {
 	const buttonRef = useRef<HTMLButtonElement>(null)
 	const { isBusy } = useTransfer()
 	const { isSelecting } = useTokenManager()
@@ -105,23 +103,24 @@ const ToggleManagerButton = () => {
 }
 
 const AssetCardList = () => {
-	const { tokens } = useTokenManager()
+	const { cache } = useTokenManager()
 	const { input } = useTransfer()
 	const { query } = useTokenManager()
 	const { network } = useWallet()
 
-	const activeChainId = useComputed(() => network.value.state === 'resolved' && network.value.value.chainId)
+	const activeChainId = useComputed(() => (network.value.state === 'resolved' ? network.value.value.chainId : 1n))
 
-	const queriedTokens = useComputed(() => {
-		const queryString = query.value.toLowerCase()
-		const tokensInChain = tokens.value.data.filter(token => token.chainId === activeChainId.value)
-		if (!queryString) return tokensInChain
-		return tokensInChain.filter(token => stringIncludes(token.name, queryString) || stringIncludes(token.symbol, queryString))
+	const matchTokensInChain = (token: ERC20Token) => token.chainId === activeChainId.value
+	const matchQueriedTokens = (token: ERC20Token) => stringIncludes(token.name, query.value) || stringIncludes(token.symbol, query.value)
+
+	const tokensList = useComputed(() => {
+		const tokensInChain = cache.value.data.filter(matchTokensInChain)
+		return tokensInChain.filter(matchQueriedTokens)
 	})
 
 	const gridStyles = useComputed(() => {
 		let classNames = 'grid-cols-1'
-		const length = queriedTokens.value.length + 2
+		const length = tokensList.value.length + 2
 		if (length > 1) classNames += ' sm:grid-cols-2'
 		if (length > 2) classNames += ' md:grid-cols-3'
 		if (length > 3) classNames += ' lg:grid-cols-4'
@@ -130,13 +129,13 @@ const AssetCardList = () => {
 	})
 
 	useSignalEffect(() => {
-		input.value = { ...input.peek(), token: query.value !== '' ? queriedTokens.value.at(0) : undefined }
+		input.value = { ...input.peek(), token: query.value !== '' ? tokensList.value.at(0) : undefined }
 	})
 
 	return (
 		<fieldset class={removeNonStringsAndTrim('px-4 grid gap-4', gridStyles.value)} tabIndex={-1}>
-			{query.value === '' ? <AssetCard /> : <></>}
-			{queriedTokens.value.map(token => (
+			{query.value === '' || stringIncludes('ethers', query.value) ? <AssetCard /> : <></>}
+			{tokensList.value.map(token => (
 				<AssetCard token={token} />
 			))}
 			<AddTokenCard />
@@ -144,7 +143,7 @@ const AssetCardList = () => {
 	)
 }
 
-const AssetCard = ({ token }: { token?: TokenContract }) => {
+const AssetCard = ({ token }: { token?: ERC20Token }) => {
 	const radioRef = useRef<HTMLInputElement>(null)
 	const { isSelecting } = useTokenManager()
 	const { input } = useTransfer()
@@ -190,16 +189,14 @@ const AssetCard = ({ token }: { token?: TokenContract }) => {
 	)
 }
 
-const RemoveAssetDialog = ({ token }: { token: TokenContract }) => {
+const RemoveAssetDialog = ({ token }: { token: ERC20Token }) => {
 	const isRemoving = useSignal(false)
-	const { tokens } = useTokenManager()
 
-	const rejectRemove = () => {
+	const confirmRemove = () => {
 		isRemoving.value = false
 	}
 
-	const confirmRemove = () => {
-		tokens.value = { ...tokens.peek(), data: tokens.peek().data.filter(_token => _token.address !== token.address) }
+	const rejectRemove = () => {
 		isRemoving.value = false
 	}
 
@@ -232,9 +229,19 @@ const RemoveAssetDialog = ({ token }: { token: TokenContract }) => {
 }
 
 const AddTokenCard = () => {
-	const { isSelecting } = useTokenManager()
+	const { cache, isSelecting } = useTokenManager()
 
 	const openAddTokenDialog = () => {
+		const newToken: ERC20Token = {
+			address: `0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984`,
+			decimals: 18n,
+			name: 'Uniswap',
+			symbol: 'UNI',
+			chainId: 5n,
+		}
+
+		cache.value = Object.assign({}, cache.peek(), { data: cache.peek().data.concat([newToken]) })
+
 		isSelecting.value = false
 	}
 

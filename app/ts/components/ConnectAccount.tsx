@@ -1,25 +1,26 @@
 import { useSignalEffect } from '@preact/signals'
-import { useWallet } from '../context/Wallet.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { EthereumAddress } from '../schema.js'
+import { useWallet } from '../context/Wallet.js'
+import { useAccount } from '../context/Account.js'
 import { useNotice } from '../store/notice.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
 
 export const ConnectAccount = () => {
-	const { browserProvider, account } = useWallet()
+	const { browserProvider } = useWallet()
+	const { account } = useAccount()
 	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
 	const { notify } = useNotice()
 
 	const connect = () => {
+		if (!browserProvider) {
+			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
+			return
+		}
 		waitFor(async () => {
-			try {
-				const signer = await browserProvider.getSigner()
-				return EthereumAddress.parse(signer.address)
-			} catch (error) {
-				notify({ message: 'An unknown error occurred.', title: 'Unable to connect' })
-				throw error
-			}
+			const signer = await browserProvider.getSigner()
+			return EthereumAddress.parse(signer.address)
 		})
 	}
 
@@ -60,7 +61,7 @@ export const ConnectAccount = () => {
 }
 
 const AccountAddress = () => {
-	const { account } = useWallet()
+	const { account } = useAccount()
 
 	switch (account.value.state) {
 		case 'inactive':
@@ -81,7 +82,7 @@ const NetworkIcon = () => (
 )
 
 const AccountAvatar = () => {
-	const { account } = useWallet()
+	const { account } = useAccount()
 
 	switch (account.value.state) {
 		case 'inactive':
@@ -99,7 +100,7 @@ const AccountAvatar = () => {
 }
 
 const WalletNetwork = () => {
-	const { account } = useWallet()
+	const { account } = useAccount()
 
 	switch (account.value.state) {
 		case 'inactive':

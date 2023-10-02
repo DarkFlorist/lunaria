@@ -7,6 +7,7 @@ import { useWallet } from '../context/Wallet.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { EthereumAddress } from '../schema.js'
 import { useNotice } from '../store/notice.js'
+import { useAccount } from '../context/Account.js'
 
 export const TransferButton = () => {
 	const { transaction } = useTransfer()
@@ -26,19 +27,18 @@ export const TransferButton = () => {
 
 const ConnectOrTransferButton = () => {
 	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
-	const { account, browserProvider } = useWallet()
+	const { browserProvider } = useWallet()
+	const { account } = useAccount()
 	const { notify } = useNotice()
 
 	const connect = () => {
+		if (!browserProvider) {
+			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
+			return
+		}
 		waitFor(async () => {
-			try {
-				const signer = await browserProvider.getSigner()
-				return EthereumAddress.parse(signer.address)
-			} catch (error) {
-				let errorMessage = 'An unknown error occurred.'
-				notify({ message: errorMessage, title: 'Unable to connect' })
-				throw error
-			}
+			const signer = await browserProvider.getSigner()
+			return EthereumAddress.parse(signer.address)
 		})
 	}
 

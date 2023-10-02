@@ -7,10 +7,10 @@ import { Contract, isAddress } from 'ethers'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
-import { createCacheParser, EthereumAddress, TokenContract } from '../schema.js'
+import { createCacheParser, EthereumAddress, ERC20Token } from '../schema.js'
 
 export function useTokenQuery() {
-	const { value: query, waitFor, reset } = useAsyncState<TokenContract>()
+	const { value: query, waitFor, reset } = useAsyncState<ERC20Token>()
 	const providers = useProviders()
 	const { network } = useNetwork()
 	const tokenAddress = useSignal('')
@@ -60,8 +60,8 @@ export function useTokenBalance() {
 	return { tokenBalance, getTokenBalance }
 }
 
-const ManagedTokensSchema = funtypes.Array(TokenContract)
-const managedTokens = signal<TokenContract[]>(DEFAULT_TOKENS)
+const ManagedTokensSchema = funtypes.Array(ERC20Token)
+const managedTokens = signal<ERC20Token[]>(DEFAULT_TOKENS)
 const managedTokensCacheKey = signal(MANAGED_TOKENS_CACHE_KEY)
 
 export function useManagedTokens() {

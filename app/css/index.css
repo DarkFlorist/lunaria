@@ -1558,10 +1558,6 @@ input[type='password']:autofill {
 	opacity: 1;
 }
 
-.peer:placeholder-shown ~ .peer-placeholder-shown\:flex {
-	display: flex;
-}
-
 .peer:placeholder-shown ~ .peer-placeholder-shown\:hidden {
 	display: none;
 }

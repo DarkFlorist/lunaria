@@ -1,4 +1,4 @@
-import { Signal, useComputed, useSignal, useSignalEffect } from "@preact/signals";
+import { Signal, useSignal, useSignalEffect } from "@preact/signals";
 import { ComponentChildren, createContext } from "preact";
 import { useContext } from "preact/hooks";
 import { DEFAULT_TOKENS, SETTINGS_CACHE_KEY } from "../library/constants.js";

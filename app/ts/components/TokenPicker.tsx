@@ -36,7 +36,6 @@ export const TokenPicker = () => {
 		return () => document.removeEventListener('click', closeDialogOnBackdropClick)
 	}
 
-	useSignalEffect(() => console.log(stage.value))
 	useSignalEffect(showOrHideDialog)
 	useSignalEffect(setClickListenerForDialog)
 
@@ -180,11 +179,11 @@ const AddTokenCard = () => {
 	return (
 		<div class='relative aspect-[16/9] md:aspect-[4/5] md:min-w-[14em] bg-neutral-900'>
 			<button for='transfer_asset_add' class='w-full h-full outline-none border border-transparent opacity-50 focus:opacity-100 hover:opacity-100 focus|hover:bg-neutral-800 cursor-pointer flex items-center justify-center' onClick={openAddTokenDialog} tabIndex={3}>
-				<div>
+				<div class='grid place-items-center'>
 					<div class='w-16 h-16 rounded-full bg-neutral-600 flex items-center justify-center mb-2'>
 						<svg class='text-white/50' width='3em' height='3em' viewBox='0 0 15 15' fill='none' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' clip-rule="evenodd" d="M8 2.75a.5.5 0 0 0-1 0V7H2.75a.5.5 0 0 0 0 1H7v4.25a.5.5 0 0 0 1 0V8h4.25a.5.5 0 0 0 0-1H8V2.75Z" fill="currentColor"></path></svg>
 					</div>
-					<div>Add Token</div>
+					<div>New Token</div>
 				</div>
 			</button>
 		</div>

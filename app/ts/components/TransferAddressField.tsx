@@ -38,7 +38,6 @@ export const TransferAddressField = () => {
 		}
 
 		inputRef.value.setCustomValidity(validationMessage.value)
-		// inputRef.value.reportValidity()
 	}
 
 	useSignalEffect(validateField)

@@ -107,7 +107,9 @@ const QueryAddressField = ({ result }: { result: Signal<Result<EthereumAddress> 
 		inputRef.value.reportValidity()
 	}
 
-	useSignalEffect(() => { result.value = parsedAddress.value })
+	useSignalEffect(() => {
+		result.value = parsedAddress.value
+	})
 	useSignalEffect(validateField)
 
 	return (
@@ -151,7 +153,6 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 			const chainId = activeChainId
 			return { chainId, name, symbol, decimals, address: tokenAddress }
 		})
-
 	}
 
 	useSignalEffect(getTokenMetadata)
@@ -169,7 +170,9 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 		case 'rejected':
 			return (
 				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-[min-content,1fr] gap-x-3 items-center'>
-					<div class='text-3xl text-white/50'><EmptyIcon /></div>
+					<div class='text-3xl text-white/50'>
+						<EmptyIcon />
+					</div>
 					<div>
 						<div class='leading-tight'>No token contract matches the provided address</div>
 						<div class='text-sm text-white/50'>Make sure the address and network is correctly set in your connected wallet.</div>
@@ -182,7 +185,9 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 
 			return (
 				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-[1fr,min-content] gap-x-2 items-center'>
-					<div>{token.name} <span class='text-white/50'>({token.symbol})</span></div>
+					<div>
+						{token.name} <span class='text-white/50'>({token.symbol})</span>
+					</div>
 					<UseTokenButton token={parsedToken} />
 				</div>
 			)
@@ -207,15 +212,31 @@ const UseTokenButton = ({ token }: { token: ERC20Token }) => {
 		})
 	}
 
-	return <button type='button' class='outline-none border border-white/50 focus|hover:border-white focus|hover:bg-white/10 px-4 h-10 whitespace-nowrap grid grid-cols-[min-content,1fr] gap-x-1 items-center font-semibold' onClick={useToken}><PlusIcon /><span>{!tokenExistsInCache.value ? 'Save and ' : ''}Use</span></button>
+	return (
+		<button type='button' class='outline-none border border-white/50 focus|hover:border-white focus|hover:bg-white/10 px-4 h-10 whitespace-nowrap grid grid-cols-[min-content,1fr] gap-x-1 items-center font-semibold' onClick={useToken}>
+			<PlusIcon />
+			<span>{!tokenExistsInCache.value ? 'Save and ' : ''}Use</span>
+		</button>
+	)
 }
 
 const ClearButton = ({ onClick }: { onClick: () => void }) => {
 	return (
-		<button type='button' onClick={onClick} class='outline-none w-8 h-8 flex items-center justify-center border border-white/50 text-white/50 peer-placeholder-shown:hidden peer-disabled:hidden focus:text-white focus:border-white hover:text-white hover:border-white text-xs'><Icon.Xmark /></button>
+		<button type='button' onClick={onClick} class='outline-none w-8 h-8 flex items-center justify-center border border-white/50 text-white/50 peer-placeholder-shown:hidden peer-disabled:hidden focus:text-white focus:border-white hover:text-white hover:border-white text-xs'>
+			<Icon.Xmark />
+		</button>
 	)
 }
 
-const PlusIcon = () => <svg width="1em" height="1em" viewBox="0 0 24 24" data-name="Line Color" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14m-7-7v14" style="fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2" /></svg>
+const PlusIcon = () => (
+	<svg width='1em' height='1em' viewBox='0 0 24 24' data-name='Line Color' xmlns='http://www.w3.org/2000/svg'>
+		<path d='M5 12h14m-7-7v14' style='fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2' />
+	</svg>
+)
 
-const EmptyIcon = () => <svg width="1em" height="1em" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="m4.93 4.93 14.14 14.14" /></svg>
+const EmptyIcon = () => (
+	<svg width='1em' height='1em' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+		<circle cx='12' cy='12' r='10' />
+		<path d='m4.93 4.93 14.14 14.14' />
+	</svg>
+)

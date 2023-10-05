@@ -1,11 +1,11 @@
-import { Signal, useSignal, useSignalEffect } from "@preact/signals";
-import { ComponentChildren, createContext } from "preact";
-import { useContext } from "preact/hooks";
-import { DEFAULT_TOKENS, SETTINGS_CACHE_KEY } from "../library/constants.js";
-import { assertsEthereumObservable, assertsWithEthereum } from "../library/ethereum.js";
-import { persistSignalEffect } from "../library/persistent-signal.js";
-import { AsyncProperty } from "../library/preact-utilities.js";
-import { SettingsCacheSchema, createCacheParser, SettingsCache, EthereumAddress } from "../schema.js";
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
+import { ComponentChildren, createContext } from 'preact'
+import { useContext } from 'preact/hooks'
+import { DEFAULT_TOKENS, SETTINGS_CACHE_KEY } from '../library/constants.js'
+import { assertsEthereumObservable, assertsWithEthereum } from '../library/ethereum.js'
+import { persistSignalEffect } from '../library/persistent-signal.js'
+import { AsyncProperty } from '../library/preact-utilities.js'
+import { SettingsCacheSchema, createCacheParser, SettingsCache, EthereumAddress } from '../schema.js'
 
 export type AccountContext = {
 	settings: Signal<SettingsCache>

@@ -15,7 +15,7 @@ export const TokenAdd = () => {
 	const queryResult = useSignal<Result<EthereumAddress> | undefined>(undefined)
 
 	return (
-		<Dialog>
+		<AddTokenDialog>
 			<div class='lg:w-[32rem] mx-auto'>
 				<div class='text-2xl font-semibold px-4 pt-5 leading-0'>Add a token</div>
 				<div class='px-4 mb-3 text-white/50'>Enter the token's contract address to retrieve details</div>
@@ -26,11 +26,11 @@ export const TokenAdd = () => {
 					</div>
 				</form>
 			</div>
-		</Dialog>
+		</AddTokenDialog>
 	)
 }
 
-const Dialog = ({ children }: { children: ComponentChildren }) => {
+const AddTokenDialog = ({ children }: { children: ComponentChildren }) => {
 	const { ref, signal: dialogRef } = useSignalRef<HTMLDialogElement | null>(null)
 	const { stage } = useTokenManager()
 

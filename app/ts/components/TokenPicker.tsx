@@ -1,11 +1,15 @@
 import { batch, Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { useRef } from 'preact/hooks'
+import { Contract, formatUnits } from 'ethers'
+import { useEffect, useRef } from 'preact/hooks'
+import { useAccount } from '../context/Account.js'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
 import { useWallet } from '../context/Wallet.js'
-import { useSignalRef } from '../library/preact-utilities.js'
+import { ERC20ABI } from '../library/ERC20ABI.js'
+import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
 import { removeNonStringsAndTrim, stringIncludes } from '../library/utilities.js'
 import { ERC20Token } from '../schema.js'
+import { AsyncText } from './AsyncText.js'
 import * as Icon from './Icon/index.js'
 
 export const TokenPicker = () => {
@@ -126,17 +130,53 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 		<div class='relative aspect-[16/9] md:aspect-[4/5] md:min-w-[14em] bg-neutral-900 hover:bg-neutral-800'>
 			<input id={uniqueId} ref={radioRef} type='radio' name={setId} checked={isSelected.value} autofocus={isSelected.value} tabIndex={1} onFocus={inputEventHandler} onKeyDown={inputEventHandler} class='peer absolute w-0 h-0 appearance-none' />
 			<label for={uniqueId} class='grid grid-rows-[1fr,min-content] h-full p-4 border border-transparent peer-checked:border-white/50 peer-checked:peer-focus:border-white opacity-50 peer-checked:opacity-100 hover:opacity-100 cursor-pointer' onClick={selectAssetAndExitManager}>
-				<div class='row-start-2 grid grid-cols-[min-content,1fr] gap-x-3 gap-y-2 items-center'>
-					<object class='w-12 h-12 bg-white rounded-full overflow-hidden' data={iconPath} type='image/svg+xml' tabIndex={-1}>
+				<div class='row-start-2 grid grid-cols-[min-content,1fr] gap-x-3 gap-y-1 items-center'>
+					<object class='w-12 h-12 bg-white rounded-full overflow-hidden mb-1' data={iconPath} type='image/svg+xml' tabIndex={-1}>
 						<div class='bg-white text-gray-900 font-bold text-lg w-full h-full flex items-center justify-center uppercase'>{token?.name.substring(0, 2)}</div>
 					</object>
-					<div class='text-white/50'>{token?.symbol || 'ETH'}</div>
+					<div class='text-whte/50'>{token?.symbol || 'ETH'}</div>
 					<div class='col-span-full'>{token?.name || 'Ether'}</div>
+					<div class='col-span-full text-white/50'>
+						<TokenBalance token={token} />
+					</div>
 				</div>
 			</label>
 			{token ? <RemoveAssetDialog token={token} /> : <></>}
 		</div>
 	)
+}
+
+const TokenBalance = ({ token }: { token?: ERC20Token }) => {
+	const { browserProvider} = useWallet()
+	const { account } = useAccount()
+	const { value: query, waitFor } = useAsyncState<bigint>()
+
+	if (!browserProvider || !token) return <></>
+
+	const getTokenBalance = async () => {
+		if (account.value.state !== 'resolved') return
+		console.log('getTokenBalance', account.value.state)
+		const accountAddress = account.value.value
+		const contract = new Contract(token.address, ERC20ABI, browserProvider)
+		waitFor(async () => await contract.balanceOf(accountAddress))
+	}
+
+	useEffect(() => {
+		getTokenBalance()
+	}, [token])
+
+	switch (query.value.state) {
+		case 'inactive':
+			return <></>
+		case 'pending':
+			return <AsyncText placeholderLength={10} />
+		case 'rejected':
+			return <div>error</div>
+		case 'resolved':
+			const displayValue = formatUnits(query.value.value, token.decimals)
+			return <>{displayValue} {token.symbol}</>
+	}
+
 }
 
 const RemoveAssetDialog = ({ token }: { token: ERC20Token }) => {

@@ -17,8 +17,7 @@ export const ConnectAccount = () => {
 				const signer = await browserProvider.getSigner()
 				return EthereumAddress.parse(signer.address)
 			} catch (error) {
-				let errorMessage = 'An unknown error occurred.'
-				notify({ message: errorMessage, title: 'Unable to connect' })
+				notify({ message: 'An unknown error occurred.', title: 'Unable to connect' })
 				throw error
 			}
 		})

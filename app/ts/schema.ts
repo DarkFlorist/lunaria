@@ -60,17 +60,6 @@ export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['confi
 export const EthereumAddress = funtypes.String.withParser(AddressParser).withGuard(isHexString)
 export type EthereumAddress = funtypes.Static<typeof EthereumAddress>
 
-export const QuantityParser: funtypes.ParsedValue<funtypes.String, bigint>['config'] = {
-	parse(value) {
-		if (!/^0x([a-fA-F0-9]{1,64})$/.test(value)) return { success: false, message: `${value} is not a hex string encoded number.` }
-		return { success: true, value: BigInt(value) }
-	},
-	serialize(value) {
-		if (typeof value !== 'bigint') return { success: false, message: `${typeof value} is not a bigint.` } satisfies funtypes.Failure
-		return { success: true, value: `0x${value.toString(16)}` } satisfies funtypes.Success<string>
-	},
-}
-
 export const TokenContract = funtypes.Object({
 	chainId: BigIntHex,
 	name: funtypes.String,

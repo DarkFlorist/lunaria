@@ -37,6 +37,6 @@ export class ApplicationError extends Error {
 
 // TODO: create a map of possible errors
 export const ErrorsDictionary = {
-	'UNKNOWN': 'An unknown error has occurred.',
-	'WALLET_MISSING': 'No web 3 compatible wallet detected.'
+	UNKNOWN: 'An unknown error has occurred.',
+	WALLET_MISSING: 'No web 3 compatible wallet detected.',
 }

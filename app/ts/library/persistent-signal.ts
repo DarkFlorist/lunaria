@@ -3,7 +3,7 @@ import * as funtypes from 'funtypes'
 import { useEffect } from 'preact/hooks'
 import { safeSerialize } from '../schema.js'
 
-export function persistSignalEffect<T extends funtypes.ParsedValue<funtypes.String, R>["config"], R>(cacheKey: string, derivedSignal: Signal<R>, funTypeParser: T, storage?: Storage) {
+export function persistSignalEffect<T extends funtypes.ParsedValue<funtypes.String, R>['config'], R>(cacheKey: string, derivedSignal: Signal<R>, funTypeParser: T, storage?: Storage) {
 	const cacheStorage = storage ?? localStorage
 	const error = useSignal<string | undefined>(undefined)
 

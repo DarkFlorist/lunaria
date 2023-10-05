@@ -3,14 +3,14 @@ import * as funtypes from 'funtypes'
 import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
 import { RECENT_TRANSFERS_CACHE_KEY } from '../library/constants.js'
-import { persistSignalEffect } from "../library/persistent-signal.js"
+import { persistSignalEffect } from '../library/persistent-signal.js'
 import { createCacheParser, TransferSchema } from '../schema.js'
 
 export const TransferHistoryCacheSchema = funtypes.Union(
 	funtypes.Object({
 		data: funtypes.Array(TransferSchema),
-		version: funtypes.Literal('1.0.0')
-	})
+		version: funtypes.Literal('1.0.0'),
+	}),
 )
 
 export type TransferHistory = funtypes.Static<typeof TransferHistoryCacheSchema>
@@ -22,11 +22,7 @@ export const TransferHistoryProvider = ({ children }: { children: ComponentChild
 
 	persistSignalEffect(RECENT_TRANSFERS_CACHE_KEY, transfers, createCacheParser(TransferHistoryCacheSchema))
 
-	return (
-		<TransferHistoryContext.Provider value={transfers}>
-			{children}
-		</TransferHistoryContext.Provider>
-	)
+	return <TransferHistoryContext.Provider value={transfers}>{children}</TransferHistoryContext.Provider>
 }
 
 export function useTransferHistory() {

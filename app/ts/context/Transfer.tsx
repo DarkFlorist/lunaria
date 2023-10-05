@@ -1,12 +1,12 @@
-import { Signal, ReadonlySignal, useComputed, useSignal } from "@preact/signals"
-import { TransactionResponse } from "ethers"
-import * as funtypes from "funtypes"
-import { ComponentChildren, createContext } from "preact"
-import { useContext } from "preact/hooks"
-import { AsyncProperty } from "../library/preact-utilities.js"
-import { createUnitParser, safeSerialize, TokenContract, TransferRequestInput } from "../schema.js"
+import { Signal, ReadonlySignal, useComputed, useSignal } from '@preact/signals'
+import { TransactionResponse } from 'ethers'
+import * as funtypes from 'funtypes'
+import { ComponentChildren, createContext } from 'preact'
+import { useContext } from 'preact/hooks'
+import { AsyncProperty } from '../library/preact-utilities.js'
+import { createUnitParser, safeSerialize, TokenContract, TransferRequestInput } from '../schema.js'
 
-type PartialInput = { to: string, amount: string, token: TokenContract | undefined }
+type PartialInput = { to: string; amount: string; token: TokenContract | undefined }
 
 type TransferContext = {
 	input: Signal<PartialInput>
@@ -40,11 +40,7 @@ export const TransferProvider = ({ children }: { children: ComponentChildren }) 
 		return TransferRequestInput.safeParse({ ...input.value, amount, token })
 	})
 
-	return (
-		<TransferContext.Provider value={{ input, safeParse, transaction, isBusy }}>
-			{children}
-		</TransferContext.Provider>
-	)
+	return <TransferContext.Provider value={{ input, safeParse, transaction, isBusy }}>{children}</TransferContext.Provider>
 }
 
 export function useTransfer() {
@@ -52,4 +48,3 @@ export function useTransfer() {
 	if (!context) throw new Error('useTransfer can only be used within children of TransferProvider')
 	return context
 }
-

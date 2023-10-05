@@ -1,15 +1,15 @@
-import { useSignalEffect } from "@preact/signals"
-import { Contract, TransactionResponse } from "ethers"
-import { ComponentChildren } from "preact"
-import { useTransfer } from "../context/Transfer.js"
-import { ERC20ABI } from "../library/ERC20ABI.js"
-import { useAsyncState } from "../library/preact-utilities.js"
-import { TransferAddressField } from "./TransferAddressField.js"
-import { TransferAmountField } from "./TransferAmountField.js"
-import { TransferRecorder } from "./TransferRecorder.js"
-import { TransferButton } from "./TransferButton.js"
-import { TransferTokenSelector } from "./TransferTokenField.js"
-import { useWallet } from "../context/Wallet.js"
+import { useSignalEffect } from '@preact/signals'
+import { Contract, TransactionResponse } from 'ethers'
+import { ComponentChildren } from 'preact'
+import { useTransfer } from '../context/Transfer.js'
+import { ERC20ABI } from '../library/ERC20ABI.js'
+import { useAsyncState } from '../library/preact-utilities.js'
+import { TransferAddressField } from './TransferAddressField.js'
+import { TransferAmountField } from './TransferAmountField.js'
+import { TransferRecorder } from './TransferRecorder.js'
+import { TransferButton } from './TransferButton.js'
+import { TransferTokenSelector } from './TransferTokenField.js'
+import { useWallet } from '../context/Wallet.js'
 
 export function SetupTransfer() {
 	return (
@@ -62,9 +62,5 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 
 	useSignalEffect(listenForQueryChanges)
 
-	return (
-		<form onSubmit={sendTransferRequest}>
-			{children}
-		</form>
-	)
+	return <form onSubmit={sendTransferRequest}>{children}</form>
 }

@@ -1,10 +1,10 @@
-import { Signal, useSignal, useSignalEffect } from "@preact/signals"
-import { BrowserProvider, Network } from "ethers"
-import { ComponentChildren, createContext } from "preact"
-import { useContext, useEffect } from "preact/hooks"
-import { assertsEthereumObservable, assertsWithEthereum } from "../library/ethereum.js"
-import { AsyncProperty } from "../library/preact-utilities.js"
-import { BigIntHex, EthereumAddress, HexString } from "../schema.js"
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
+import { BrowserProvider, Network } from 'ethers'
+import { ComponentChildren, createContext } from 'preact'
+import { useContext, useEffect } from 'preact/hooks'
+import { assertsEthereumObservable, assertsWithEthereum } from '../library/ethereum.js'
+import { AsyncProperty } from '../library/preact-utilities.js'
+import { BigIntHex, EthereumAddress, HexString } from '../schema.js'
 
 type WalletContext = {
 	browserProvider: BrowserProvider
@@ -23,7 +23,7 @@ export const WalletProvider = ({ children }: { children: ComponentChildren }) =>
 		const chainId = chainIdHex ? BigIntHex.parse(chainIdHex) : undefined
 		provider.value = new BrowserProvider(window.ethereum, chainId)
 		const newNetwork = await provider.value.getNetwork()
-		network.value = { state: 'resolved' , value: newNetwork }
+		network.value = { state: 'resolved', value: newNetwork }
 	}
 
 	const listenToWalletsChainChange = () => {
@@ -43,7 +43,7 @@ export const WalletProvider = ({ children }: { children: ComponentChildren }) =>
 			return provider.value
 		},
 		account,
-		network
+		network,
 	}
 
 	const updateAsyncAccount = ([newAddress]: (string | undefined)[]) => {

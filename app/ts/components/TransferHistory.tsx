@@ -9,15 +9,16 @@ export const TransferHistory = () => {
 	const history = useTransferHistory()
 	const { address } = useAccount()
 
-	const connectedAddress = useComputed(() => address.value.state !== 'resolved' ? undefined : address.value.value)
+	const connectedAddress = useComputed(() => (address.value.state !== 'resolved' ? undefined : address.value.value))
 
 	const getTransfersFromConnectedAddress = () => {
-		return history.value.data
-			// select only history from connected address
-			.filter((transfer) => transfer.from === connectedAddress.value)
-			// sort by recent transfer date
-			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-			)
+		return (
+			history.value.data
+				// select only history from connected address
+				.filter(transfer => transfer.from === connectedAddress.value)
+				// sort by recent transfer date
+				.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+		)
 	}
 
 	const connectedAddressTransfers = useComputed(getTransfersFromConnectedAddress)

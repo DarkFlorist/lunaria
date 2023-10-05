@@ -24,4 +24,3 @@ export function App() {
 		</SplashScreen>
 	)
 }
-

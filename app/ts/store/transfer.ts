@@ -59,8 +59,8 @@ export function useTransfer() {
 const RecentTransfersCacheSchema = funtypes.Union(
 	funtypes.Object({
 		data: funtypes.Array(TransferSchema),
-		version: funtypes.Literal('1.0.0')
-	})
+		version: funtypes.Literal('1.0.0'),
+	}),
 )
 
 type RecentTransfers = funtypes.Static<typeof RecentTransfersCacheSchema>

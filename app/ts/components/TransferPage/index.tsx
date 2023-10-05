@@ -56,7 +56,9 @@ const MainPanel = () => {
 	const { transaction } = useTransfer()
 	const { nav, main } = usePanels()
 
-	const redirectOnSuccess = (path: string) => { window.location.hash = path }
+	const redirectOnSuccess = (path: string) => {
+		window.location.hash = path
+	}
 
 	useSignalEffect(() => {
 		if (transaction.value.state !== 'resolved') return

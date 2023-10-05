@@ -22,8 +22,8 @@ export type TokenHolding = funtypes.Static<typeof TokenHolding>
 export const ManagedTokensCacheSchema = funtypes.Union(
 	funtypes.Object({
 		data: funtypes.Array(TokenHolding),
-		version: funtypes.Literal('1.0.0')
-	})
+		version: funtypes.Literal('1.0.0'),
+	}),
 )
 
 export type ManagedTokens = funtypes.Static<typeof ManagedTokensCacheSchema>
@@ -49,7 +49,7 @@ export function useTokenManager() {
 }
 
 export function useTokenBalance() {
-	const { browserProvider }  = useWallet()
+	const { browserProvider } = useWallet()
 	const { value: tokenBalance, waitFor } = useAsyncState<bigint>()
 
 	const getTokenBalance = (accountAddress: string, tokenAddress: string) => {

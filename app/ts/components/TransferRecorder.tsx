@@ -1,7 +1,7 @@
-import { useComputed, useSignalEffect } from "@preact/signals"
-import { useTransferHistory } from "../context/TransferHistory.js"
-import { useTransfer } from "../context/Transfer.js"
-import { EthereumAddress, Transfer } from "../schema.js"
+import { useComputed, useSignalEffect } from '@preact/signals'
+import { useTransferHistory } from '../context/TransferHistory.js'
+import { useTransfer } from '../context/Transfer.js'
+import { EthereumAddress, Transfer } from '../schema.js'
 
 export const TransferRecorder = () => {
 	const history = useTransferHistory()
@@ -21,10 +21,10 @@ export const TransferRecorder = () => {
 		return {
 			from: EthereumAddress.parse(currentTransaction.from),
 			to: inputs.to,
-			amount:inputs.amount,
+			amount: inputs.amount,
 			date: Date.now(),
 			hash: currentTransaction.hash,
-			token: inputs.token
+			token: inputs.token,
 		}
 	})
 

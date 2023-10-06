@@ -8,35 +8,45 @@ import { TransferAddressField } from './TransferAddressField.js'
 import { TransferAmountField } from './TransferAmountField.js'
 import { TransferRecorder } from './TransferRecorder.js'
 import { TransferButton } from './TransferButton.js'
-import { TransferTokenSelector } from './TransferTokenField.js'
+import { TransferTokenSelectField } from './TransferTokenField.js'
 import { useWallet } from '../context/Wallet.js'
+import { useNotice } from '../store/notice.js'
+import { TokenPicker } from './TokenPicker.js'
+import { TokenAdd } from './TokenAdd.js'
 
 export function SetupTransfer() {
 	return (
 		<TransferForm>
 			<div class='grid gap-3'>
 				<div class='grid gap-3 md:grid-cols-2'>
-					<TransferTokenSelector />
+					<TransferTokenSelectField />
 					<TransferAmountField />
 				</div>
 				<TransferAddressField />
 				<TransferButton />
 				<TransferRecorder />
+				<TokenPicker />
+				<TokenAdd />
 			</div>
 		</TransferForm>
 	)
 }
 
 const TransferForm = ({ children }: { children: ComponentChildren }) => {
-	const { browserProvider } = useWallet()
-	const { transaction, safeParse } = useTransfer()
+	const { browserProvider, network } = useWallet()
+	const { input, transaction, safeParse } = useTransfer()
 	const { value: transactionQuery, waitFor } = useAsyncState<TransactionResponse>()
+	const { notify } = useNotice()
 
 	const sendTransferRequest = (e: Event) => {
 		e.preventDefault()
 
-		if (!safeParse.value.success) return
+		if (!browserProvider) {
+			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
+			return
+		}
 
+		if (!safeParse.value.success) return
 		const transferInput = safeParse.value.value
 
 		waitFor(async () => {
@@ -60,6 +70,13 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 		transaction.value = transactionQuery.value
 	}
 
+	const listenForWalletsChainChange = () => {
+		if (network.value.state !== 'resolved') return
+		// reset token input as it may not exist on the active network
+		input.value = { ...input.peek(), token: undefined }
+	}
+
+	useSignalEffect(listenForWalletsChainChange)
 	useSignalEffect(listenForQueryChanges)
 
 	return <form onSubmit={sendTransferRequest}>{children}</form>

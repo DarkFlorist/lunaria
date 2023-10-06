@@ -13,14 +13,17 @@ import { TokenManagerProvider } from '../../context/TokenManager.js'
 import { useWallet } from '../../context/Wallet.js'
 import { useAsyncState } from '../../library/preact-utilities.js'
 import { EthereumAddress } from '../../schema.js'
+import { useAccount } from '../../context/Account.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransferPage = () => {
-	const { browserProvider, account } = useWallet()
+	const { browserProvider } = useWallet()
+	const { account } = useAccount()
 	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
 
 	const attemptToConnect = () => {
+		if (browserProvider === undefined) return
 		waitFor(async () => {
 			const [signer] = await browserProvider.listAccounts()
 			return EthereumAddress.parse(signer.address)

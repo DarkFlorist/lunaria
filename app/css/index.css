@@ -598,6 +598,10 @@ input[type='password']:autofill {
 	margin-bottom: 0.5rem;
 }
 
+.mb-3 {
+	margin-bottom: 0.75rem;
+}
+
 .mb-4 {
 	margin-bottom: 1rem;
 }
@@ -926,12 +930,24 @@ input[type='password']:autofill {
 	gap: 1.5rem;
 }
 
+.gap-x-1 {
+	column-gap: 0.25rem;
+}
+
+.gap-x-2 {
+	column-gap: 0.5rem;
+}
+
 .gap-x-3 {
 	column-gap: 0.75rem;
 }
 
-.gap-y-2 {
-	row-gap: 0.5rem;
+.gap-y-1 {
+	row-gap: 0.25rem;
+}
+
+.gap-y-3 {
+	row-gap: 0.75rem;
 }
 
 .overflow-hidden {
@@ -1558,10 +1574,6 @@ input[type='password']:autofill {
 	opacity: 1;
 }
 
-.peer:placeholder-shown ~ .peer-placeholder-shown\:flex {
-	display: flex;
-}
-
 .peer:placeholder-shown ~ .peer-placeholder-shown\:hidden {
 	display: none;
 }
@@ -1589,9 +1601,18 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
+.focus\|hover\:border-white:focus {
+	--tw-border-opacity: 1;
+	border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
 .focus\|hover\:bg-neutral-800:focus {
 	--tw-bg-opacity: 1;
 	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
+}
+
+.focus\|hover\:bg-white\/10:focus {
+	background-color: rgb(255 255 255 / 0.1);
 }
 
 .focus\|hover\:text-white:focus {
@@ -1612,9 +1633,18 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
+.focus\|hover\:border-white:hover {
+	--tw-border-opacity: 1;
+	border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
 .focus\|hover\:bg-neutral-800:hover {
 	--tw-bg-opacity: 1;
 	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
+}
+
+.focus\|hover\:bg-white\/10:hover {
+	background-color: rgb(255 255 255 / 0.1);
 }
 
 .focus\|hover\:text-white:hover {
@@ -1678,6 +1708,10 @@ input[type='password']:autofill {
 @media (min-width: 1024px) {
 	.lg\:hidden {
 		display: none;
+	}
+
+	.lg\:w-\[32rem\] {
+		width: 32rem;
 	}
 
 	.lg\:grid-cols-4 {

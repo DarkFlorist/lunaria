@@ -60,7 +60,7 @@ export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['confi
 export const EthereumAddress = funtypes.String.withParser(AddressParser).withGuard(isHexString)
 export type EthereumAddress = funtypes.Static<typeof EthereumAddress>
 
-export const TokenContract = funtypes.Object({
+export const ERC20Token = funtypes.Object({
 	chainId: BigIntHex,
 	name: funtypes.String,
 	address: EthereumAddress,
@@ -68,14 +68,14 @@ export const TokenContract = funtypes.Object({
 	decimals: BigIntHex,
 })
 
-export type TokenContract = funtypes.Static<typeof TokenContract>
+export type ERC20Token = funtypes.Static<typeof ERC20Token>
 
 export const TransferSchema = funtypes.Object({
 	hash: funtypes.String,
 	from: EthereumAddress,
 	to: EthereumAddress,
 	amount: BigIntHex,
-	token: TokenContract.Or(funtypes.Undefined),
+	token: ERC20Token.Or(funtypes.Undefined),
 	date: funtypes.Number,
 })
 
@@ -84,10 +84,33 @@ export type Transfer = funtypes.Static<typeof TransferSchema>
 export const TransferRequestInput = funtypes.Object({
 	to: EthereumAddress,
 	amount: BigIntHex,
-	token: TokenContract.Or(funtypes.Undefined),
+	token: ERC20Token.Or(funtypes.Undefined),
 })
 
 export type TransferRequestInput = funtypes.Static<typeof TransferRequestInput>
+
+export const TokensCacheSchema = funtypes.Union(
+	funtypes.Object({
+		data: funtypes.Array(ERC20Token),
+		version: funtypes.Literal('1.0.0'),
+	})
+)
+
+export type TokensCache = funtypes.Static<typeof TokensCacheSchema>
+
+const AccountSettings = funtypes.Object({
+	address: EthereumAddress,
+	tokens: funtypes.Array(EthereumAddress),
+})
+
+export const SettingsCacheSchema = funtypes.Union(
+	funtypes.Object({
+		data: funtypes.Array(AccountSettings),
+		version: funtypes.Literal('1.0.0'),
+	})
+)
+
+export type SettingsCache = funtypes.Static<typeof SettingsCacheSchema>
 
 export function serialize<T, U extends funtypes.Codec<T>>(funType: U, value: T) {
 	return funType.serialize(value) as ToWireType<U>

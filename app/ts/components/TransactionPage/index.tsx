@@ -1,22 +1,41 @@
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
-import { TransferHistory } from '../TransferHistory.js'
 import { DiscordInvite } from '../DiscordInvite.js'
-import { TransactionDetails } from './TransactionDetails.js'
 import { Favorites } from '../Favorites.js'
 import { MainFooter } from '../MainFooter.js'
-import { useAccount } from '../../store/account.js'
 import { useEffect } from 'preact/hooks'
+import { useWallet } from '../../context/Wallet.js'
+import { useAsyncState } from '../../library/preact-utilities.js'
+import { EthereumAddress } from '../../schema.js'
+import { useSignalEffect } from '@preact/signals'
+import { useAccount } from '../../context/Account.js'
 import { TransferHistoryProvider } from '../../context/TransferHistory.js'
+import { TransferHistory } from '../TransferHistory.js'
+import { TransactionDetails } from './TransactionDetails.js'
 
 const SCROLL_OPTIONS = { inline: 'start', behavior: 'smooth' } as const
 
 export const TransactionPage = () => {
-	const { attemptToConnect } = useAccount()
+	const { browserProvider } = useWallet()
+	const { account } = useAccount()
+	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
 
-	useEffect(() => {
-		attemptToConnect()
-	}, [])
+	const attemptToConnect = () => {
+		if (browserProvider === undefined) return
+		waitFor(async () => {
+			const [signer] = await browserProvider.listAccounts()
+			return EthereumAddress.parse(signer.address)
+		})
+	}
+
+	const listenForQueryChanges = () => {
+		// do not reset shared state for other instances of this hooks
+		if (query.value.state === 'inactive') return
+		account.value = query.value
+	}
+
+	useSignalEffect(listenForQueryChanges)
+	useEffect(attemptToConnect, [])
 
 	return (
 		<div class='fixed inset-0 bg-black text-white h-[100dvh]'>

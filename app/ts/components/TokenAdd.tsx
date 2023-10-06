@@ -147,9 +147,12 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 
 		waitFor(async () => {
 			const contract = new Contract(tokenAddress, ERC20ABI, browserProvider)
-			const name = await contract.name()
-			const symbol = await contract.symbol()
-			const decimals = await contract.decimals()
+			const namePromise = contract.name()
+			const symbolPromise = contract.symbol()
+			const decimalsPromise = contract.decimals()
+			const name = await namePromise
+			const symbol = await symbolPromise
+			const decimals = await decimalsPromise
 			const chainId = activeChainId
 			return { chainId, name, symbol, decimals, address: tokenAddress }
 		})

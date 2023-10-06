@@ -1,5 +1,5 @@
 import { Signal, useSignal } from '@preact/signals'
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks'
 export type Inactive = { state: 'inactive' }
 export type Pending = { state: 'pending' }
 export type Resolved<T> = { state: 'resolved'; value: T }
@@ -48,7 +48,6 @@ export function useAsyncState<T>(): AsyncState<T> {
 
 	return { value: result, waitFor: resolver => activate(resolver), reset }
 }
-
 
 // Creates a signal-observable state of an element ref
 // enables listening to ref change from within a signal effect such as useSignalEffect and useComputed

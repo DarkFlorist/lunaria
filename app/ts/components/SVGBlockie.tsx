@@ -1,6 +1,6 @@
 // ported directly from https://github.com/DarkFlorist/TheInterceptor
 
-import { useMemo } from "preact/hooks";
+import { useMemo } from 'preact/hooks'
 
 function generateIdenticon(options: { seed: string; size?: number }) {
 	// NOTE -- Majority of this code is referenced from: https://github.com/alexvandesande/blockies

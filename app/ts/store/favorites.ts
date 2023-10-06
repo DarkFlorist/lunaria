@@ -1,13 +1,13 @@
 import { effect, signal } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 import { JSONStringify } from '../library/utilities.js'
-import { TokenMeta } from './tokens.js'
+import { ERC20Token } from '../schema.js'
 
 export type FavoriteModel = {
 	label?: string
 	source: string
 	recipientAddress: string
-	token?: TokenMeta
+	token?: ERC20Token
 	amount: string
 }
 

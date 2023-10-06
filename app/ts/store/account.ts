@@ -4,21 +4,20 @@ import { ApplicationError } from './errors.js'
 import { useNotice } from './notice.js'
 import { useProviders } from './provider.js'
 import { effect, signal, useSignalEffect } from '@preact/signals'
-import { Address, AddressSchema } from '../schema.js'
-import { getAddress } from 'ethers'
+import { EthereumAddress } from '../schema.js'
 
-const address = signal<AsyncProperty<Address>>({ state: 'inactive' })
+const address = signal<AsyncProperty<EthereumAddress>>({ state: 'inactive' })
 
 export function useAccount() {
 	const { notify } = useNotice()
 	const provider = useProviders()
-	const { value: query, waitFor } = useAsyncState<Address>()
+	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
 
 	const connect = () => {
 		waitFor(async () => {
 			try {
 				const signer = await provider.browserProvider.getSigner()
-				return AddressSchema.parse(getAddress(signer.address))
+				return EthereumAddress.parse(signer.address)
 			} catch (error) {
 				let errorMessage = 'An unknown error occurred.'
 				if (error instanceof ApplicationError) errorMessage = error.message
@@ -31,7 +30,7 @@ export function useAccount() {
 	const attemptToConnect = () => {
 		waitFor(async () => {
 			const [signer] = await provider.browserProvider.listAccounts()
-			return AddressSchema.parse(getAddress(signer.address))
+			return EthereumAddress.parse(signer.address)
 		})
 	}
 
@@ -53,7 +52,7 @@ const handleAccountChanged = ([newAddress]: string[]) => {
 		address.value = { state: 'inactive' }
 		return
 	}
-	address.value = { ...address.value, value: AddressSchema.parse(getAddress(newAddress)) }
+	address.value = { ...address.value, value: EthereumAddress.parse(newAddress) }
 }
 
 const removeAccountChangedListener = effect(() => {

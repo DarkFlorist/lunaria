@@ -29,7 +29,7 @@ export const TransactionPage = () => {
 	}
 
 	const listenForQueryChanges = () => {
-		// do not reset shared state for other instances of this hooks
+		// do not reset shared state for other instances of this hook
 		if (query.value.state === 'inactive') return
 		account.value = query.value
 	}

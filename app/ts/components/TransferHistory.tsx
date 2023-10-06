@@ -1,20 +1,20 @@
 import { useComputed } from '@preact/signals'
 import { formatUnits } from 'ethers'
+import { useAccount } from '../context/Account.js'
 import { useTransferHistory } from '../context/TransferHistory.js'
 import { Transfer } from '../schema.js'
-import { useAccount } from '../store/account.js'
 import { TimeAgo } from './TimeAgo.js'
 
 export const TransferHistory = () => {
 	const history = useTransferHistory()
-	const { address } = useAccount()
+	const { account } = useAccount()
 
-	const connectedAddress = useComputed(() => (address.value.state !== 'resolved' ? undefined : address.value.value))
+	const connectedAddress = useComputed(() => (account.value.state !== 'resolved' ? undefined : account.value.value))
 
 	const getTransfersFromConnectedAddress = () => {
 		return (
 			history.value.data
-				// select only history from connected address
+				// select only history from connected account
 				.filter(transfer => transfer.from === connectedAddress.value)
 				// sort by recent transfer date
 				.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

@@ -132,7 +132,7 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 			return
 		}
 
-		if (!browserProvider) {
+		if (!browserProvider.value) {
 			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
 			return
 		}
@@ -144,9 +144,10 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 
 		const tokenAddress = result.value.value
 		const activeChainId = network.value.value.chainId
+		const provider = browserProvider.value
 
 		waitFor(async () => {
-			const contract = new Contract(tokenAddress, ERC20ABI, browserProvider)
+			const contract = new Contract(tokenAddress, ERC20ABI, provider)
 			const namePromise = contract.name()
 			const symbolPromise = contract.symbol()
 			const decimalsPromise = contract.decimals()

@@ -1,6 +1,6 @@
 import { batch, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { Contract, formatUnits, parseUnits } from 'ethers'
-import { useAccount } from '../context/Account.js'
+import { useAccount, useBalance } from '../context/Account.js'
 import { useTransfer } from '../context/Transfer.js'
 import { useWallet } from '../context/Wallet.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
@@ -57,6 +57,7 @@ export const TransferAmountField = () => {
 }
 
 const MaxButton = () => {
+	const { balance, token } = useBalance()
 	const { browserProvider } = useWallet()
 	const { value: tokenBalance, waitFor } = useAsyncState<bigint>()
 	const { input } = useTransfer()
@@ -67,9 +68,11 @@ const MaxButton = () => {
 	const currentTokenBalance = useComputed(() => (tokenBalance.value.state === 'resolved' ? tokenBalance.value.value : 0n))
 
 	const getTokenBalance = () => {
+		if (!browserProvider.value) return
+		const provider = browserProvider.value
 		waitFor(async () => {
 			if (!accountAddress.value || !tokenAddress.value) return
-			const contract = new Contract(tokenAddress.value, ERC20ABI, browserProvider)
+			const contract = new Contract(tokenAddress.value, ERC20ABI, provider)
 			return await contract.balanceOf(accountAddress.value)
 		})
 	}
@@ -90,6 +93,7 @@ const MaxButton = () => {
 
 	useSignalEffect(() => {
 		if (!tokenAddress.value || !accountAddress.value) return
+		token.value = input.value.token
 		getTokenBalance()
 	})
 

@@ -43,7 +43,7 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 	const sendTransferRequest = (e: Event) => {
 		e.preventDefault()
 
-		if (!browserProvider) {
+		if (!browserProvider.value) {
 			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
 			return
 		}
@@ -51,9 +51,10 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 		if (!safeParse.value.success) return
 
 		const transferInput = safeParse.value.value
+		const provider = browserProvider.value
 
 		waitFor(async () => {
-			const signer = await browserProvider.getSigner()
+			const signer = await provider.getSigner()
 
 			// Ether transfer
 			if (transferInput.token === undefined) {

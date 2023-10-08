@@ -1,6 +1,6 @@
 import { batch, Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { Contract, formatUnits } from 'ethers'
-import { useEffect, useRef } from 'preact/hooks'
+import { Contract, formatEther, formatUnits } from 'ethers'
+import { useRef } from 'preact/hooks'
 import { useAccount } from '../context/Account.js'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
@@ -8,7 +8,7 @@ import { useWallet } from '../context/Wallet.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
 import { removeNonStringsAndTrim, stringIncludes } from '../library/utilities.js'
-import { ERC20Token } from '../schema.js'
+import { ERC20Token, HexString } from '../schema.js'
 import { AsyncText } from './AsyncText.js'
 import * as Icon from './Icon/index.js'
 
@@ -137,7 +137,7 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 					<div class='text-whte/50'>{token?.symbol || 'ETH'}</div>
 					<div class='col-span-full'>{token?.name || 'Ether'}</div>
 					<div class='col-span-full text-white/50'>
-						<TokenBalance token={token} />
+						<AssetBalance token={token} />
 					</div>
 				</div>
 			</label>
@@ -146,23 +146,28 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 	)
 }
 
-const TokenBalance = ({ token }: { token?: ERC20Token }) => {
-	const { browserProvider} = useWallet()
+const AssetBalance = ({ token }: { token?: ERC20Token }) => {
+	const { browserProvider, blockNumber } = useWallet()
 	const { account } = useAccount()
 	const { value: query, waitFor } = useAsyncState<bigint>()
 
-	if (!browserProvider || !token) return <></>
+	if (!browserProvider) return <></>
 
-	const getTokenBalance = async () => {
-		if (account.value.state !== 'resolved') return
-		const accountAddress = account.value.value
-		const contract = new Contract(token.address, ERC20ABI, browserProvider)
-		waitFor(async () => await contract.balanceOf(accountAddress))
+	const getTokenBalance = async (address: HexString) => {
+		if (!browserProvider.value) return
+		const provider = browserProvider.value
+		if (!token) {
+			waitFor(async () => await provider.getBalance(address))
+		} else {
+			const contract = new Contract(token.address, ERC20ABI, provider)
+			waitFor(async () => await contract.balanceOf(address))
+		}
 	}
 
-	useEffect(() => {
-		getTokenBalance()
-	}, [token])
+	useSignalEffect(() => {
+		if (!blockNumber.value || account.value.state !== 'resolved') return
+		getTokenBalance(account.value.value)
+	})
 
 	switch (query.value.state) {
 		case 'inactive':
@@ -172,10 +177,15 @@ const TokenBalance = ({ token }: { token?: ERC20Token }) => {
 		case 'rejected':
 			return <div>error</div>
 		case 'resolved':
-			const displayValue = formatUnits(query.value.value, token.decimals)
-			return <>{displayValue} {token.symbol}</>
-	}
+			if (!token) return <>{formatEther(query.value.value)}</>
 
+			const displayValue = formatUnits(query.value.value, token.decimals)
+			return (
+				<>
+					{displayValue} {token.symbol}
+				</>
+			)
+	}
 }
 
 const RemoveAssetDialog = ({ token }: { token: ERC20Token }) => {

@@ -3,7 +3,7 @@ import { ComponentChildren, createContext } from 'preact'
 import { useContext } from 'preact/hooks'
 import { Contract } from 'ethers'
 import { createCacheParser, TokensCache, TokensCacheSchema } from '../schema.js'
-import { DEFAULT_TOKENS, MANAGED_TOKENS_CACHE_KEY } from '../library/constants.js'
+import { DEFAULT_TOKENS, KNOWN_TOKENS_CACHE_KEY } from '../library/constants.js'
 import { persistSignalEffect } from '../library/persistent-signal.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
@@ -22,7 +22,7 @@ export const TokenManagerProvider = ({ children }: { children: ComponentChildren
 	const stage = useSignal(undefined)
 	const cache = useSignal<TokensCache>({ data: DEFAULT_TOKENS, version: '1.0.0' })
 
-	persistSignalEffect(MANAGED_TOKENS_CACHE_KEY, cache, createCacheParser(TokensCacheSchema))
+	persistSignalEffect(KNOWN_TOKENS_CACHE_KEY, cache, createCacheParser(TokensCacheSchema))
 
 	return <TokenManagerContext.Provider value={{ cache, query, stage }}>{children}</TokenManagerContext.Provider>
 }
@@ -38,8 +38,10 @@ export function useTokenBalance() {
 	const { value: tokenBalance, waitFor } = useAsyncState<bigint>()
 
 	const getTokenBalance = (accountAddress: string, tokenAddress: string) => {
+		if (!browserProvider.value) return
+		const provider = browserProvider.value
 		waitFor(async () => {
-			const contract = new Contract(tokenAddress, ERC20ABI, browserProvider)
+			const contract = new Contract(tokenAddress, ERC20ABI, provider)
 			return await contract.balanceOf(accountAddress)
 		})
 	}

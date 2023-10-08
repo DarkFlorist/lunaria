@@ -1,11 +1,10 @@
 import { Signal, useComputed, useSignal } from '@preact/signals'
 import { useRouter } from '../HashRouter.js'
-import { formatEther, formatUnits, TransactionReceipt, TransactionResponse } from 'ethers'
+import { formatEther, TransactionReceipt, TransactionResponse } from 'ethers'
 import { AsyncProperty } from '../../library/preact-utilities.js'
 import { Info, InfoError, InfoPending } from './Info.js'
 import { useTransaction } from '../../store/transaction.js'
 import { calculateGasFee, extractArgValue, extractTransferLogFromSender } from '../../library/ethereum.js'
-import { useTokenQuery } from '../../store/tokens.js'
 import { SaveTransfer } from './SaveTransfer.js'
 import { FavoriteModel } from '../../store/favorites.js'
 import SVGBlockie from '../SVGBlockie.js'
@@ -155,28 +154,7 @@ type TokenAmountProps = {
 }
 
 const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
-	const { query, tokenAddress } = useTokenQuery()
-
-	if (receipt.to === null) return <></>
-	tokenAddress.value = receipt.to
-
-	const txLog = extractTransferLogFromSender(receipt)
-	if (txLog === null) return <></>
-
-	const tokenValue = extractArgValue<bigint>(txLog, 'value')
-	if (tokenValue === null) return <></>
-
-	switch (query.value.state) {
-		case 'inactive':
-			return <></>
-		case 'pending':
-			return <InfoPending />
-		case 'rejected':
-			return <InfoError displayText='Failed to get token amount' message={query.value.error.message} />
-		case 'resolved':
-			const { decimals, symbol } = query.value.value
-			const amount = formatUnits(tokenValue, decimals)
-			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
-			return <Info label='Amount' value={`${amount} ${symbol}`} />
-	}
+	// TODO: implement amount query
+	console.log('token amount', receipt, addFavoriteStore)
+	return <></>
 }

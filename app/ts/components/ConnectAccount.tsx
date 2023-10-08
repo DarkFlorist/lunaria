@@ -14,12 +14,13 @@ export const ConnectAccount = () => {
 	const { notify } = useNotice()
 
 	const connect = () => {
-		if (!browserProvider) {
+		if (!browserProvider.value) {
 			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
 			return
 		}
+		const provider = browserProvider.value
 		waitFor(async () => {
-			const signer = await browserProvider.getSigner()
+			const signer = await provider.getSigner()
 			return EthereumAddress.parse(signer.address)
 		})
 	}

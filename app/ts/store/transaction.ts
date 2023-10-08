@@ -2,16 +2,17 @@ import { useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { TransactionReceipt, TransactionResponse } from 'ethers'
-import { useProviders } from './provider.js'
+import { useWallet } from '../context/Wallet.js'
 
 export function useTransaction(transactionHash: string) {
-	const providers = useProviders()
+	const { browserProvider } = useWallet()
 	const { value: transactionResponse, waitFor: waitForResponse, reset: resetResponse } = useAsyncState<TransactionResponse>()
 	const { value: transactionReceipt, waitFor: waitForReceipt, reset: resetReceipt } = useAsyncState<TransactionReceipt | null>()
 
 	const getTransactionResponse = (transactionHash: string) => {
+		if (!browserProvider.value) return
+		const provider = browserProvider.value
 		waitForResponse(async () => {
-			const provider = providers.browserProvider
 			const result = await provider.getTransaction(transactionHash)
 			// TransactionResult can actually be null?
 			if (result === null) throw new Error('Transaction was not found on chain!')

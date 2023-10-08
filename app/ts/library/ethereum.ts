@@ -1,29 +1,19 @@
-import { TransactionResponse, Interface, id, TransactionReceipt, Log, Eip1193Provider, formatEther } from 'ethers'
+import { TransactionResponse, Interface, id, TransactionReceipt, Log, Eip1193Provider, formatEther, EventEmitterable } from 'ethers'
 import { ERC20ABI } from './ERC20ABI.js'
-import { ApplicationError } from '../store/errors.js'
 
-export interface WithEthereum {
+export interface WithEip1193Provider {
 	ethereum: Eip1193Provider
 }
 
-export function withEthereum(global: unknown): global is WithEthereum {
-	return global !== null && typeof global === 'object' && 'ethereum' in global && global.ethereum !== null && typeof global.ethereum === 'object' && 'on' in global.ethereum && typeof global.ethereum.on === 'function'
+export type EthereumProviderEvents = 'chainChanged' | 'accountsChanged'
+export type EthereumProvider = EventEmitterable<EthereumProviderEvents>
+
+export function withEip1193Provider(global: unknown): global is WithEip1193Provider {
+	return global !== null && typeof global === 'object' && 'ethereum' in global && global.ethereum !== null && typeof global.ethereum === 'object' && 'request' in global.ethereum && typeof global.ethereum.request === 'function'
 }
 
-export type ObservableEthereum = {
-	on(eventName: string | symbol, listener: (...args: any[]) => void): void
-}
-
-export function isEthereumObservable(ethereum: unknown): ethereum is ObservableEthereum {
-	return ethereum instanceof Object && 'on' in ethereum && typeof ethereum.on === 'function'
-}
-
-export function assertsEthereumObservable(ethereum: unknown): asserts ethereum is ObservableEthereum {
-	if (!isEthereumObservable(ethereum)) throw new Error('Ethereum object is not observable')
-}
-
-export function assertsWithEthereum(global: unknown): asserts global is WithEthereum {
-	if (!withEthereum(global)) throw new ApplicationError('WALLET_MISSING')
+export function isEthereumProvider(ethereum: unknown): ethereum is EthereumProvider {
+	return ethereum !== null && typeof ethereum === 'object' && 'on' in ethereum && typeof ethereum.on === 'function' && 'removeListener' in ethereum && typeof ethereum.removeListener === 'function'
 }
 
 export const calculateGasFee = (effectiveGasPrice: bigint, gasUsed: bigint) => {

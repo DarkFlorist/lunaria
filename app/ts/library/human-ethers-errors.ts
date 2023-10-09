@@ -24,7 +24,7 @@ type EthersError = (UnknownError & { code: 'UNKNOWN_ERROR' })
 const ETHERS_ERROR_CODES = [ 'UNKNOWN_ERROR', 'NOT_IMPLEMENTED', 'UNSUPPORTED_OPERATION', 'NETWORK_ERROR', 'SERVER_ERROR', 'TIMEOUT', 'BAD_DATA', 'CANCELLED', 'BUFFER_OVERRUN', 'NUMERIC_FAULT', 'INVALID_ARGUMENT', 'MISSING_ARGUMENT', 'UNEXPECTED_ARGUMENT', 'CALL_EXCEPTION', 'INSUFFICIENT_FUNDS', 'NONCE_EXPIRED', 'OFFCHAIN_FAULT', 'REPLACEMENT_UNDERPRICED', 'TRANSACTION_REPLACED', 'UNCONFIGURED_NAME', 'ACTION_REJECTED' ] as const
 type ETHERS_ERROR_CODES = typeof ETHERS_ERROR_CODES[number]
 
-export function isEthersError(error: unknown): error is ETHERS_ERROR {
+export function isEthersError(error: unknown): error is EthersError {
 	if (typeof error !== 'object') return false
 	if (error === null) return false
 	if (!('code' in error)) return false

@@ -1,6 +1,6 @@
 import { ActionRejectedError, NetworkError, TimeoutError, CancelledError, NumericFaultError, MissingArgumentError, CallExceptionError, TransactionReplacedError, ReplacementUnderpricedError, UnconfiguredNameError, UnexpectedArgumentError, InvalidArgumentError, BufferOverrunError, BadDataError, ServerError, NotImplementedError, UnknownError, UnsupportedOperationError, InsufficientFundsError, NonceExpiredError, OffchainFaultError } from 'ethers'
 
-type ETHERS_ERROR = (UnknownError & { code: 'UNKNOWN_ERROR' })
+type EthersError = (UnknownError & { code: 'UNKNOWN_ERROR' })
   | (NotImplementedError & { code: 'NOT_IMPLEMENTED' })
   | (UnsupportedOperationError & { code: 'UNSUPPORTED_OPERATION' })
   | (NetworkError & { code: 'NETWORK_ERROR' })

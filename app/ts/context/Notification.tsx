@@ -7,6 +7,7 @@ type notification = {
 	id: number
 	message: string
 	title: string
+	duration?: number
 }
 
 type NotificationContext = {
@@ -61,26 +62,35 @@ const NotificationCenter = () => {
 	})
 
 	return (
-		<dialog ref={ref} class='absolute bottom-4'>
-			{notifications.value.map(notification => (
-				<Notification notification={notification} />
-			))}
+		<dialog ref={ref} class='absolute bottom-4 bg-transparent'>
+			<div class='grid gap-y-2'>
+				{notifications.value.map(notification => (
+					<Notification notification={notification} />
+				))}
+			</div>
 		</dialog>
 	)
 }
 
 const Notification = ({ notification }: { notification: notification }) => {
 	const { notifications } = useNotification()
+	const { id, title, message, duration } = notification
 
 	const removeNotice = (id: number) => {
 		notifications.value = notifications.peek().filter(n => n.id !== id)
 	}
 
 	useEffect(() => {
-		setTimeout(() => removeNotice(notification.id), 3000)
+		setTimeout(() => removeNotice(id), duration || 3000)
 	}, [])
 
 	return (
-		<div>{notification.message}</div>
+		<div class='bg-neutral-900 text-white grid grid-cols-[1fr,min-content]'>
+			<div class='px-4 py-3 '>
+				<div class='font-semibold'>{title}</div>
+				<div class='text-sm text-white/50'>{message}</div>
+			</div>
+			<button class='text-white/50 focus|hover:text-white w-10 h-10 flex items-center justify-center' onClick={() => removeNotice(id)}>&times;</button>
+		</div>
 	)
 }

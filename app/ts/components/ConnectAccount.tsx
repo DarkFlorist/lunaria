@@ -3,24 +3,24 @@ import { useAsyncState } from '../library/preact-utilities.js'
 import { EthereumAddress } from '../schema.js'
 import { useWallet } from '../context/Wallet.js'
 import { useAccount } from '../context/Account.js'
-import { useNotice } from '../store/notice.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
+import { useNotification } from '../context/Notification.js'
+import { humanReadableEthersError, isJsonRpcError, isEthersError, humanReadableJsonRpcError } from '../library/errors.js'
+import { makeError } from 'ethers'
 
 export const ConnectAccount = () => {
 	const { browserProvider } = useWallet()
 	const { account } = useAccount()
 	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
-	const { notify } = useNotice()
+	const { notify } = useNotification()
 
 	const connect = () => {
-		if (!browserProvider.value) {
-			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
-			return
-		}
-		const provider = browserProvider.value
 		waitFor(async () => {
-			const signer = await provider.getSigner()
+			if (!browserProvider.value) {
+				throw makeError('No compatible web3 wallet detected.', 'UNKNOWN_ERROR', { error: { code: 4900 } })
+			}
+			const signer = await browserProvider.value.getSigner()
 			return EthereumAddress.parse(signer.address)
 		})
 	}
@@ -34,8 +34,28 @@ export const ConnectAccount = () => {
 	useSignalEffect(listenForQueryChanges)
 
 	switch (account.value.state) {
-		case 'inactive':
 		case 'rejected':
+			const accountError = account.value.error
+			if (isEthersError(accountError)) {
+				let message = humanReadableEthersError(accountError).message
+				if (accountError.code === 'UNKNOWN_ERROR' && isJsonRpcError(accountError.error)) {
+					message = humanReadableJsonRpcError(accountError.error).message
+				}
+				notify({ message, title: 'Notice' })
+			}
+
+			return (
+				<div class='grid grid-cols-[1fr,auto] gap-3 px-4 lg:px-0 h-20 border border-white/20 lg:border-none lg:place-items-end place-content-center items-center'>
+					<div class='grid lg:place-items-end'>
+						<span class='font-bold'>Get started quickly</span>
+						<span class='text-sm text-white/50'>by connecting your wallet</span>
+					</div>
+					<button class='h-12 px-4 border border-white/50 bg-white/20' onClick={connect}>
+						Connect
+					</button>
+				</div>
+			)
+		case 'inactive':
 			return (
 				<div class='grid grid-cols-[1fr,auto] gap-3 px-4 lg:px-0 h-20 border border-white/20 lg:border-none lg:place-items-end place-content-center items-center'>
 					<div class='grid lg:place-items-end'>

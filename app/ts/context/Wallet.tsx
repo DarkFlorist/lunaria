@@ -65,10 +65,7 @@ const BlockUpdater = () => {
 	const updateBlock = (newBlockNumber: number) => blockNumber.value = newBlockNumber
 
 	const addBlockListener = async (provider: BrowserProvider) => {
-		if (previousProvider.current) {
-			console.log(previousProvider.current.removeListener)
-			previousProvider.current.removeListener('block', updateBlock)
-		}
+		if (previousProvider.current) previousProvider.current.removeListener('block', updateBlock)
 		previousProvider.current = await provider.on('block', updateBlock)
 	}
 

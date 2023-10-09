@@ -1,14 +1,17 @@
 import { useComputed } from '@preact/signals'
 import { useAccount } from '../context/Account.js'
+import { useNotification } from '../context/Notification.js'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
+import { humanReadableEthersError, isEthersError } from '../library/errors.js'
 import { areEqualStrings } from '../library/utilities.js'
 import { EthereumAddress } from '../schema.js'
 
 export const TransferResult = () => {
 	const { account } = useAccount()
-	const { input } = useTransfer()
+	const { input, transaction } = useTransfer()
 	const { cache: tokensCache } = useTokenManager()
+	const { notify } = useNotification()
 
 	const recipientIsSender = useComputed(() => {
 		if (account.value.state !== 'resolved') return false
@@ -25,6 +28,34 @@ export const TransferResult = () => {
 
 	if (recipientIsAKnownToken.value) {
 		return <ConfirmField title='Warning: Recipient is a token address' description='The recipient address provided is a token contract address and will probably result in a loss of funds.' label='I understand that this will probably result in a loss of funds.' />
+	}
+
+	if (transaction.value.state === 'rejected') {
+		const txError = transaction.value.error
+		let errorMessage = 'An unknown error occurred'
+
+		if (isEthersError(txError)) {
+			const { warning, message } = humanReadableEthersError(txError)
+
+			if (!warning) {
+				notify({ message, title: 'Action Rejected' })
+				return <></>
+			}
+
+			errorMessage = message
+		}
+
+		return (
+			<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] grid-rows-[min-content,min-content] gap-x-3 items-center'>
+				<div class='row-span-2'>
+					<ExclamationIcon />
+				</div>
+				<div>
+					<div class='font-semibold leading-tight'>Transaction failed!</div>
+					<div class='text-sm text-white/50 leading-tight'>{errorMessage}</div>
+				</div>
+			</div>
+		)
 	}
 
 	return <></>

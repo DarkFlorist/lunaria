@@ -153,7 +153,7 @@ const AssetBalance = ({ token }: { token?: ERC20Token }) => {
 
 	if (!browserProvider) return <></>
 
-	const getTokenBalance = async (address: HexString) => {
+	const getAssetBalance = async (address: HexString) => {
 		if (!browserProvider.value) return
 		const provider = browserProvider.value
 		if (!token) {
@@ -166,7 +166,7 @@ const AssetBalance = ({ token }: { token?: ERC20Token }) => {
 
 	useSignalEffect(() => {
 		if (!blockNumber.value || account.value.state !== 'resolved') return
-		getTokenBalance(account.value.value)
+		getAssetBalance(account.value.value)
 	})
 
 	switch (query.value.state) {

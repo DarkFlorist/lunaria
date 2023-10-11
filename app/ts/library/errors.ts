@@ -73,7 +73,7 @@ export function humanReadableEthersError(error: EthersError): HumanReadableError
 			if (error.receipt) {
 				return { warning: true, message: `Transaction was included in block #${error.receipt.blockNumber} but reverted${error.reason ? ` with error: ${error.reason}` : ''}` }
 			} else {
-				return { warning: true, message: error.reason ? `Transaction will fail. Call exeception during ${error.action}: ${error.reason}` : `The transaction will revert. ${error.reason ?? ''}` }
+				return { warning: true, message: error.reason ? `Transaction will fail. Call exeception during ${error.action}: ${error.reason}` : `The transaction will revert.` }
 			}
 		case 'INSUFFICIENT_FUNDS':
 			return { warning: true, message: `Account ${error.transaction.from} does not have enough funds for this transaction.` }

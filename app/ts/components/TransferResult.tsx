@@ -1,5 +1,5 @@
 import { useComputed } from '@preact/signals'
-import { useAccount } from '../context/Account.js'
+import { useWallet } from '../context/Wallet.js'
 import { useNotification } from '../context/Notification.js'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
@@ -8,7 +8,7 @@ import { areEqualStrings } from '../library/utilities.js'
 import { EthereumAddress } from '../schema.js'
 
 export const TransferResult = () => {
-	const { account } = useAccount()
+	const { account } = useWallet()
 	const { input, transaction } = useTransfer()
 	const { cache: tokensCache } = useTokenManager()
 	const { notify } = useNotification()

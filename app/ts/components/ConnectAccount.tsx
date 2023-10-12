@@ -1,17 +1,17 @@
 import { useSignalEffect } from '@preact/signals'
+import { makeError } from 'ethers'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { EthereumAddress } from '../schema.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { useWallet } from '../context/Wallet.js'
-import { useAccount } from '../context/Account.js'
+import { useNotification } from '../context/Notification.js'
 import { AsyncText } from './AsyncText.js'
 import SVGBlockie from './SVGBlockie.js'
-import { useNotification } from '../context/Notification.js'
 import { humanReadableEthersError, isJsonRpcError, isEthersError, humanReadableJsonRpcError } from '../library/errors.js'
-import { makeError } from 'ethers'
 
 export const ConnectAccount = () => {
-	const { browserProvider } = useWallet()
-	const { account } = useAccount()
+	const { browserProvider } = useEthereumProvider()
+	const { account } = useWallet()
 	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
 	const { notify } = useNotification()
 
@@ -82,7 +82,7 @@ export const ConnectAccount = () => {
 }
 
 const AccountAddress = () => {
-	const { account } = useAccount()
+	const { account } = useWallet()
 
 	switch (account.value.state) {
 		case 'inactive':
@@ -103,7 +103,7 @@ const NetworkIcon = () => (
 )
 
 const AccountAvatar = () => {
-	const { account } = useAccount()
+	const { account } = useWallet()
 
 	switch (account.value.state) {
 		case 'inactive':
@@ -121,7 +121,7 @@ const AccountAvatar = () => {
 }
 
 const WalletNetwork = () => {
-	const { account } = useAccount()
+	const { account } = useWallet()
 
 	switch (account.value.state) {
 		case 'inactive':
@@ -140,7 +140,7 @@ const WalletNetwork = () => {
 }
 
 const NetworkName = () => {
-	const { network } = useWallet()
+	const { network } = useEthereumProvider()
 
 	switch (network.value.state) {
 		case 'inactive':

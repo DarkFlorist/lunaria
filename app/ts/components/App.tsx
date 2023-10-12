@@ -2,16 +2,16 @@ import { Route, Router } from './HashRouter.js'
 import { SplashScreen } from './SplashScreen.js'
 import { TransactionPage } from './TransactionPage/index.js'
 import { TransferPage } from './TransferPage/index.js'
+import { EthereumProvider } from '../context/Ethereum.js'
 import { WalletProvider } from '../context/Wallet.js'
-import { AccountProvider } from '../context/Account.js'
 import { NotificationProvider } from '../context/Notification.js'
 
 export function App() {
 	return (
 		<SplashScreen>
 			<NotificationProvider>
-				<WalletProvider>
-					<AccountProvider>
+				<EthereumProvider>
+					<WalletProvider>
 						<Router>
 							<Route path=''>
 								<TransferPage />
@@ -20,8 +20,8 @@ export function App() {
 								<TransactionPage />
 							</Route>
 						</Router>
-					</AccountProvider>
-				</WalletProvider>
+					</WalletProvider>
+				</EthereumProvider>
 			</NotificationProvider>
 		</SplashScreen>
 	)

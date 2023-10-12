@@ -4,7 +4,7 @@ import { Result } from 'funtypes'
 import { ComponentChildren } from 'preact'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
-import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
 import { ERC20Token, EthereumAddress, serialize } from '../schema.js'
@@ -124,7 +124,7 @@ const QueryAddressField = ({ result }: { result: Signal<Result<EthereumAddress> 
 const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | undefined> }) => {
 	const { notify } = useNotice()
 	const { value: query, waitFor, reset } = useAsyncState<ERC20Token>()
-	const { browserProvider, network } = useWallet()
+	const { browserProvider, network } = useEthereumProvider()
 
 	const getTokenMetadata = () => {
 		if (!result.value?.success) {

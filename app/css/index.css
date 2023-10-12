@@ -554,6 +554,18 @@ input[type='password']:autofill {
 	top: 0.5rem;
 }
 
+.bottom-auto {
+	bottom: auto;
+}
+
+.top-auto {
+	top: auto;
+}
+
+.bottom-0 {
+	bottom: 0px;
+}
+
 .z-10 {
 	z-index: 10;
 }

@@ -1,13 +1,13 @@
 import { useComputed } from '@preact/signals'
 import { formatUnits } from 'ethers'
-import { useAccount } from '../context/Account.js'
+import { useWallet } from '../context/Wallet.js'
 import { useTransferHistory } from '../context/TransferHistory.js'
 import { Transfer } from '../schema.js'
 import { TimeAgo } from './TimeAgo.js'
 
 export const TransferHistory = () => {
 	const history = useTransferHistory()
-	const { account } = useAccount()
+	const { account } = useWallet()
 
 	const connectedAddress = useComputed(() => (account.value.state !== 'resolved' ? undefined : account.value.value))
 

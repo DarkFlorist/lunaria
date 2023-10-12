@@ -1,10 +1,8 @@
 import { batch, useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { Contract, formatUnits, parseUnits } from 'ethers'
-import { useAccount, useBalance } from '../context/Account.js'
+import { formatUnits, parseUnits } from 'ethers'
+import { useBalance } from '../context/Wallet.js'
 import { useTransfer } from '../context/Transfer.js'
-import { useWallet } from '../context/Wallet.js'
-import { ERC20ABI } from '../library/ERC20ABI.js'
-import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
+import { useSignalRef } from '../library/preact-utilities.js'
 import * as Icon from './Icon/index.js'
 
 export const TransferAmountField = () => {
@@ -58,53 +56,36 @@ export const TransferAmountField = () => {
 
 const MaxButton = () => {
 	const { balance, token } = useBalance()
-	const { browserProvider } = useWallet()
-	const { value: tokenBalance, waitFor } = useAsyncState<bigint>()
 	const { input } = useTransfer()
-	const { account } = useAccount()
 
-	const accountAddress = useComputed(() => (account.value.state === 'resolved' ? account.value.value : undefined))
-	const tokenAddress = useComputed(() => input.value.token?.address)
-	const currentTokenBalance = useComputed(() => (tokenBalance.value.state === 'resolved' ? tokenBalance.value.value : 0n))
-
-	const getTokenBalance = () => {
-		if (!browserProvider.value) return
-		const provider = browserProvider.value
-		waitFor(async () => {
-			if (!accountAddress.value || !tokenAddress.value) return
-			const contract = new Contract(tokenAddress.value, ERC20ABI, provider)
-			return await contract.balanceOf(accountAddress.value)
-		})
-	}
+	const resolvedBalance = useComputed(() => balance.value.state === 'resolved' ? balance.value.value : undefined)
 
 	const setMaxAmount = async () => {
-		const amount = formatUnits(currentTokenBalance.value, input.value.token?.decimals)
+		const amount = formatUnits(resolvedBalance.value || 0n, input.value.token?.decimals)
 		input.value = Object.assign({}, input.peek(), { amount })
 	}
 
 	const isInputAmountAtMax = useComputed(() => {
 		try {
 			const amount = parseUnits(input.value.amount, input.value.token?.decimals)
-			return currentTokenBalance.value === amount
+			return resolvedBalance.value === amount
 		} catch {
 			return false
 		}
 	})
 
 	useSignalEffect(() => {
-		if (!tokenAddress.value || !accountAddress.value) return
 		token.value = input.value.token
-		getTokenBalance()
 	})
 
 	if (!input.value.token || isInputAmountAtMax.value) return <></>
 
-	switch (tokenBalance.value.state) {
+	switch (balance.value.state) {
 		case 'inactive':
 		case 'rejected':
 			return <></>
 		case 'pending':
-			return <Icon.Spinner class='opacity-50' />
+			return <><Icon.Spinner class='opacity-50' /> <div class='text-xs text-white/50 flex flex-col'><span>checking</span><span>balance</span></div></>
 		case 'resolved':
 			return (
 				<button type='button' onClick={setMaxAmount} class='outline-none px-2 h-8 items-center justify-center border border-white/50 text-white/50 peer-disabled:hidden focus:text-white focus:border-white hover:text-white hover:border-white'>

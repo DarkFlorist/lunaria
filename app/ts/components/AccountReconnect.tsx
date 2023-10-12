@@ -1,13 +1,13 @@
 import { useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
-import { useAccount } from '../context/Account.js'
 import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { EthereumAddress } from '../schema.js'
 
 export const AccountReconnect = () => {
-	const { browserProvider } = useWallet()
-	const { account } = useAccount()
+	const { browserProvider } = useEthereumProvider()
+	const { account } = useWallet()
 	const { value: query, waitFor } = useAsyncState<EthereumAddress>()
 
 	const attemptToConnect = () => {

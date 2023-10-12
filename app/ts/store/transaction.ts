@@ -2,10 +2,10 @@ import { useSignalEffect } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 import { useAsyncState } from '../library/preact-utilities.js'
 import { TransactionReceipt, TransactionResponse } from 'ethers'
-import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 
 export function useTransaction(transactionHash: string) {
-	const { browserProvider } = useWallet()
+	const { browserProvider } = useEthereumProvider()
 	const { value: transactionResponse, waitFor: waitForResponse, reset: resetResponse } = useAsyncState<TransactionResponse>()
 	const { value: transactionReceipt, waitFor: waitForReceipt, reset: resetReceipt } = useAsyncState<TransactionReceipt | null>()
 

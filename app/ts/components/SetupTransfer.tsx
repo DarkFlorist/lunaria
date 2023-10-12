@@ -9,7 +9,7 @@ import { TransferAmountField } from './TransferAmountField.js'
 import { TransferRecorder } from './TransferRecorder.js'
 import { TransferButton } from './TransferButton.js'
 import { TransferTokenSelectField } from './TransferTokenField.js'
-import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { useNotice } from '../store/notice.js'
 import { TokenPicker } from './TokenPicker.js'
 import { TokenAdd } from './TokenAdd.js'
@@ -35,7 +35,7 @@ export function SetupTransfer() {
 }
 
 const TransferForm = ({ children }: { children: ComponentChildren }) => {
-	const { browserProvider, network } = useWallet()
+	const { browserProvider, network } = useEthereumProvider()
 	const { input, transaction, safeParse } = useTransfer()
 	const { value: transactionQuery, waitFor } = useAsyncState<TransactionResponse>()
 	const { notify } = useNotice()

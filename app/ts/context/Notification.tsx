@@ -1,7 +1,7 @@
-import { ComponentChildren, createContext } from "preact"
-import { Signal, useSignal, useSignalEffect } from "@preact/signals"
-import { useContext, useEffect } from "preact/hooks"
-import { useSignalRef } from "../library/preact-utilities.js"
+import { ComponentChildren, createContext } from 'preact'
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
+import { useContext, useEffect } from 'preact/hooks'
+import { useSignalRef } from '../library/preact-utilities.js'
 
 type notification = {
 	id: number

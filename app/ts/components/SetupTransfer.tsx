@@ -9,10 +9,11 @@ import { TransferAmountField } from './TransferAmountField.js'
 import { TransferRecorder } from './TransferRecorder.js'
 import { TransferButton } from './TransferButton.js'
 import { TransferTokenSelectField } from './TransferTokenField.js'
-import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { useNotice } from '../store/notice.js'
 import { TokenPicker } from './TokenPicker.js'
 import { TokenAdd } from './TokenAdd.js'
+import { TransferResult } from './TransferResult.js'
 
 export function SetupTransfer() {
 	return (
@@ -23,6 +24,7 @@ export function SetupTransfer() {
 					<TransferAmountField />
 				</div>
 				<TransferAddressField />
+				<TransferResult />
 				<TransferButton />
 				<TransferRecorder />
 				<TokenPicker />
@@ -33,7 +35,7 @@ export function SetupTransfer() {
 }
 
 const TransferForm = ({ children }: { children: ComponentChildren }) => {
-	const { browserProvider, network } = useWallet()
+	const { browserProvider, network } = useEthereumProvider()
 	const { input, transaction, safeParse } = useTransfer()
 	const { value: transactionQuery, waitFor } = useAsyncState<TransactionResponse>()
 	const { notify } = useNotice()
@@ -41,16 +43,18 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 	const sendTransferRequest = (e: Event) => {
 		e.preventDefault()
 
-		if (!browserProvider) {
+		if (!browserProvider.value) {
 			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
 			return
 		}
 
 		if (!safeParse.value.success) return
+
 		const transferInput = safeParse.value.value
+		const provider = browserProvider.value
 
 		waitFor(async () => {
-			const signer = await browserProvider.getSigner()
+			const signer = await provider.getSigner()
 
 			// Ether transfer
 			if (transferInput.token === undefined) {

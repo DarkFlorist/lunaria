@@ -5,10 +5,10 @@ import { AsyncProperty } from '../../library/preact-utilities.js'
 import { Info, InfoError, InfoPending } from './Info.js'
 import { useTransaction } from '../../store/transaction.js'
 import { calculateGasFee, extractArgValue, extractTransferLogFromSender } from '../../library/ethereum.js'
-import { useTokenQuery } from '../../store/tokens.js'
 import { SaveTransfer } from './SaveTransfer.js'
 import { FavoriteModel } from '../../store/favorites.js'
 import SVGBlockie from '../SVGBlockie.js'
+import { useTokenManager } from '../../context/TokenManager.js'
 
 export const TransactionDetails = () => {
 	const favorite = useSignal<Partial<FavoriteModel> | undefined>(undefined)
@@ -154,29 +154,22 @@ type TokenAmountProps = {
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 
-const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
-	const { query, tokenAddress } = useTokenQuery()
+const TokenAmount = ({ receipt }: TokenAmountProps) => {
+	const { cache:tokensCache } = useTokenManager()
 
 	if (receipt.to === null) return <></>
-	tokenAddress.value = receipt.to
 
 	const txLog = extractTransferLogFromSender(receipt)
 	if (txLog === null) return <></>
 
-	const tokenValue = extractArgValue<bigint>(txLog, 'value')
-	if (tokenValue === null) return <></>
+	const transferredTokenValue = extractArgValue<bigint>(txLog, 'value')
+	if (transferredTokenValue === null) return <></>
 
-	switch (query.value.state) {
-		case 'inactive':
-			return <></>
-		case 'pending':
-			return <InfoPending />
-		case 'rejected':
-			return <InfoError displayText='Failed to get token amount' message={query.value.error.message} />
-		case 'resolved':
-			const { decimals, symbol } = query.value.value
-			const amount = formatUnits(tokenValue, decimals)
-			addFavoriteStore.value = { ...addFavoriteStore.peek(), amount, token: query.value.value }
-			return <Info label='Amount' value={`${amount} ${symbol}`} />
-	}
+	const token = useComputed(() => tokensCache.value.data.find(token => token.address === receipt.to))
+
+	if (!token.value) return <></>
+
+	const amount = formatUnits(transferredTokenValue, token.value.decimals)
+
+	return <Info label='Amount' value={`${amount} ${token.value.symbol}`} />
 }

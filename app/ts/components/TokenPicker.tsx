@@ -1,16 +1,16 @@
 import { batch, Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { Contract, formatUnits } from 'ethers'
-import { useEffect, useRef } from 'preact/hooks'
-import { useAccount } from '../context/Account.js'
+import { Contract, formatEther, formatUnits } from 'ethers'
+import { useRef } from 'preact/hooks'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
-import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
 import { removeNonStringsAndTrim, stringIncludes } from '../library/utilities.js'
-import { ERC20Token } from '../schema.js'
+import { ERC20Token, HexString } from '../schema.js'
 import { AsyncText } from './AsyncText.js'
 import * as Icon from './Icon/index.js'
+import { useWallet } from '../context/Wallet.js'
 
 export const TokenPicker = () => {
 	const { ref, signal: dialogRef } = useSignalRef<HTMLDialogElement | null>(null)
@@ -60,7 +60,7 @@ const AssetCardList = () => {
 	const { cache } = useTokenManager()
 	const { input } = useTransfer()
 	const { query } = useTokenManager()
-	const { network } = useWallet()
+	const { network } = useEthereumProvider()
 
 	const activeChainId = useComputed(() => (network.value.state === 'resolved' ? network.value.value.chainId : 1n))
 
@@ -92,7 +92,7 @@ const AssetCardList = () => {
 			{tokensList.value.map(token => (
 				<AssetCard key={token.address} token={token} />
 			))}
-			<AddTokenCard />
+			<AddTokenOrConnectCard />
 		</fieldset>
 	)
 }
@@ -137,7 +137,7 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 					<div class='text-whte/50'>{token?.symbol || 'ETH'}</div>
 					<div class='col-span-full'>{token?.name || 'Ether'}</div>
 					<div class='col-span-full text-white/50'>
-						<TokenBalance token={token} />
+						<AssetBalance token={token} />
 					</div>
 				</div>
 			</label>
@@ -146,24 +146,29 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 	)
 }
 
-const TokenBalance = ({ token }: { token?: ERC20Token }) => {
-	const { browserProvider} = useWallet()
-	const { account } = useAccount()
+const AssetBalance = ({ token }: { token?: ERC20Token }) => {
+	const { browserProvider, blockNumber } = useEthereumProvider()
+	const { account } = useWallet()
 	const { value: query, waitFor } = useAsyncState<bigint>()
 
-	if (!browserProvider || !token) return <></>
+	if (account.value.state !== 'resolved') return <></>
+	if (!browserProvider) return <></>
 
-	const getTokenBalance = async () => {
-		if (account.value.state !== 'resolved') return
-		console.log('getTokenBalance', account.value.state)
-		const accountAddress = account.value.value
-		const contract = new Contract(token.address, ERC20ABI, browserProvider)
-		waitFor(async () => await contract.balanceOf(accountAddress))
+	const getAssetBalance = async (address: HexString) => {
+		if (!browserProvider.value) return
+		const provider = browserProvider.value
+		if (!token) {
+			waitFor(async () => await provider.getBalance(address))
+		} else {
+			const contract = new Contract(token.address, ERC20ABI, provider)
+			waitFor(async () => await contract.balanceOf(address))
+		}
 	}
 
-	useEffect(() => {
-		getTokenBalance()
-	}, [token])
+	useSignalEffect(() => {
+		if (!blockNumber.value || account.value.state !== 'resolved') return
+		getAssetBalance(account.value.value)
+	})
 
 	switch (query.value.state) {
 		case 'inactive':
@@ -173,10 +178,15 @@ const TokenBalance = ({ token }: { token?: ERC20Token }) => {
 		case 'rejected':
 			return <div>error</div>
 		case 'resolved':
-			const displayValue = formatUnits(query.value.value, token.decimals)
-			return <>{displayValue} {token.symbol}</>
-	}
+			if (!token) return <>{formatEther(query.value.value)}</>
 
+			const displayValue = formatUnits(query.value.value, token.decimals)
+			return (
+				<>
+					{displayValue} {token.symbol}
+				</>
+			)
+	}
 }
 
 const RemoveAssetDialog = ({ token }: { token: ERC20Token }) => {
@@ -220,11 +230,14 @@ const RemoveAssetDialog = ({ token }: { token: ERC20Token }) => {
 	)
 }
 
-const AddTokenCard = () => {
+const AddTokenOrConnectCard = () => {
+	const { account } = useWallet()
 	const { stage } = useTokenManager()
 	const openAddTokenDialog = () => {
 		stage.value = 'add'
 	}
+
+	if (account.value.state !== 'resolved') return <></>
 
 	return (
 		<div class='relative aspect-[16/9] md:aspect-[4/5] md:min-w-[14em] bg-neutral-900'>

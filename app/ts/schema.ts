@@ -98,10 +98,15 @@ export const TokensCacheSchema = funtypes.Union(
 
 export type TokensCache = funtypes.Static<typeof TokensCacheSchema>
 
+export const Holdings = funtypes.Array(EthereumAddress)
+export type Holdings = funtypes.Static<typeof Holdings>
+
 const AccountSettings = funtypes.Object({
 	address: EthereumAddress,
-	tokens: funtypes.Array(EthereumAddress),
+	holdings: Holdings
 })
+
+export type AccountSettings = funtypes.Static<typeof AccountSettings>
 
 export const SettingsCacheSchema = funtypes.Union(
 	funtypes.Object({

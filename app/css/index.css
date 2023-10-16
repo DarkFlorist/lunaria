@@ -526,16 +526,12 @@ input[type='password']:autofill {
 	inset: 0px;
 }
 
+.bottom-4 {
+	bottom: 1rem;
+}
+
 .left-4 {
 	left: 1rem;
-}
-
-.left-auto {
-	left: auto;
-}
-
-.right-0 {
-	right: 0px;
 }
 
 .right-2 {
@@ -560,6 +556,10 @@ input[type='password']:autofill {
 
 .col-span-full {
 	grid-column: 1 / -1;
+}
+
+.row-span-2 {
+	grid-row: span 2 / span 2;
 }
 
 .row-start-2 {
@@ -608,18 +608,6 @@ input[type='password']:autofill {
 
 .mb-8 {
 	margin-bottom: 2rem;
-}
-
-.mb-auto {
-	margin-bottom: auto;
-}
-
-.ml-auto {
-	margin-left: auto;
-}
-
-.mr-8 {
-	margin-right: 2rem;
 }
 
 .mt-8 {
@@ -874,6 +862,10 @@ input[type='password']:autofill {
 	grid-template-rows: 1fr min-content;
 }
 
+.grid-rows-\[min-content\2c min-content\] {
+	grid-template-rows: min-content min-content;
+}
+
 .flex-col {
 	flex-direction: column;
 }
@@ -946,6 +938,10 @@ input[type='password']:autofill {
 	row-gap: 0.25rem;
 }
 
+.gap-y-2 {
+	row-gap: 0.5rem;
+}
+
 .gap-y-3 {
 	row-gap: 0.75rem;
 }
@@ -1002,6 +998,10 @@ input[type='password']:autofill {
 	border-style: dashed;
 }
 
+.border-amber-500\/50 {
+	border-color: rgb(245 158 11 / 0.5);
+}
+
 .border-lime-400\/40 {
 	border-color: rgb(163 230 53 / 0.4);
 }
@@ -1013,6 +1013,10 @@ input[type='password']:autofill {
 
 .border-red-400\/20 {
 	border-color: rgb(248 113 113 / 0.2);
+}
+
+.border-red-400\/50 {
+	border-color: rgb(248 113 113 / 0.5);
 }
 
 .border-transparent {
@@ -1042,6 +1046,10 @@ input[type='password']:autofill {
 
 .border-b-white\/10 {
 	border-bottom-color: rgb(255 255 255 / 0.1);
+}
+
+.bg-amber-500\/10 {
+	background-color: rgb(245 158 11 / 0.1);
 }
 
 .bg-black {
@@ -1075,6 +1083,10 @@ input[type='password']:autofill {
 	background-color: rgb(23 23 23 / var(--tw-bg-opacity));
 }
 
+.bg-red-400\/10 {
+	background-color: rgb(248 113 113 / 0.1);
+}
+
 .bg-red-400\/5 {
 	background-color: rgb(248 113 113 / 0.05);
 }
@@ -1106,10 +1118,6 @@ input[type='password']:autofill {
 
 .bg-white\/50 {
 	background-color: rgb(255 255 255 / 0.5);
-}
-
-.p-10 {
-	padding: 2.5rem;
 }
 
 .p-2 {
@@ -1148,11 +1156,6 @@ input[type='password']:autofill {
 	padding-right: 1rem;
 }
 
-.px-6 {
-	padding-left: 1.5rem;
-	padding-right: 1.5rem;
-}
-
 .py-1 {
 	padding-top: 0.25rem;
 	padding-bottom: 0.25rem;
@@ -1178,10 +1181,6 @@ input[type='password']:autofill {
 	padding-bottom: 1rem;
 }
 
-.pb-4 {
-	padding-bottom: 1rem;
-}
-
 .pl-4 {
 	padding-left: 1rem;
 }
@@ -1192,10 +1191,6 @@ input[type='password']:autofill {
 
 .pt-5 {
 	padding-top: 1.25rem;
-}
-
-.pt-6 {
-	padding-top: 1.5rem;
 }
 
 .text-left {

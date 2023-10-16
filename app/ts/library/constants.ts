@@ -1,5 +1,6 @@
 import { ERC20Token } from '../schema'
 
+export const LAYOUT_SCROLL_OPTIONS:ScrollIntoViewOptions = { inline: 'start', behavior: 'smooth' }
 export const DEFAULT_TOKENS: ERC20Token[] = [
 	{
 		chainId: 1n,
@@ -51,8 +52,7 @@ export const DEFAULT_TOKENS: ERC20Token[] = [
 		decimals: 6n,
 	},
 ]
-
 export const STORAGE_KEY_RECENTS = 'txns'
-export const MANAGED_TOKENS_CACHE_KEY = 'managed_tokens'
+export const KNOWN_TOKENS_CACHE_KEY = 'tokens'
 export const SETTINGS_CACHE_KEY = 'settings'
 export const RECENT_TRANSFERS_CACHE_KEY = 'transfers'

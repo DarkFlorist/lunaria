@@ -4,7 +4,7 @@ import { Result } from 'funtypes'
 import { ComponentChildren } from 'preact'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
-import { useWallet } from '../context/Wallet.js'
+import { useEthereumProvider } from '../context/Ethereum.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
 import { ERC20Token, EthereumAddress, serialize } from '../schema.js'
@@ -124,7 +124,7 @@ const QueryAddressField = ({ result }: { result: Signal<Result<EthereumAddress> 
 const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | undefined> }) => {
 	const { notify } = useNotice()
 	const { value: query, waitFor, reset } = useAsyncState<ERC20Token>()
-	const { browserProvider, network } = useWallet()
+	const { browserProvider, network } = useEthereumProvider()
 
 	const getTokenMetadata = () => {
 		if (!result.value?.success) {
@@ -132,7 +132,7 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 			return
 		}
 
-		if (!browserProvider) {
+		if (!browserProvider.value) {
 			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
 			return
 		}
@@ -144,9 +144,10 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 
 		const tokenAddress = result.value.value
 		const activeChainId = network.value.value.chainId
+		const provider = browserProvider.value
 
 		waitFor(async () => {
-			const contract = new Contract(tokenAddress, ERC20ABI, browserProvider)
+			const contract = new Contract(tokenAddress, ERC20ABI, provider)
 			const namePromise = contract.name()
 			const symbolPromise = contract.symbol()
 			const decimalsPromise = contract.decimals()

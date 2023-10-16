@@ -237,9 +237,7 @@ const AddTokenOrConnectCard = () => {
 		stage.value = 'add'
 	}
 
-	if (account.value.state !== 'resolved') return (
-		<></>
-	)
+	if (account.value.state !== 'resolved') return <></>
 
 	return (
 		<div class='relative aspect-[16/9] md:aspect-[4/5] md:min-w-[14em] bg-neutral-900'>

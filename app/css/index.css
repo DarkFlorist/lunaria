@@ -534,14 +534,6 @@ input[type='password']:autofill {
 	left: 1rem;
 }
 
-.left-auto {
-	left: auto;
-}
-
-.right-0 {
-	right: 0px;
-}
-
 .right-2 {
 	right: 0.5rem;
 }
@@ -552,18 +544,6 @@ input[type='password']:autofill {
 
 .top-2 {
 	top: 0.5rem;
-}
-
-.bottom-auto {
-	bottom: auto;
-}
-
-.top-auto {
-	top: auto;
-}
-
-.bottom-0 {
-	bottom: 0px;
 }
 
 .z-10 {
@@ -628,18 +608,6 @@ input[type='password']:autofill {
 
 .mb-8 {
 	margin-bottom: 2rem;
-}
-
-.mb-auto {
-	margin-bottom: auto;
-}
-
-.ml-auto {
-	margin-left: auto;
-}
-
-.mr-8 {
-	margin-right: 2rem;
 }
 
 .mt-8 {
@@ -970,12 +938,12 @@ input[type='password']:autofill {
 	row-gap: 0.25rem;
 }
 
-.gap-y-3 {
-	row-gap: 0.75rem;
-}
-
 .gap-y-2 {
 	row-gap: 0.5rem;
+}
+
+.gap-y-3 {
+	row-gap: 0.75rem;
 }
 
 .overflow-hidden {
@@ -1152,18 +1120,6 @@ input[type='password']:autofill {
 	background-color: rgb(255 255 255 / 0.5);
 }
 
-.bg-black\/80 {
-	background-color: rgb(0 0 0 / 0.8);
-}
-
-.bg-neutral-900\/80 {
-	background-color: rgb(23 23 23 / 0.8);
-}
-
-.p-10 {
-	padding: 2.5rem;
-}
-
 .p-2 {
 	padding: 0.5rem;
 }
@@ -1200,11 +1156,6 @@ input[type='password']:autofill {
 	padding-right: 1rem;
 }
 
-.px-6 {
-	padding-left: 1.5rem;
-	padding-right: 1.5rem;
-}
-
 .py-1 {
 	padding-top: 0.25rem;
 	padding-bottom: 0.25rem;
@@ -1230,10 +1181,6 @@ input[type='password']:autofill {
 	padding-bottom: 1rem;
 }
 
-.pb-4 {
-	padding-bottom: 1rem;
-}
-
 .pl-4 {
 	padding-left: 1rem;
 }
@@ -1244,10 +1191,6 @@ input[type='password']:autofill {
 
 .pt-5 {
 	padding-top: 1.25rem;
-}
-
-.pt-6 {
-	padding-top: 1.5rem;
 }
 
 .text-left {
@@ -1758,22 +1701,6 @@ input[type='password']:autofill {
 }
 
 @media (min-width: 1024px) {
-	.lg\:right-4 {
-		right: 1rem;
-	}
-
-	.lg\:top-4 {
-		top: 1rem;
-	}
-
-	.lg\:bottom-auto {
-		bottom: auto;
-	}
-
-	.lg\:left-auto {
-		left: auto;
-	}
-
 	.lg\:hidden {
 		display: none;
 	}

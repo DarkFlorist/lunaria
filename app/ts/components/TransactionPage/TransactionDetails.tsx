@@ -1,6 +1,6 @@
 import { Signal, useComputed, useSignal } from '@preact/signals'
 import { useRouter } from '../HashRouter.js'
-import { formatEther, TransactionReceipt, TransactionResponse } from 'ethers'
+import { formatEther, formatUnits, TransactionReceipt, TransactionResponse } from 'ethers'
 import { AsyncProperty } from '../../library/preact-utilities.js'
 import { Info, InfoError, InfoPending } from './Info.js'
 import { useTransaction } from '../../store/transaction.js'
@@ -8,6 +8,7 @@ import { calculateGasFee, extractArgValue, extractTransferLogFromSender } from '
 import { SaveTransfer } from './SaveTransfer.js'
 import { FavoriteModel } from '../../store/favorites.js'
 import SVGBlockie from '../SVGBlockie.js'
+import { useTokenManager } from '../../context/TokenManager.js'
 
 export const TransactionDetails = () => {
 	const favorite = useSignal<Partial<FavoriteModel> | undefined>(undefined)
@@ -153,8 +154,22 @@ type TokenAmountProps = {
 	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
 }
 
-const TokenAmount = ({ receipt, addFavoriteStore }: TokenAmountProps) => {
-	// TODO: implement amount query
-	console.log('token amount', receipt, addFavoriteStore)
-	return <></>
+const TokenAmount = ({ receipt }: TokenAmountProps) => {
+	const { cache:tokensCache } = useTokenManager()
+
+	if (receipt.to === null) return <></>
+
+	const txLog = extractTransferLogFromSender(receipt)
+	if (txLog === null) return <></>
+
+	const transferredTokenValue = extractArgValue<bigint>(txLog, 'value')
+	if (transferredTokenValue === null) return <></>
+
+	const token = useComputed(() => tokensCache.value.data.find(token => token.address === receipt.to))
+
+	if (!token.value) return <></>
+
+	const amount = formatUnits(transferredTokenValue, token.value.decimals)
+
+	return <Info label='Amount' value={`${amount} ${token.value.symbol}`} />
 }

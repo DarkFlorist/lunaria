@@ -3,7 +3,7 @@ import { Signal, useSignal, useSignalEffect } from '@preact/signals'
 import { useContext, useEffect } from 'preact/hooks'
 import { useSignalRef } from '../library/preact-utilities.js'
 
-type notification = {
+type Notification = {
 	id: number
 	message: string
 	title: string
@@ -11,13 +11,13 @@ type notification = {
 }
 
 type NotificationContext = {
-	notifications: Signal<notification[]>
+	notifications: Signal<Notification[]>
 }
 
 const NotificationContext = createContext<NotificationContext | undefined>(undefined)
 
 export const NotificationProvider = ({ children }: { children: ComponentChildren }) => {
-	const notifications = useSignal<notification[]>([])
+	const notifications = useSignal<Notification[]>([])
 
 	useSignalEffect(() => {
 		if (!notifications.value.length) return
@@ -35,8 +35,8 @@ export function useNotification() {
 	const context = useContext(NotificationContext)
 	if (!context) throw new Error('useNotification can only be used within children of NotificationProvider')
 
-	const notify = (notification: Omit<notification, 'id'>) => {
-		const newNotice = { id: Date.now(), ...notification }
+	const notify = (Notification: Omit<Notification, 'id'>) => {
+		const newNotice = { id: Date.now(), ...Notification }
 		context.notifications.value = context.notifications.peek().concat([newNotice])
 	}
 
@@ -72,7 +72,7 @@ const NotificationCenter = () => {
 	)
 }
 
-const Notification = ({ notification }: { notification: notification }) => {
+const Notification = ({ notification }: { notification: Notification }) => {
 	const { notifications } = useNotification()
 	const { id, title, message, duration } = notification
 

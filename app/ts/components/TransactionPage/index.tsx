@@ -9,6 +9,7 @@ import { TransferHistory } from '../TransferHistory.js'
 import { TransactionDetails } from './TransactionDetails.js'
 import { AccountReconnect } from '../AccountReconnect.js'
 import * as Icon from '../Icon/index.js'
+import { TokenManagerProvider } from '../../context/TokenManager.js'
 
 export const TransactionPage = () => {
 	return (
@@ -16,10 +17,12 @@ export const TransactionPage = () => {
 			<AccountReconnect />
 			<div class='fixed inset-0 bg-black text-white h-[100dvh]'>
 				<Root>
-					<TransferHistoryProvider>
-						<LeftPanel />
-						<MainPanel />
-					</TransferHistoryProvider>
+					<TokenManagerProvider>
+						<TransferHistoryProvider>
+							<LeftPanel />
+							<MainPanel />
+						</TransferHistoryProvider>
+					</TokenManagerProvider>
 				</Root>
 			</div>
 		</>

@@ -70,6 +70,7 @@ export function humanReadableEthersError(error: EthersError): HumanReadableError
 			return { warning: true, message: `EthersJS received too many arguments. This is a bug and you should report it. ${error.stack ?? ''}` }
 		// Blockchain Errors
 		case 'CALL_EXCEPTION':
+			console.error('Encountered CALL_EXCEPTION Error', error)
 			if (error.receipt) {
 				return { warning: true, message: `Transaction was included in block #${error.receipt.blockNumber} but reverted${error.reason ? ` with error: ${error.reason}` : ''}` }
 			} else {

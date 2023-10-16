@@ -22,43 +22,45 @@ export const TransferResult = () => {
 
 	const recipientIsAKnownToken = useComputed(() => tokensCache.value.data.some(token => areEqualStrings(token.address, input.value.to)))
 
-	if (recipientIsSender.value) {
-		return <ConfirmField title='Warning: The recipient is the same as the sender' description='This transactions sends funds to itself and will almost certainly result wasting money on transaction fees.' label='I understand that this will almost certainly have no effect but still cost me transactions fees.' />
-	}
+	switch (transaction.value.state) {
+		case 'inactive':
+			if (recipientIsSender.value) {
+				return <ConfirmField title='Warning: The recipient is the same as the sender' description='This transactions sends funds to itself and will almost certainly result wasting money on transaction fees.' label='I understand that this will almost certainly have no effect but still cost me transactions fees.' />
+			}
+			if (recipientIsAKnownToken.value) {
+				return <ConfirmField title='Warning: Recipient is a token address' description='The recipient address provided is a token contract address and will probably result in a loss of funds.' label='I understand that this will probably result in a loss of funds.' />
+			}
+			return <></>
+		case 'rejected':
+			const txError = transaction.value.error
+			let errorMessage = 'An unknown error occurred'
 
-	if (recipientIsAKnownToken.value) {
-		return <ConfirmField title='Warning: Recipient is a token address' description='The recipient address provided is a token contract address and will probably result in a loss of funds.' label='I understand that this will probably result in a loss of funds.' />
-	}
+			if (isEthersError(txError)) {
+				const { warning, message } = humanReadableEthersError(txError)
 
-	if (transaction.value.state === 'rejected') {
-		const txError = transaction.value.error
-		let errorMessage = 'An unknown error occurred'
+				if (!warning) {
+					notify({ message, title: 'Action Rejected' })
+					return <></>
+				}
 
-		if (isEthersError(txError)) {
-			const { warning, message } = humanReadableEthersError(txError)
-
-			if (!warning) {
-				notify({ message, title: 'Action Rejected' })
-				return <></>
+				errorMessage = message
 			}
 
-			errorMessage = message
-		}
-
-		return (
-			<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] grid-rows-[min-content,min-content] gap-x-3 items-center'>
-				<div class='row-span-2'>
-					<ExclamationIcon />
+			return (
+				<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] grid-rows-[min-content,min-content] gap-x-3 items-center'>
+					<div class='row-span-2'>
+						<ExclamationIcon />
+					</div>
+					<div>
+						<div class='font-semibold leading-tight'>Transaction failed!</div>
+						<div class='text-sm text-white/50 leading-tight'>{errorMessage}</div>
+					</div>
 				</div>
-				<div>
-					<div class='font-semibold leading-tight'>Transaction failed!</div>
-					<div class='text-sm text-white/50 leading-tight'>{errorMessage}</div>
-				</div>
-			</div>
-		)
+			)
+		case 'resolved':
+		case 'pending':
+			return <></>
 	}
-
-	return <></>
 }
 
 type ConfirmFieldProps = {

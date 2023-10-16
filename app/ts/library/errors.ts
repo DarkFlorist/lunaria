@@ -99,7 +99,7 @@ export function humanReadableEthersError(error: EthersError): HumanReadableError
 /*
  * https://eips.ethereum.org/EIPS/eip-1474#error-codes
  * */
-const jsonRpcErrorCodes = [-32002,4100,4900] as const
+const jsonRpcErrorCodes = [-32002, 4100, 4900] as const
 type JsonRpcErrorCode = typeof jsonRpcErrorCodes[number]
 type JsonRpcError = Error & { code: JsonRpcErrorCode }
 

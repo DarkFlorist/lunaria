@@ -64,3 +64,15 @@ export function areEqualStrings(a: string, b: string, caseSensitive?: true) {
 	if (caseSensitive) return a === b
 	return a.toLowerCase() === b.toLowerCase()
 }
+
+/**
+ * Abbreviate huge numbers
+ */
+export function abbreviateNumber(num: number): string {
+	const suffixes = ["", "K", "M", "B", "T", "Q"]
+	const exponent = Math.floor(Math.log10(num) / 3)
+	const shortValue = num / Math.pow(1000, exponent)
+	const displayValue = shortValue.toFixed(1)
+	const suffix = suffixes[exponent]
+	return `${displayValue}${suffix}`
+}

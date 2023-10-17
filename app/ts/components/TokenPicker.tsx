@@ -6,7 +6,7 @@ import { useTransfer } from '../context/Transfer.js'
 import { useEthereumProvider } from '../context/Ethereum.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
 import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
-import { removeNonStringsAndTrim, stringIncludes } from '../library/utilities.js'
+import { abbreviateNumber, removeNonStringsAndTrim, stringIncludes } from '../library/utilities.js'
 import { ERC20Token, HexString } from '../schema.js'
 import { AsyncText } from './AsyncText.js'
 import * as Icon from './Icon/index.js'
@@ -178,12 +178,13 @@ const AssetBalance = ({ token }: { token?: ERC20Token }) => {
 		case 'rejected':
 			return <div>error</div>
 		case 'resolved':
-			if (!token) return <>{formatEther(query.value.value)}</>
-
-			const displayValue = formatUnits(query.value.value, token.decimals)
+			const stringValue = token ? formatUnits(query.value.value, token.decimals) : formatEther(query.value.value)
+			const symbol = token ? token.symbol : 'ETH'
+			const numericValue = parseFloat(stringValue)
+			const displayValue = numericValue ? abbreviateNumber(numericValue) : stringValue
 			return (
 				<>
-					{displayValue} {token.symbol}
+					{displayValue} {symbol}
 				</>
 			)
 	}

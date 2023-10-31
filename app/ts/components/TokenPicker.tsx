@@ -11,6 +11,7 @@ import { ERC20Token, HexString } from '../schema.js'
 import { AsyncText } from './AsyncText.js'
 import * as Icon from './Icon/index.js'
 import { useWallet } from '../context/Wallet.js'
+import { AbbreviatedValue } from './AbbreviatedValue.js'
 
 export const TokenPicker = () => {
 	const { ref, signal: dialogRef } = useSignalRef<HTMLDialogElement | null>(null)
@@ -181,11 +182,8 @@ const AssetBalance = ({ token }: { token?: ERC20Token }) => {
 			const stringValue = token ? formatUnits(query.value.value, token.decimals) : formatEther(query.value.value)
 			const symbol = token ? token.symbol : 'ETH'
 			const numericValue = parseFloat(stringValue)
-			const displayValue = numericValue ? abbreviateNumber(numericValue) : stringValue
 			return (
-				<>
-					{displayValue} {symbol}
-				</>
+				<><AbbreviatedValue floatValue={numericValue} /> {symbol}</>
 			)
 	}
 }

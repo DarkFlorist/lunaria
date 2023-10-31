@@ -66,13 +66,31 @@ export function areEqualStrings(a: string, b: string, caseSensitive?: true) {
 }
 
 /**
- * Abbreviate huge numbers
+ * Abbreviate lengthy numbers
  */
-export function abbreviateNumber(num: number): string {
-	const suffixes = ["", "K", "M", "B", "T", "Q"]
-	const exponent = Math.floor(Math.log10(num) / 3)
-	const shortValue = num / Math.pow(1000, exponent)
-	const displayValue = shortValue.toFixed(1)
-	const suffix = suffixes[exponent]
-	return `${displayValue}${suffix}`
+export function abbreviateNumber(number: number, precision: number = 2): string {
+	const siUnits = new Map([
+		[1e9, 'G'],
+		[1e6, 'M'],
+		[1e3, 'k'],
+		[1, ''],
+	]);
+
+	for (const [factor, suffix] of siUnits) {
+		if (Math.abs(number) > factor) {
+			const shortValue = number / factor;
+			return `${shortValue.toFixed(precision)}${suffix}`;
+		}
+	}
+
+	return number.toString()
 }
+
+export function parseNumericTerm(num: number): { coefficient: number, exponent: number } {
+	const [c, e] = num.toExponential().split('e')
+	const exponent = parseInt(e)
+	return { coefficient: parseFloat(c), exponent };
+}
+
+const win = window as any
+win.parseNumericTerm = parseNumericTerm

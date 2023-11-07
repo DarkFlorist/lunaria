@@ -1,4 +1,4 @@
-import { useComputed } from '@preact/signals'
+import { useComputed, useSignal } from '@preact/signals'
 import { useWallet } from '../context/Wallet.js'
 import { useNotification } from '../context/Notification.js'
 import { useTokenManager } from '../context/TokenManager.js'
@@ -6,6 +6,7 @@ import { useTransfer } from '../context/Transfer.js'
 import { humanReadableEthersError, isEthersError } from '../library/errors.js'
 import { areEqualStrings } from '../library/utilities.js'
 import { EthereumAddress } from '../schema.js'
+import { CopyButton } from './CopyButton.js'
 
 export const TransferResult = () => {
 	const { account } = useWallet()
@@ -46,21 +47,43 @@ export const TransferResult = () => {
 				errorMessage = message
 			}
 
-			return (
-				<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] grid-rows-[min-content,min-content] gap-x-3 items-center'>
-					<div class='row-span-2'>
-						<ExclamationIcon />
-					</div>
-					<div>
-						<div class='font-semibold leading-tight'>Transaction failed!</div>
-						<div class='text-sm text-white/50 leading-tight'>{errorMessage}</div>
-					</div>
-				</div>
-			)
+			return <ErrorDetails summary={errorMessage} message={txError.message} />
 		case 'resolved':
 		case 'pending':
 			return <></>
 	}
+}
+
+const ErrorDetails = ({ message, summary }: { message: string, summary: string }) => {
+	const displayMessage = useSignal(false)
+	const toggleMessageDisplay = () => displayMessage.value = !displayMessage.peek()
+
+	return (
+		<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] gap-x-3 items-center'>
+			<div>
+				<ExclamationIcon />
+			</div>
+			<div>
+				<div class='font-semibold'>Transaction failed!</div>
+				<p>
+					<span class='text-sm text-white/50'>{summary}.</span>&nbsp;
+					<button type='button' class='appearance-none outline-none underline text-sm text-white/75 underline-offset-2 focus|hover:text-white' onClick={toggleMessageDisplay}>{displayMessage.value ? 'Hide' : 'Show'} details</button>
+				</p>
+			</div>
+			<div class='col-span-2'>
+				{
+					displayMessage.value ? (
+						<div class='border border-white/10 bg-white/5 px-3 py-2 mt-2 group relative'>
+							<pre class='whitespace-pre-wrap text-sm text-white/30 mb-2'>{message}</pre>
+							<div class='absolute right-2 bottom-2 hidden group-hover:block'>
+								<CopyButton value={message} withLabel />
+							</div>
+						</div>
+					) : <></>
+				}
+			</div>
+		</div>
+	)
 }
 
 type ConfirmFieldProps = {

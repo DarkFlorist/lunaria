@@ -526,6 +526,10 @@ input[type='password']:autofill {
 	inset: 0px;
 }
 
+.bottom-2 {
+	bottom: 0.5rem;
+}
+
 .bottom-4 {
 	bottom: 1rem;
 }
@@ -552,6 +556,10 @@ input[type='password']:autofill {
 
 .z-50 {
 	z-index: 50;
+}
+
+.col-span-2 {
+	grid-column: span 2 / span 2;
 }
 
 .col-span-full {
@@ -608,6 +616,10 @@ input[type='password']:autofill {
 
 .mb-8 {
 	margin-bottom: 2rem;
+}
+
+.mt-2 {
+	margin-top: 0.5rem;
 }
 
 .mt-8 {
@@ -978,6 +990,10 @@ input[type='password']:autofill {
 	white-space: nowrap;
 }
 
+.whitespace-pre-wrap {
+	white-space: pre-wrap;
+}
+
 .rounded {
 	border-radius: 0.25rem;
 }
@@ -1156,11 +1172,6 @@ input[type='password']:autofill {
 	padding-right: 1rem;
 }
 
-.py-1 {
-	padding-top: 0.25rem;
-	padding-bottom: 0.25rem;
-}
-
 .py-2 {
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
@@ -1278,8 +1289,20 @@ input[type='password']:autofill {
 	color: rgb(255 255 255 / 0.5);
 }
 
+.text-white\/75 {
+	color: rgb(255 255 255 / 0.75);
+}
+
 .text-white\/80 {
 	color: rgb(255 255 255 / 0.8);
+}
+
+.underline {
+	text-decoration-line: underline;
+}
+
+.underline-offset-2 {
+	text-underline-offset: 2px;
 }
 
 .opacity-0 {
@@ -1555,6 +1578,14 @@ input[type='password']:autofill {
 
 .disabled\:hover\:bg-transparent:hover:disabled {
 	background-color: transparent;
+}
+
+.disabled\:hover\:text-white\/30:hover:disabled {
+	color: rgb(255 255 255 / 0.3);
+}
+
+.group:hover .group-hover\:block {
+	display: block;
 }
 
 .peer:checked ~ .peer-checked\:hidden {

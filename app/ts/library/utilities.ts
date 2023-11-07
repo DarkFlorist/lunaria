@@ -91,6 +91,3 @@ export function parseNumericTerm(num: number): { coefficient: number, exponent: 
 	const exponent = parseInt(e)
 	return { coefficient: parseFloat(c), exponent }
 }
-
-const win = window as any
-win.parseNumericTerm = parseNumericTerm

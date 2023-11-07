@@ -78,8 +78,8 @@ export function abbreviateNumber(number: number, precision: number = 2): string 
 
 	for (const [factor, suffix] of siUnits) {
 		if (Math.abs(number) > factor) {
-			const shortValue = number / factor;
-			return `${shortValue.toFixed(precision)}${suffix}`;
+			const shortValue = number / factor
+			return `${shortValue.toFixed(precision)}${suffix}`
 		}
 	}
 

@@ -89,7 +89,7 @@ export function abbreviateNumber(number: number, precision: number = 2): string 
 export function parseNumericTerm(num: number): { coefficient: number, exponent: number } {
 	const [c, e] = num.toExponential().split('e')
 	const exponent = parseInt(e)
-	return { coefficient: parseFloat(c), exponent };
+	return { coefficient: parseFloat(c), exponent }
 }
 
 const win = window as any

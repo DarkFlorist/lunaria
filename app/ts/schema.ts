@@ -50,9 +50,8 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		const addressString = value.toLowerCase()
-		if (!isAddress(addressString)) return { success: false, message: `${value} is not a valid address string.` }
-		else return { success: true, value: getAddress(addressString) }
+		if (!isAddress(value)) return { success: false, message: `${value} is not a valid address string.` }
+		else return { success: true, value: getAddress(value) }
 	},
 	serialize: funtypes.String.safeParse,
 }

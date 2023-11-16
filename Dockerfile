@@ -1,17 +1,24 @@
 FROM node:20.9.0-alpine as builder
 
 # Set directory for the sources to be processed
-WORKDIR /source
+WORKDIR /source/build
 
 # Install node depenedencies
-COPY app app
-COPY build build
+COPY build/package.json package.json
+COPY build/package-lock.json package-lock.json
+RUN npm ci
+
+WORKDIR /source
 COPY package.json package.json
 COPY package-lock.json package-lock.json
-RUN npm run vendor
+RUN npm ci
 
-# Build the app
+# Copy and build the app
+COPY build build
+COPY app app
 COPY tsconfig.json tsconfig.json
+
+RUN npm run --prefix ./build vendor
 RUN npm run build
 
 # Push the built app to IPFS

@@ -1,3 +1,5 @@
+#! /usr/bin/env tsx
+
 import * as path from 'path'
 import * as url from 'url'
 import { promises as fs } from 'fs'

@@ -18,17 +18,16 @@ COPY build build
 COPY app app
 COPY tsconfig.json tsconfig.json
 
-RUN npm run --prefix ./build vendor
+RUN npm exec --prefix ./build vendor
 RUN npm run build
 
-# Push the built app to IPFS
+# Create kubo container
 FROM ipfs/kubo:latest
 
-# Set path for lunaria static site
-WORKDIR /ipfs
+WORKDIR /container-init.d
+ADD ipfs.config.sh .
+RUN chmod a+x ipfs.config.sh
 
-# Copy all built files from previous step
+# Copy generated app
+WORKDIR /var/www
 COPY --from=builder /source/app .
-RUN ipfs init
-RUN ipfs add --cid-version 1 --quieter --only-hash --recursive . > ipfs_hash.txt
-RUN cat ipfs_hash.txt

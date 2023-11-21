@@ -15,7 +15,7 @@
 	"scripts": {
 		"build": "rm -rf app/js && tsc",
 		"serve": "npx serve -L ./app",
-		"vendor": "npm ci --ignore-scripts && npm --prefix ./build ci --ignore-scripts && npm --prefix ./build run vendor",
-		"styles": "npm --prefix ./twcss ci --ignore-scripts && npm --prefix ./twcss run styles"
+		"vendor": "npm exec --prefix ./build vendor",
+		"styles": "npm --prefix ./twcss run styles"
 	}
 }

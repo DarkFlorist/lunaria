@@ -1,0 +1,31 @@
+app = "darkflorist-lunaria"
+primary_region = "sin"
+
+[build]
+
+[env]
+	IPV4_ADDRESS = "66.241.125.191"
+
+[[services]]
+  internal_port = 4001
+  protocol = "udp"
+  [[services.ports]]
+    port = 4001
+
+[[services]]
+  internal_port = 4001
+  protocol = "tcp"
+  [[services.ports]]
+    port = 4001
+
+[[services]]
+  internal_port = 5001
+  protocol = "tcp"
+  [[services.ports]]
+    port = 5001
+
+[[services]]
+  internal_port = 8080
+  protocol = "udp"
+  [[services.ports]]
+    port = 8080

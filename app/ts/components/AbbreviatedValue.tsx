@@ -23,6 +23,6 @@ export const AbbreviatedValue = ({ floatValue }: { floatValue: number }) => {
 }
 
 function toFixedLengthDigits(num: number, max: number = 5) {
-	const formatter = new Intl.NumberFormat('en-US', { maximumSignificantDigits: max })
+	const formatter = new Intl.NumberFormat('en-US', { maximumSignificantDigits: max, useGrouping: false })
 	return formatter.format(num)
 }

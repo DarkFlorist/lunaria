@@ -1,16 +1,28 @@
-import { parseNumericTerm } from '../library/utilities.js'
-
 export const AbbreviatedValue = ({ floatValue }: { floatValue: number }) => {
-	const { coefficient, exponent } = parseNumericTerm(floatValue)
+	const prefixes = [
+		{ value: 1e9, symbol: 'G' },
+		{ value: 1e6, symbol: 'M' },
+		{ value: 1e3, symbol: 'k' },
+	];
 
-	if (exponent < 0) {
-		const leadingZeros = Math.abs(exponent) - 1
-		return <>0.<small>{'0'.repeat(leadingZeros)}</small>{coefficient}</>
+	for (const prefix of prefixes) {
+		if (floatValue >= prefix.value) {
+			return <>{toFixedLengthDigits(floatValue / prefix.value) + prefix.symbol}</>
+		}
 	}
 
-	const prefixes = ['', 'k', 'M', 'G']
-	const prefix = prefixes[Math.floor(exponent/3)]
-	const displayValue = coefficient.toFixed(3)
+	// if value is a fraction of 1
+	if (floatValue && floatValue % 1 === floatValue) {
+		const [coefficient, exponent] = floatValue.toExponential().split('e')
+		const leadingZerosCount = Math.abs(parseInt(exponent)) - 1
+		const significantDigits = coefficient.replace('.', '')
+		return <>0.<small>{'0'.repeat(leadingZerosCount)}</small>{significantDigits}</>
+	}
 
-	return <>{displayValue}{prefix}</>
+	return <>{toFixedLengthDigits(floatValue)}</>
+}
+
+function toFixedLengthDigits(num: number, max: number = 5) {
+	const formatter = new Intl.NumberFormat('en-US', { maximumSignificantDigits: max, useGrouping: false })
+	return formatter.format(num)
 }

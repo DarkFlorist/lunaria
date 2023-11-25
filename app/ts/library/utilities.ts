@@ -64,9 +64,3 @@ export function areEqualStrings(a: string, b: string, caseSensitive?: true) {
 	if (caseSensitive) return a === b
 	return a.toLowerCase() === b.toLowerCase()
 }
-
-export function parseNumericTerm(num: number): { coefficient: number, exponent: number } {
-	const [c, e] = num.toExponential().split('e')
-	const exponent = parseInt(e)
-	return { coefficient: parseFloat(c), exponent }
-}

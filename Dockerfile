@@ -1,33 +1,33 @@
-FROM node:20.9.0-alpine as builder
+FROM node:20-alpine as builder
 
-# Set directory for the sources to be processed
-WORKDIR /source/build
-
-# Install node depenedencies
-COPY build/package.json package.json
-COPY build/package-lock.json package-lock.json
+# Install vendor dependencies
+WORKDIR /source/vendor
+COPY vendor/package.json package.json
+COPY vendor/package-lock.json package-lock.json
 RUN npm ci
 
+# Install app dependencies
 WORKDIR /source
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 RUN npm ci
 
-# Copy and build the app
-COPY build build
+# Copy project files and run necessary symlinks npm needs
 COPY app app
-COPY tsconfig.json tsconfig.json
+COPY vendor vendor
+RUN npm ci
 
-RUN npm exec --prefix ./build vendor
+# Buld the app
+COPY tsconfig.json tsconfig.json
 RUN npm run build
 
 # Create kubo container
-FROM ipfs/kubo:latest
+FROM ipfs/kubo:latest as ipfs
 
 WORKDIR /container-init.d
 ADD ipfs.config.sh .
 RUN chmod a+x ipfs.config.sh
 
 # Copy generated app
-WORKDIR /var/www
+WORKDIR /export
 COPY --from=builder /source/app .

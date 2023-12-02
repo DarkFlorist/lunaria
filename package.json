@@ -13,9 +13,12 @@
 		"preact": "10.8.1"
 	},
 	"scripts": {
-		"build": "rm -rf app/js && tsc",
+		"prebuild": "rm -rf app/js",
+		"build": "npx -- vendor -w vendor && tsc",
 		"serve": "npx serve -L ./app",
-		"vendor": "npm exec --prefix ./build vendor",
 		"styles": "npm --prefix ./twcss run styles"
-	}
+	},
+	"workspaces": [
+		"vendor"
+	]
 }

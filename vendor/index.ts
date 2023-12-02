@@ -1,4 +1,4 @@
-#! /usr/bin/env tsx
+#!/usr/bin/env node
 
 import * as path from 'path'
 import * as url from 'url'
@@ -49,7 +49,9 @@ async function rewriteSourceMapSourcePath(packageName: string, sourcePath: strin
 	await fs.writeFile(destinationPath, JSON.stringify(fileContents))
 }
 
-vendorDependencies().catch(error => {
+vendorDependencies().then(() => {
+	console.log('Successfully injected vendor dependencies')
+}).catch(error => {
 	console.error(error)
 	debugger
 	process.exit(1)

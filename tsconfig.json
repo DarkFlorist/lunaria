@@ -16,7 +16,7 @@
 		"noImplicitThis": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
-		"lib": ["ES2021", "DOM"],
+		"lib": ["ES2021"],
 		"typeRoots": ["./node_modules/@types"],
 		"types": []
 	},

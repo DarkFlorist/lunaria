@@ -1,11 +1,16 @@
 {
 	"name": "lunaria-vendor",
 	"type": "module",
+	"main": "index.js",
+	"bin": {
+		"vendor": "./index.js"
+	},
 	"devDependencies": {
+		"@types/node": "20.10.3",
 		"@zoltu/file-copier": "2.2.1",
 		"typescript": "4.7.3"
 	},
-	"bin": {
-		"vendor": "./vendor.ts"
+	"scripts": {
+		"build": "tsc"
 	}
 }

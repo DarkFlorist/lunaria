@@ -21,7 +21,7 @@ RUN npm ci
 COPY tsconfig.json tsconfig.json
 RUN npm run build
 
-# Create kubo container
+# Create kubo-based image
 FROM ipfs/kubo:latest as ipfs
 
 # Copy generated app

@@ -24,10 +24,6 @@ RUN npm run build
 # Create kubo container
 FROM ipfs/kubo:latest as ipfs
 
-WORKDIR /container-init.d
-ADD ipfs.config.sh .
-RUN chmod a+x ipfs.config.sh
-
 # Copy generated app
 WORKDIR /export
 COPY --from=builder /source/app .

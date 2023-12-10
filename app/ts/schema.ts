@@ -116,6 +116,23 @@ export const SettingsCacheSchema = funtypes.Union(
 
 export type SettingsCache = funtypes.Static<typeof SettingsCacheSchema>
 
+export const TransferTemplate = funtypes.Object({
+	label: funtypes.String.Or(funtypes.Undefined),
+	source: funtypes.String,
+	recipientAddress: funtypes.String,
+	token: ERC20Token.Or(funtypes.Undefined),
+	amount: funtypes.String,
+})
+
+export const TemplatesCacheSchema = funtypes.Union(
+	funtypes.Object({
+		data: funtypes.Array(TransferTemplate),
+		version: funtypes.Literal('1.0.0'),
+	})
+)
+
+export type TemplatesCache = funtypes.Static<typeof TemplatesCacheSchema>
+
 export function serialize<T, U extends funtypes.Codec<T>>(funType: U, value: T) {
 	return funType.serialize(value) as ToWireType<U>
 }

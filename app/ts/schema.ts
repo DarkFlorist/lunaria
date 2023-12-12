@@ -118,11 +118,13 @@ export type SettingsCache = funtypes.Static<typeof SettingsCacheSchema>
 
 export const TransferTemplate = funtypes.Object({
 	label: funtypes.String.Or(funtypes.Undefined),
-	source: funtypes.String,
-	recipientAddress: funtypes.String,
-	token: ERC20Token.Or(funtypes.Undefined),
-	amount: funtypes.String,
+	from: EthereumAddress,
+	to: EthereumAddress,
+	contractAddress: EthereumAddress,
+	amount: BigIntHex,
 })
+
+export type TransferTemplate = funtypes.Static<typeof TransferTemplate>
 
 export const TemplatesCacheSchema = funtypes.Union(
 	funtypes.Object({

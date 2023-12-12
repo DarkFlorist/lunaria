@@ -10,6 +10,7 @@ import { TransactionDetails } from './TransactionDetails.js'
 import { AccountReconnect } from '../AccountReconnect.js'
 import * as Icon from '../Icon/index.js'
 import { TokenManagerProvider } from '../../context/TokenManager.js'
+import { TransactionProvider } from '../TransactionProvider.js'
 
 export const TransactionPage = () => {
 	return (
@@ -47,7 +48,9 @@ const MainPanel = () => {
 			</div>
 
 			<div class='px-4'>
-				<TransactionDetails />
+				<TransactionProvider>
+					<TransactionDetails />
+				</TransactionProvider>
 			</div>
 			<MainFooter />
 		</Main>

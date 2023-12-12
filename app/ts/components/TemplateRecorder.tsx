@@ -1,43 +1,38 @@
-import { Signal, useSignal } from '@preact/signals'
-import { useEffect } from 'preact/hooks'
-import { FavoriteModel, isFavorite, useFavorites } from '../../store/favorites.js'
+import { Signal, useComputed, useSignal } from '@preact/signals'
+import { useTemplates } from '../context/TransferTemplates.js'
+import { extractERC20TransferFromReceipt } from '../library/ethereum.js'
+import { TransferTemplate } from '../schema.js'
+import { useTransaction } from './TransactionProvider.js'
 
-type Props = {
-	show?: boolean
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
-}
-
-export const SaveTransfer = ({ show, addFavoriteStore }: Props) => {
+export const TemplateRecorder = () => {
+	const { receipt } = useTransaction()
+	const { save } = useTemplates()
 	const isSaved = useSignal(false)
-	const { add } = useFavorites()
+	const draft = useSignal<Partial<TransferTemplate>>({})
 
-	const saveTransfer = () => {
-		if (addFavoriteStore.value === undefined || !isFavorite(addFavoriteStore.value)) return
+	const txReceipt = useComputed(() => receipt.value.state === 'resolved' ? receipt.value.value : null)
+	if (txReceipt.value === null) return <></>
+	const erc20Transfer = extractERC20TransferFromReceipt(txReceipt.value)
+	console.log(erc20Transfer)
 
-		add(addFavoriteStore.value)
+	const saveTemplate = () => {
+		const newTemplate = TransferTemplate.safeParse(draft.value)
+		if (!newTemplate.success) return
+		save(newTemplate.value)
 		isSaved.value = true
 	}
 
-	useEffect(() => {
-		if (!show) return
-		addFavoriteStore.value = { ...addFavoriteStore.peek(), label: '' }
-	}, [show])
-
-	if (!isFavorite(addFavoriteStore.value)) return <></>
-
 	if (isSaved.value === true) return <AcknowledgeFavoriteAdd />
 
-	return <AddFavoriteForm onSubmit={saveTransfer} addFavoriteStore={addFavoriteStore} />
+	return <AddTemplateForm formData={draft} onSubmit={saveTemplate} />
 }
 
-type SaveFormProps = {
+type AddTemplateFormProps = {
 	onSubmit: () => void
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
+	formData: Signal<Partial<TransferTemplate>>
 }
 
-const AddFavoriteForm = ({ addFavoriteStore, onSubmit }: SaveFormProps) => {
-	if (addFavoriteStore.value === undefined) return <></>
-
+const AddTemplateForm = ({ formData, onSubmit }: AddTemplateFormProps) => {
 	const submitForm = (e: Event) => {
 		e.preventDefault()
 		onSubmit()
@@ -53,7 +48,7 @@ const AddFavoriteForm = ({ addFavoriteStore, onSubmit }: SaveFormProps) => {
 					</div>
 					<form class='w-full' onSubmit={submitForm}>
 						<div class='grid gap-2 items-center w-full'>
-							<input class='border border-white/30 px-4 py-2 bg-transparent outline-none min-w-auto' type='text' value={addFavoriteStore.value.label} onInput={event => (addFavoriteStore.value = { ...addFavoriteStore.peek(), label: event.currentTarget.value })} placeholder='Add a label (optional)' />
+							<input class='border border-white/30 px-4 py-2 bg-transparent outline-none min-w-auto' type='text' value={formData.value.label} onInput={event => (formData.value = { ...formData.peek(), label: event.currentTarget.value })} placeholder='Add a label (optional)' />
 							<button type='submit' class='border border-white/50 bg-white/10 px-4 py-3 outline-none focus:bg-white/20 hover:bg-white/20'>
 								Save
 							</button>

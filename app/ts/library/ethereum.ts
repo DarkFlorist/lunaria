@@ -1,4 +1,5 @@
-import { TransactionResponse, Interface, id, TransactionReceipt, Log, Eip1193Provider, formatEther, EventEmitterable } from 'ethers'
+import { TransactionResponse, Interface, id, TransactionReceipt, Eip1193Provider, EventEmitterable, stripZerosLeft, Log, getAddress } from 'ethers'
+import { BigIntHex } from '../schema.js'
 import { ERC20ABI } from './ERC20ABI.js'
 
 export interface WithEip1193Provider {
@@ -16,12 +17,6 @@ export function isEthereumProvider(ethereum: unknown): ethereum is EthereumProvi
 	return ethereum !== null && typeof ethereum === 'object' && 'on' in ethereum && typeof ethereum.on === 'function' && 'removeListener' in ethereum && typeof ethereum.removeListener === 'function'
 }
 
-export const calculateGasFee = (effectiveGasPrice: bigint, gasUsed: bigint) => {
-	const gasFeeBigNum = effectiveGasPrice * gasUsed
-	const gasFee = formatEther(gasFeeBigNum)
-	return gasFee
-}
-
 export type TransferTransactionResponse = TransactionResponse & {
 	to: string
 }
@@ -31,24 +26,37 @@ export function isTransferTransaction(txResponse: TransactionResponse): txRespon
 }
 
 export const erc20Interface = new Interface(ERC20ABI)
-export const transferTopic = id('Transfer(address,address,uint256)')
+export const erc20TransferMethod = id('Transfer(address,address,uint256)')
 
-export function parseERC20Log({ topics: [...topics], data }: Log) {
-	// topics is spread to conform to parseLog parameters
-	try {
-		return erc20Interface.parseLog({ topics, data })
-	} catch (error) {
-		return null
+export function extractERC20TransferFromReceipt(receipt: TransactionReceipt) {
+	const isTransferLog = (log: Log) => {
+		const [method] = log.topics
+		return method === erc20TransferMethod
 	}
+
+	const logOriginAndSenderMatched = (log: Log) => {
+		const [_, from] = log.topics
+		try {
+			const logFrom = getAddress(stripZerosLeft(from))
+			const receiptFrom = getAddress(receipt.from)
+			return logFrom === receiptFrom
+		} catch {
+			return false
+		}
+	}
+
+	const parseTransferLog = (log: Log) => {
+		const [_, logFrom, logTo] = log.topics
+		const quantity = BigIntHex.parse(log.data)
+		const contractAddress = getAddress(log.address)
+		const from = getAddress(stripZerosLeft(logFrom))
+		const to = getAddress(stripZerosLeft(logTo))
+		return { contractAddress, from, to, quantity }
+	}
+
+	// get the outbound transfer log
+	const transferLog = receipt.logs.filter(isTransferLog).find(logOriginAndSenderMatched)
+	if (transferLog === undefined) return
+	return parseTransferLog(transferLog)
 }
 
-export function extractArgValue<T>(log: Log, argKey: string): T | null {
-	const parsedLog = parseERC20Log(log)
-	return parsedLog ? parsedLog.args.getValue(argKey) : null
-}
-
-export function extractTransferLogFromSender(receipt: TransactionReceipt) {
-	const hasTransferTopic = (log: Log) => log.topics.some(topic => topic === transferTopic)
-	const isAddressFromSender = (log: Log) => extractArgValue(log, 'from') === receipt.from
-	return receipt.logs.filter(hasTransferTopic).find(isAddressFromSender) || null
-}

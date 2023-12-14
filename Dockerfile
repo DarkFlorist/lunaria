@@ -6,7 +6,7 @@ COPY ./package-lock.json /source/package-lock.json
 WORKDIR /source
 RUN npm ci
 
-# Copy project files and run necessary symlinks npm needs
+# Run the vendoring script
 COPY ./build-scripts/ /source/build-scripts/
 COPY ./tsconfig.vendor.json /source/tsconfig.vendor.json
 COPY ./app/index.html /source/app/index.html

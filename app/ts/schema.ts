@@ -1,5 +1,6 @@
-import { getAddress, isAddress, isHexString, parseUnits } from 'ethers'
+import { getAddress, isAddress, isHexString, Log, parseUnits, stripZerosLeft, TransactionReceipt } from 'ethers'
 import * as funtypes from 'funtypes'
+import { isTransferTopic } from './library/ethereum.js'
 
 export function createCacheParser<T>(funType: funtypes.Codec<T>) {
 	const config: funtypes.ParsedValue<funtypes.String, T>['config'] = {
@@ -50,8 +51,11 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		if (!isAddress(value)) return { success: false, message: `${value} is not a valid address string.` }
-		else return { success: true, value: getAddress(value) }
+		try {
+			const address = stripZerosLeft(value)
+			if (isAddress(address)) return { success: true, value: getAddress(address) }
+		} catch (error) { }
+		return { success: false, message: `${value} is not a valid address string.` }
 	},
 	serialize: funtypes.String.safeParse,
 }
@@ -153,12 +157,12 @@ export type ToWireType<T> = T extends funtypes.Intersect<infer U>
 	? Record<funtypes.Static<U>, ToWireType<V>>
 	: T extends funtypes.Partial<infer U, infer V>
 	? V extends true
-		? { readonly [K in keyof U]?: ToWireType<U[K]> }
-		: { [K in keyof U]?: ToWireType<U[K]> }
+	? { readonly [K in keyof U]?: ToWireType<U[K]> }
+	: { [K in keyof U]?: ToWireType<U[K]> }
 	: T extends funtypes.Object<infer U, infer V>
 	? V extends true
-		? { readonly [K in keyof U]: ToWireType<U[K]> }
-		: { [K in keyof U]: ToWireType<U[K]> }
+	? { readonly [K in keyof U]: ToWireType<U[K]> }
+	: { [K in keyof U]: ToWireType<U[K]> }
 	: T extends funtypes.Readonly<funtypes.Tuple<infer U>>
 	? { readonly [P in keyof U]: ToWireType<U[P]> }
 	: T extends funtypes.Tuple<infer U>
@@ -172,3 +176,28 @@ export type ToWireType<T> = T extends funtypes.Intersect<infer U>
 	: T extends funtypes.Codec<infer U>
 	? U
 	: never
+
+export const TransferSignature = funtypes.String.withConstraint(isTransferTopic)
+export const TransferTopics = funtypes.Tuple(TransferSignature, EthereumAddress, EthereumAddress)
+
+export const TransferLog = funtypes.Object({
+	address: EthereumAddress,
+	data: BigIntHex,
+	topics: TransferTopics
+})
+export type TransferLog = Log & funtypes.Static<typeof TransferLog>
+
+export const TransferReceipt = funtypes.Object({
+	to: EthereumAddress,
+	from: EthereumAddress,
+	logs: funtypes.Array(TransferLog)
+})
+export type TransferReceipt = TransactionReceipt & funtypes.Static<typeof TransferReceipt>
+
+export const ERC20TransferMeta = funtypes.Object({
+	contractAddress: EthereumAddress,
+	from: EthereumAddress,
+	to: EthereumAddress,
+	quantity: BigIntHex
+})
+export type ERC20TransferMeta = funtypes.Static<typeof ERC20TransferMeta>

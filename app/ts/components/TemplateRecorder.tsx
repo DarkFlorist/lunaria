@@ -1,6 +1,5 @@
 import { Signal, useComputed, useSignal } from '@preact/signals'
 import { useTemplates } from '../context/TransferTemplates.js'
-import { extractERC20TransferFromReceipt } from '../library/ethereum.js'
 import { TransferTemplate } from '../schema.js'
 import { useTransaction } from './TransactionProvider.js'
 
@@ -12,8 +11,6 @@ export const TemplateRecorder = () => {
 
 	const txReceipt = useComputed(() => receipt.value.state === 'resolved' ? receipt.value.value : null)
 	if (txReceipt.value === null) return <></>
-	const erc20Transfer = extractERC20TransferFromReceipt(txReceipt.value)
-	console.log(erc20Transfer)
 
 	const saveTemplate = () => {
 		const newTemplate = TransferTemplate.safeParse(draft.value)

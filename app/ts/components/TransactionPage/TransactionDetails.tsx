@@ -1,13 +1,13 @@
-import { useComputed, useSignalEffect } from '@preact/signals'
-import { formatEther, formatUnits, Log } from 'ethers'
+import { useSignalEffect } from '@preact/signals'
+import { formatEther, formatUnits } from 'ethers'
 import SVGBlockie from '../SVGBlockie.js'
 import { useRouter } from '../HashRouter.js'
 import { TemplateRecorder } from '../TemplateRecorder.js'
 import { Info, InfoError, InfoPending } from './Info.js'
-import { extractERC20TransferFromReceipt } from '../../library/ethereum.js'
-import { useTokenManager } from '../../context/TokenManager.js'
 import { useTransaction } from '../TransactionProvider.js'
-import { EthereumAddress } from '../../schema.js'
+import { ERC20TransferMeta, EthereumAddress } from '../../schema.js'
+import { extractERC20TRansferMetaFromReceipt } from '../../library/ethereum.js'
+import { useTokenManager } from '../../context/TokenManager.js'
 
 export const TransactionDetails = () => {
 	const router = useRouter<{ transaction_hash: string }>()
@@ -25,23 +25,8 @@ export const TransactionDetails = () => {
 			<TransferAmount />
 			<TransferFee />
 			<TemplateRecorder />
-			<Test />
 		</div>
 	)
-}
-
-
-const Test = () => {
-	const { response, receipt } = useTransaction()
-	if (receipt.value.state !== 'resolved') return null
-	if (receipt.value.value === null) return null
-
-	const txReceipt = receipt.value.value
-	const erc20Transfer = extractERC20TransferFromReceipt(txReceipt)
-	if (erc20Transfer) {
-		console.log('xferlog', erc20Transfer)
-	}
-	return <></>
 }
 
 const TransactionHash = () => {
@@ -87,7 +72,7 @@ const TransferTo = () => {
 
 			if (txReceipt === null) return <></>
 
-			const erc20Transfer = extractERC20TransferFromReceipt(txReceipt)
+			const erc20Transfer = extractERC20TRansferMetaFromReceipt(txReceipt)
 
 			if (erc20Transfer) {
 				const { to } = erc20Transfer
@@ -115,8 +100,10 @@ const TransferAmount = () => {
 		case 'rejected':
 			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
 		case 'resolved':
-			if (receipt.value.value === null) return <></>
-			const erc20Transfer = extractERC20TransferFromReceipt(receipt.value.value)
+			const txReceipt = receipt.value.value
+			if (txReceipt === null) return <></>
+
+			const erc20Transfer = extractERC20TRansferMetaFromReceipt(txReceipt)
 
 			// return token amount for token transfer
 			if (erc20Transfer)  return <TokenAmount transfer={erc20Transfer} />
@@ -126,7 +113,7 @@ const TransferAmount = () => {
 	}
 }
 
-const TokenAmount = ({ transfer }: { transfer: ReturnType<typeof extractERC20TransferFromReceipt> }) => {
+const TokenAmount = ({ transfer }: { transfer: ERC20TransferMeta }) => {
 	const { cache } = useTokenManager()
 	const getCachedToken = (address: string) => cache.value.data.find(token => token.address === address)
 

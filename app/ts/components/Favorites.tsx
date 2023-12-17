@@ -1,13 +1,19 @@
-import { useSignal } from '@preact/signals'
+import { useComputed, useSignal } from '@preact/signals'
+import { useTokenManager } from '../context/TokenManager.js'
+import { useTemplates } from '../context/TransferTemplates.js'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
-import { FavoriteModel, useFavorites } from '../store/favorites.js'
+import { TransferTemplate } from '../schema.js'
 import * as Icon from './Icon/index.js'
 
 export const Favorites = () => {
 	const manage = useSignal(false)
-	const { favorites } = useFavorites()
+	const { cache:templatesCache } = useTemplates()
+	const { cache:tokensCache } = useTokenManager()
 
-	if (favorites.value.length < 1)
+	const templates = useComputed(() => templatesCache.value.data)
+	const getCachedToken = (contractAddress: string) => tokensCache.value.data.find(token => token.address === contractAddress)
+
+	if (templates.value.length < 1)
 		return (
 			<div class='pl-4 mb-4'>
 				<div class='flex justify-between'>
@@ -28,16 +34,19 @@ export const Favorites = () => {
 				</button>
 			</div>
 			<div class='grid gap-2'>
-				{favorites.value.map((favorite, index) => {
+				{templates.value.map((template, index) => {
+					const token = getCachedToken(template.contractAddress)
+					if (token === undefined) return <div>Error</div>
+
 					return (
 						<a class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} href={`#saved/${index}`}>
-							<MoveUpButton show={manage.value === true} favorite={favorite} index={index} />
+							<MoveUpButton show={manage.value === true} favorite={template} index={index} />
 							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
-								{favorite.token ? <img class='w-8 h-8' src={`./img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`./img/ethereum.svg`} />}
+								{token.address ? <img class='w-8 h-8' src={`/img/${token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
 								<div class='text-left'>
-									<div>{favorite.label}</div>
+									<div>{template.label}</div>
 									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>
-										{favorite.amount} {favorite.token ? favorite.token.symbol : 'ETH'} to {favorite.recipientAddress}
+										{template.amount} {token.address ? token.symbol : 'ETH'} to {template.to}
 									</div>
 								</div>
 							</div>
@@ -52,7 +61,7 @@ export const Favorites = () => {
 
 type PromoteButtonProps = {
 	show: boolean
-	favorite: FavoriteModel
+	favorite: TransferTemplate
 	index: number
 }
 

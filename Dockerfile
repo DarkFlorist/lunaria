@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder
+FROM node:20-alpine3.19@sha256:e96618520c7db4c3e082648678ab72a49b73367b9a1e7884cf75ac30a198e454 as builder
 
 # Install app dependencies
 COPY ./package.json /source/package.json
@@ -19,11 +19,15 @@ COPY ./app/img/ /source/app/img/
 COPY ./app/ts/ /source/app/ts/
 RUN npm run build
 
-# Create ipfs image
-FROM alpine:3.19.0 as ipfs
+# Cache the kubo image
+FROM ipfs/kubo:v0.25.0@sha256:5759933ec4e7c7d491bd3a011b84567f3b254bc7bb16bdf56ac59daa78fe4f29 as ipfs-kubo
+
+# Create the base image
+FROM debian:12.2-slim@sha256:93ff361288a7c365614a5791efa3633ce4224542afb6b53a1790330a8e52fc7d
 
 # Install kubo and initialize ipfs
-RUN apk add kubo
+COPY --from=ipfs-kubo /usr/local/bin/ipfs /usr/local/bin/ipfs
+
 RUN ipfs init
 
 # Copy lunaria build output

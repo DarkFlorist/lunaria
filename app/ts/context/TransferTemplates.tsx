@@ -28,9 +28,9 @@ export function useTemplates() {
 
 	const { cache } = context
 
-	const save = (data: TransferTemplate) => {
-		console.log(data)
+	const add = (newTemplate: TransferTemplate) => {
+		cache.value = { ...cache.peek(), data: [...cache.peek().data, newTemplate]}
 	}
 
-	return { cache, save }
+	return { cache, add }
 }

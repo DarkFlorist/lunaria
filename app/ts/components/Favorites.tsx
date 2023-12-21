@@ -1,4 +1,5 @@
 import { useComputed, useSignal } from '@preact/signals'
+import { formatEther, formatUnits } from 'ethers'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTemplates } from '../context/TransferTemplates.js'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
@@ -35,18 +36,18 @@ export const Favorites = () => {
 			</div>
 			<div class='grid gap-2'>
 				{templates.value.map((template, index) => {
-					const token = getCachedToken(template.contractAddress)
-					if (token === undefined) return <div>Error</div>
+					const token = template.contractAddress && getCachedToken(template.contractAddress)
+					const amount = token ? formatUnits(template.quantity, token.decimals) : formatEther(template.quantity)
 
 					return (
 						<a class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} href={`#saved/${index}`}>
 							<MoveUpButton show={manage.value === true} favorite={template} index={index} />
 							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
-								{token.address ? <img class='w-8 h-8' src={`/img/${token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
+								{token ? <img class='w-8 h-8' src={`/img/${token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
 								<div class='text-left'>
 									<div>{template.label}</div>
 									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>
-										{template.amount} {token.address ? token.symbol : 'ETH'} to {template.to}
+										{amount} {token ? token.symbol : 'ETH'} to {template.to}
 									</div>
 								</div>
 							</div>
@@ -66,7 +67,21 @@ type PromoteButtonProps = {
 }
 
 const MoveUpButton = (props: PromoteButtonProps) => {
-	const { swapIndex } = useFavorites()
+	const { cache } = useTemplates()
+	const templates = useComputed(() => cache.value.data)
+
+	const swapIndex = (indexA: number, indexB: number) => {
+		// ignore same indices swap
+		if (indexA === indexB) return
+
+		const orderedFavorites = [...templates.value]
+
+		const tempA = orderedFavorites[indexA]
+		orderedFavorites[indexA] = orderedFavorites[indexB]
+		orderedFavorites[indexB] = tempA
+
+		cache.value = { ...cache.peek(), data: orderedFavorites }
+	}
 
 	if (!props.show) return <></>
 	if (props.index === 0) return <div></div>
@@ -84,7 +99,12 @@ type RemoveButtonProps = {
 }
 
 const RemoveButton = (props: RemoveButtonProps) => {
-	const { remove } = useFavorites()
+	const { cache } = useTemplates()
+
+	const remove = (index: number) => {
+		const newData = [...cache.value.data.slice(0, index), ...cache.value.data.slice(index + 1)]
+		cache.value = { ...cache.peek(), data: newData }
+	}
 
 	if (!props.show) return <></>
 

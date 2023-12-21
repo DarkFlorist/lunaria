@@ -1,5 +1,5 @@
-import { TransactionResponse, Interface, id, TransactionReceipt, Eip1193Provider, EventEmitterable, Log, isHexString } from 'ethers'
-import { TransferLog, EthereumAddress, ERC20TransferMeta } from '../schema.js'
+import { Interface, id, TransactionReceipt, Eip1193Provider, EventEmitterable } from 'ethers'
+import { TransferLog, ERC20TransferReceipt } from '../schema.js'
 import { ERC20ABI } from './ERC20ABI.js'
 
 export interface WithEip1193Provider {
@@ -17,43 +17,26 @@ export function isEthereumProvider(ethereum: unknown): ethereum is EthereumProvi
 	return ethereum !== null && typeof ethereum === 'object' && 'on' in ethereum && typeof ethereum.on === 'function' && 'removeListener' in ethereum && typeof ethereum.removeListener === 'function'
 }
 
-export type TransferTransactionResponse = TransactionResponse & {
-	to: string
-}
-
-export function isTransferTransaction(txResponse: TransactionResponse): txResponse is TransferTransactionResponse {
-	return txResponse.data.toLowerCase().startsWith('0xa9059cbb')
-}
-
 export const erc20Interface = new Interface(ERC20ABI)
 export const transferSignature = id('Transfer(address,address,uint256)')
 
 export const isTransferTopic = (topic: string) => topic === transferSignature
-export const isTransferLog = (log: Log): log is TransferLog => TransferLog.safeParse(log).success
+export const isTransferLog = (log: unknown): log is TransferLog => TransferLog.safeParse(log).success
 
-export function extractERC20TRansferMetaFromReceipt(receipt: TransactionReceipt): ERC20TransferMeta | undefined {
-	const receiptTo = EthereumAddress.safeParse(receipt.to)
-	const receiptFrom = EthereumAddress.safeParse(receipt.from)
+export function extractERC20TransferRequest(receipt: TransactionReceipt) {
+	const parsedReceipt = ERC20TransferReceipt.safeParse(receipt)
+	if (!parsedReceipt.success) return
 
-	if (!receiptTo.success || !receiptFrom.success) return
-
-	const isERC20TransferLog = (log: Log) => {
-		const xferLog = TransferLog.safeParse(log)
-		if (!xferLog.success) return false
-		const { address, topics: [_, logFrom] } = xferLog.value
-		if (address !== receiptTo.value) return false
-		if (logFrom !== receiptFrom.value) return false
-		return true
+	// check for ERC20 Transfer
+	for (const log of parsedReceipt.value.logs) {
+		const { address, data, topics: [_, from, to] } = log
+		// match `receipt.to` value with `log.address` value which should be the contract's address
+		if (address !== receipt.to) return
+		// match `receipt.from` value with `log.from` as the sender's address
+		if (from !== receipt.from) return
+		// ensure request is correctly formatted
+		return { contractAddress: address, from, to, quantity: data }
 	}
 
-	const erc20TransferLog = receipt.logs.filter(isTransferLog).find(isERC20TransferLog)
-
-	if (!erc20TransferLog) return
-	const { address, data, topics: [_, from, to] } = erc20TransferLog
-	const parsedERC20Meta = ERC20TransferMeta.safeParse({ contractAddress: address, from, to, quantity: data })
-	if (!parsedERC20Meta.success) return
-	return parsedERC20Meta.value
+	return
 }
-
-const win = window as any
-win.isHex = isHexString

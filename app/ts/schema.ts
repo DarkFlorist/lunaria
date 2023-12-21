@@ -1,4 +1,4 @@
-import { getAddress, isAddress, isHexString, Log, parseUnits, stripZerosLeft, TransactionReceipt } from 'ethers'
+import { getAddress, isAddress, isHexString, parseUnits, stripZerosLeft } from 'ethers'
 import * as funtypes from 'funtypes'
 import { isTransferTopic } from './library/ethereum.js'
 
@@ -120,25 +120,6 @@ export const SettingsCacheSchema = funtypes.Union(
 
 export type SettingsCache = funtypes.Static<typeof SettingsCacheSchema>
 
-export const TransferTemplate = funtypes.Object({
-	label: funtypes.String.Or(funtypes.Undefined),
-	from: EthereumAddress,
-	to: EthereumAddress,
-	contractAddress: EthereumAddress,
-	amount: BigIntHex,
-})
-
-export type TransferTemplate = funtypes.Static<typeof TransferTemplate>
-
-export const TemplatesCacheSchema = funtypes.Union(
-	funtypes.Object({
-		data: funtypes.Array(TransferTemplate),
-		version: funtypes.Literal('1.0.0'),
-	})
-)
-
-export type TemplatesCache = funtypes.Static<typeof TemplatesCacheSchema>
-
 export function serialize<T, U extends funtypes.Codec<T>>(funType: U, value: T) {
 	return funType.serialize(value) as ToWireType<U>
 }
@@ -185,19 +166,32 @@ export const TransferLog = funtypes.Object({
 	data: BigIntHex,
 	topics: TransferTopics
 })
-export type TransferLog = Log & funtypes.Static<typeof TransferLog>
+export type TransferLog = funtypes.Static<typeof TransferLog>
 
-export const TransferReceipt = funtypes.Object({
+export const ERC20TransferReceipt = funtypes.Object({
 	to: EthereumAddress,
 	from: EthereumAddress,
 	logs: funtypes.Array(TransferLog)
-})
-export type TransferReceipt = TransactionReceipt & funtypes.Static<typeof TransferReceipt>
+}).withConstraint(obj => obj.logs.length !== 0)
+export type ERC20TransferReceipt = funtypes.Static<typeof ERC20TransferReceipt>
 
-export const ERC20TransferMeta = funtypes.Object({
-	contractAddress: EthereumAddress,
+export const TransferRequest = funtypes.Object({
+	contractAddress: EthereumAddress.Or(funtypes.Undefined),
 	from: EthereumAddress,
 	to: EthereumAddress,
 	quantity: BigIntHex
 })
-export type ERC20TransferMeta = funtypes.Static<typeof ERC20TransferMeta>
+
+export type TransferRequest = funtypes.Static<typeof TransferRequest>
+
+export const TransferTemplate = funtypes.Intersect(TransferRequest, funtypes.Object({ label: funtypes.String.Or(funtypes.Undefined) }))
+export type TransferTemplate = funtypes.Static<typeof TransferTemplate>
+
+export const TemplatesCacheSchema = funtypes.Union(
+	funtypes.Object({
+		data: funtypes.Array(TransferTemplate),
+		version: funtypes.Literal('1.0.0'),
+	})
+)
+
+export type TemplatesCache = funtypes.Static<typeof TemplatesCacheSchema>

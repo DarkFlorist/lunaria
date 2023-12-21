@@ -1,21 +1,31 @@
-import { Signal, useComputed, useSignal } from '@preact/signals'
+import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { JSX } from 'preact/jsx-runtime'
 import { useTemplates } from '../context/TransferTemplates.js'
-import { TransferTemplate } from '../schema.js'
+import { extractERC20TransferRequest } from '../library/ethereum.js'
+import { serialize, TransferTemplate } from '../schema.js'
 import { useTransaction } from './TransactionProvider.js'
 
 export const TemplateRecorder = () => {
 	const { receipt } = useTransaction()
-	const { save } = useTemplates()
+	const { add } = useTemplates()
 	const isSaved = useSignal(false)
-	const draft = useSignal<Partial<TransferTemplate>>({})
+	const draft = useSignal<TransferTemplate | undefined>(undefined)
 
 	const txReceipt = useComputed(() => receipt.value.state === 'resolved' ? receipt.value.value : null)
 	if (txReceipt.value === null) return <></>
 
+	useSignalEffect(() => {
+		if (txReceipt.value === null) return
+		const erc20Transfer = extractERC20TransferRequest(txReceipt.value)
+		if (!erc20Transfer) return
+		draft.value = { label: draft.peek()?.label, ...erc20Transfer }
+	})
+
 	const saveTemplate = () => {
-		const newTemplate = TransferTemplate.safeParse(draft.value)
-		if (!newTemplate.success) return
-		save(newTemplate.value)
+		if (!draft.value) return
+		const serialized = serialize(TransferTemplate, draft.value)
+		const template = TransferTemplate.parse(serialized)
+		add(template)
 		isSaved.value = true
 	}
 
@@ -26,13 +36,20 @@ export const TemplateRecorder = () => {
 
 type AddTemplateFormProps = {
 	onSubmit: () => void
-	formData: Signal<Partial<TransferTemplate>>
+	formData: Signal<TransferTemplate | undefined>
 }
 
 const AddTemplateForm = ({ formData, onSubmit }: AddTemplateFormProps) => {
 	const submitForm = (e: Event) => {
 		e.preventDefault()
 		onSubmit()
+	}
+
+	const updateLabel = (event: JSX.TargetedEvent<HTMLInputElement>) => {
+		event.preventDefault()
+		const templateData = formData.peek()
+		if (!templateData) return
+		formData.value = { ...templateData, label: event.currentTarget.value }
 	}
 
 	return (
@@ -45,7 +62,7 @@ const AddTemplateForm = ({ formData, onSubmit }: AddTemplateFormProps) => {
 					</div>
 					<form class='w-full' onSubmit={submitForm}>
 						<div class='grid gap-2 items-center w-full'>
-							<input class='border border-white/30 px-4 py-2 bg-transparent outline-none min-w-auto' type='text' value={formData.value.label} onInput={event => (formData.value = { ...formData.peek(), label: event.currentTarget.value })} placeholder='Add a label (optional)' />
+							<input class='border border-white/30 px-4 py-2 bg-transparent outline-none min-w-auto' type='text' value={formData.value?.label} onInput={updateLabel} placeholder='Add a label (optional)' />
 							<button type='submit' class='border border-white/50 bg-white/10 px-4 py-3 outline-none focus:bg-white/20 hover:bg-white/20'>
 								Save
 							</button>

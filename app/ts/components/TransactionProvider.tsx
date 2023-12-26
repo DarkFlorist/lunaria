@@ -1,9 +1,9 @@
-import { ComponentChildren, createContext } from "preact"
-import { useContext } from "preact/hooks"
-import { Signal, useSignal, useSignalEffect } from "@preact/signals"
-import { TransactionReceipt, TransactionResponse } from "ethers"
-import { useEthereumProvider } from "../context/Ethereum.js"
-import { AsyncProperty, useAsyncState } from "../library/preact-utilities.js"
+import { ComponentChildren, createContext } from 'preact'
+import { useContext } from 'preact/hooks'
+import { Signal, useSignal, useSignalEffect } from '@preact/signals'
+import { TransactionReceipt, TransactionResponse } from 'ethers'
+import { useEthereumProvider } from '../context/Ethereum.js'
+import { AsyncProperty, useAsyncState } from '../library/preact-utilities.js'
 
 type TransactionContext = {
 	transactionHash: Signal<string | undefined>

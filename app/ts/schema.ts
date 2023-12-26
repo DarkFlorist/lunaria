@@ -1,4 +1,4 @@
-import { getAddress, isAddress, isHexString, parseUnits, stripZerosLeft } from 'ethers'
+import { getAddress, isAddress, isHexString, parseUnits } from 'ethers'
 import * as funtypes from 'funtypes'
 import { isTransferTopic } from './library/ethereum.js'
 
@@ -52,8 +52,9 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
 		try {
-			const address = stripZerosLeft(value)
-			if (isAddress(address)) return { success: true, value: getAddress(address) }
+			// try to strip padded address, ethers will pad `0x` if it doesn't start with one
+			const maybeAddress = value.slice(-40)
+			if (isAddress(maybeAddress)) return { success: true, value: getAddress(maybeAddress) }
 		} catch (error) { }
 		return { success: false, message: `${value} is not a valid address string.` }
 	},

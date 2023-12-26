@@ -2,7 +2,7 @@ import { LAYOUT_SCROLL_OPTIONS } from '../../library/constants.js'
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
 import { DiscordInvite } from '../DiscordInvite.js'
-import { Favorites } from '../Favorites.js'
+import { Templates } from '../Templates.js'
 import { MainFooter } from '../MainFooter.js'
 import { TransferHistoryProvider } from '../../context/TransferHistory.js'
 import { TransferHistory } from '../TransferHistory.js'
@@ -91,7 +91,7 @@ const LeftPanel = () => {
 
 			<TransferHistory />
 
-			<Favorites />
+			<Templates />
 
 			<DiscordInvite />
 		</Navigation>

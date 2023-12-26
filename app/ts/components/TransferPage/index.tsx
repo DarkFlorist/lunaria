@@ -4,7 +4,7 @@ import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../Default
 import { ConnectAccount } from '../ConnectAccount.js'
 import { TransferHistory } from '../TransferHistory.js'
 import { DiscordInvite } from '../DiscordInvite.js'
-import { Favorites } from '../Favorites.js'
+import { Templates } from '../Templates.js'
 import { MainFooter } from '../MainFooter.js'
 import { TransferProvider, useTransfer } from '../../context/Transfer.js'
 import { TransferHistoryProvider } from '../../context/TransferHistory.js'
@@ -104,7 +104,7 @@ const LeftPanel = () => {
 
 			<TransferHistory />
 
-			<Favorites />
+			<Templates />
 
 			<DiscordInvite />
 		</Navigation>

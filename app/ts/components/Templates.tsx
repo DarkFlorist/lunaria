@@ -6,10 +6,10 @@ import { removeNonStringsAndTrim } from '../library/utilities.js'
 import { TransferTemplate } from '../schema.js'
 import * as Icon from './Icon/index.js'
 
-export const Favorites = () => {
+export const Templates = () => {
 	const manage = useSignal(false)
-	const { cache:templatesCache } = useTemplates()
-	const { cache:tokensCache } = useTokenManager()
+	const { cache: templatesCache } = useTemplates()
+	const { cache: tokensCache } = useTokenManager()
 
 	const templates = useComputed(() => templatesCache.value.data)
 	const getCachedToken = (contractAddress: string) => tokensCache.value.data.find(token => token.address === contractAddress)
@@ -41,7 +41,7 @@ export const Favorites = () => {
 
 					return (
 						<a class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} href={`#saved/${index}`}>
-							<MoveUpButton show={manage.value === true} favorite={template} index={index} />
+							<MoveUpButton show={manage.value === true} template={template} index={index} />
 							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
 								{token ? <img class='w-8 h-8' src={`/img/${token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
 								<div class='text-left'>
@@ -62,7 +62,7 @@ export const Favorites = () => {
 
 type PromoteButtonProps = {
 	show: boolean
-	favorite: TransferTemplate
+	template: TransferTemplate
 	index: number
 }
 
@@ -74,13 +74,13 @@ const MoveUpButton = (props: PromoteButtonProps) => {
 		// ignore same indices swap
 		if (indexA === indexB) return
 
-		const orderedFavorites = [...templates.value]
+		const orderedTemplates = [...templates.value]
 
-		const tempA = orderedFavorites[indexA]
-		orderedFavorites[indexA] = orderedFavorites[indexB]
-		orderedFavorites[indexB] = tempA
+		const tempA = orderedTemplates[indexA]
+		orderedTemplates[indexA] = orderedTemplates[indexB]
+		orderedTemplates[indexB] = tempA
 
-		cache.value = { ...cache.peek(), data: orderedFavorites }
+		cache.value = { ...cache.peek(), data: orderedTemplates }
 	}
 
 	if (!props.show) return <></>

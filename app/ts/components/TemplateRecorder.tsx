@@ -11,7 +11,7 @@ export const TemplateRecorder = () => {
 	const isSaved = useSignal(false)
 	const draft = useSignal<TransferTemplate | undefined>(undefined)
 
-	const txReceipt = useComputed(() => receipt.value.state === 'resolved' ? receipt.value.value : null)
+	const txReceipt = useComputed(() => (receipt.value.state === 'resolved' ? receipt.value.value : null))
 	if (txReceipt.value === null) return <></>
 
 	useSignalEffect(() => {
@@ -29,7 +29,7 @@ export const TemplateRecorder = () => {
 		isSaved.value = true
 	}
 
-	if (isSaved.value === true) return <AcknowledgeFavoriteAdd />
+	if (isSaved.value === true) return <TemplateAddConfirmation />
 
 	return <AddTemplateForm formData={draft} onSubmit={saveTemplate} />
 }
@@ -74,7 +74,7 @@ const AddTemplateForm = ({ formData, onSubmit }: AddTemplateFormProps) => {
 	)
 }
 
-const AcknowledgeFavoriteAdd = () => {
+const TemplateAddConfirmation = () => {
 	return (
 		<div class='my-4'>
 			<div class='border border-dashed border-lime-400/40 bg-lime-400/5 p-4'>

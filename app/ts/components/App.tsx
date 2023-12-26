@@ -18,7 +18,7 @@ export function App() {
 								<Route path=''>
 									<TransferPage />
 								</Route>
-								<Route path='#saved/:favorite_id'>
+								<Route path='#saved/:template_id'>
 									<TransferPage />
 								</Route>
 								<Route path='#tx/:transaction_hash'>

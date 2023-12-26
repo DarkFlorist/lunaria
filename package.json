@@ -4,6 +4,8 @@
 	"repository": "https://github.com/darkflorist/lunaria",
 	"license": "Unlicense",
 	"devDependencies": {
+		"@types/node": "18.16.1",
+		"@zoltu/file-copier": "3.0.0",
 		"typescript": "4.9.3"
 	},
 	"dependencies": {
@@ -13,9 +15,10 @@
 		"preact": "10.8.1"
 	},
 	"scripts": {
-		"build": "rm -rf app/js && tsc",
+		"build": "tsc",
+		"prebuild": "rm -rf app/js",
 		"serve": "npx serve -L ./app",
-		"vendor": "npm ci --ignore-scripts && npm --prefix ./build ci --ignore-scripts && npm --prefix ./build run vendor",
-		"styles": "npm --prefix ./twcss ci --ignore-scripts && npm --prefix ./twcss run styles"
+		"styles": "npm --prefix ./twcss run styles",
+		"vendor": "tsc --project tsconfig.vendor.json && node --enable-source-maps ./build-scripts/vendor.mjs && node --input-type=module -e \"import { promises as fs } from 'fs'; await fs.rm('./build-scripts/vendor.mjs')\""
 	}
 }

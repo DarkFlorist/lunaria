@@ -52,8 +52,8 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
 		try {
-			// try to strip padded address, ethers will pad `0x` if it doesn't start with one
-			const maybeAddress = value.slice(-40)
+			// convert hex string to bigint to strip possible leading zeros
+			const maybeAddress = BigInt(value).toString(16)
 			if (isAddress(maybeAddress)) return { success: true, value: getAddress(maybeAddress) }
 		} catch (error) { }
 		return { success: false, message: `${value} is not a valid address string.` }

@@ -47,7 +47,7 @@ const TransferFrom = () => {
 			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
 		case 'resolved':
 			const from = response.value.value?.from
-			if (!from) return <></>
+			if (from === undefined) return <></>
 			const blockieIcon = () => (
 				<span class='text-4xl'>
 					<SVGBlockie address={from} />

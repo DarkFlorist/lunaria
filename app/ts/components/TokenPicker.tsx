@@ -148,6 +148,7 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 }
 
 const AssetBalance = ({ token }: { token?: ERC20Token }) => {
+	const { stage } = useTokenManager()
 	const { browserProvider, blockNumber } = useEthereumProvider()
 	const { account } = useWallet()
 	const { value: query, waitFor } = useAsyncState<bigint>()
@@ -167,7 +168,7 @@ const AssetBalance = ({ token }: { token?: ERC20Token }) => {
 	}
 
 	useSignalEffect(() => {
-		if (!blockNumber.value || account.value.state !== 'resolved') return
+		if (!stage.value || !blockNumber.value || account.value.state !== 'resolved') return
 		getAssetBalance(account.value.value)
 	})
 

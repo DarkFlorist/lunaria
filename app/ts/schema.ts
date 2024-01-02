@@ -53,7 +53,7 @@ export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['confi
 	parse: value => {
 		try {
 			// convert hex string to bigint to strip possible leading zeros
-			const maybeAddress = BigInt(value).toString(16)
+			const maybeAddress = value && BigInt(value).toString(16).padStart(40, '0')
 			if (isAddress(maybeAddress)) return { success: true, value: getAddress(maybeAddress) }
 		} catch (error) { }
 		return { success: false, message: `${value} is not a valid address string.` }

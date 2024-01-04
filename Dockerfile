@@ -20,7 +20,7 @@ COPY ./app/ts/ /source/app/ts/
 RUN npm run build
 
 # Cache the kubo image
-FROM ipfs/kubo:v0.25.0@sha256:5759933ec4e7c7d491bd3a011b84567f3b254bc7bb16bdf56ac59daa78fe4f29 as ipfs-kubo
+FROM ipfs/kubo:v0.25.0 as ipfs-kubo
 
 # Create the base image
 FROM debian:12.2-slim@sha256:93ff361288a7c365614a5791efa3633ce4224542afb6b53a1790330a8e52fc7d

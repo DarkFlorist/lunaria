@@ -29,7 +29,7 @@ jobs:
           docker build . --file Dockerfile --tag $IMAGE_TAG
 
       - name: Log into registry
-        run: echo "${{ secrets.CONTAINER_REGISTRY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.CONTAINERREGISTRY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |

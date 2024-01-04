@@ -35,6 +35,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Push image
         run: |
           IMAGE_ID=ghcr.io/$IMAGE_TAG

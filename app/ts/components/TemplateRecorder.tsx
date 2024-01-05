@@ -2,7 +2,7 @@ import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals
 import { JSX } from 'preact/jsx-runtime'
 import { useTemplates } from '../context/TransferTemplates.js'
 import { extractERC20TransferRequest } from '../library/ethereum.js'
-import { serialize, TransferTemplate } from '../schema.js'
+import { serialize, TransferRequest, TransferTemplate } from '../schema.js'
 import { useTransaction } from './TransactionProvider.js'
 
 export const TemplateRecorder = () => {
@@ -16,9 +16,14 @@ export const TemplateRecorder = () => {
 
 	useSignalEffect(() => {
 		if (txReceipt.value === null) return
-		const erc20Transfer = extractERC20TransferRequest(txReceipt.value)
-		if (!erc20Transfer) return
-		draft.value = { label: draft.peek()?.label, ...erc20Transfer }
+		const transferRequest = extractERC20TransferRequest(txReceipt.value)
+		if (transferRequest === undefined) return
+
+		// ensure correct template entries before drafing record
+		const erc20Transfer = TransferRequest.safeParse(transferRequest)
+		if (!erc20Transfer.success) return
+
+		draft.value = { label: draft.peek()?.label, ...erc20Transfer.value } satisfies TransferTemplate
 	})
 
 	const saveTemplate = () => {

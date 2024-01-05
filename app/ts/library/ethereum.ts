@@ -1,5 +1,4 @@
-import { Interface, id, TransactionReceipt, Eip1193Provider, EventEmitterable } from 'ethers'
-import { TransferLog, ERC20TransferReceipt } from '../schema.js'
+import { Interface, id, TransactionReceipt, Eip1193Provider, EventEmitterable, Log, toQuantity } from 'ethers'
 import { ERC20ABI } from './ERC20ABI.js'
 
 export interface WithEip1193Provider {
@@ -21,22 +20,35 @@ export const erc20Interface = new Interface(ERC20ABI)
 export const transferSignature = id('Transfer(address,address,uint256)')
 
 export const isTransferTopic = (topic: string) => topic === transferSignature
-export const isTransferLog = (log: unknown): log is TransferLog => TransferLog.safeParse(log).success
+
+export const ERC20Interface = new Interface(ERC20ABI)
+
+export const parseERC20ReceiptLog = ({ topics, data }: Log) => ERC20Interface.parseLog({ topics: [...topics], data })
 
 export function extractERC20TransferRequest(receipt: TransactionReceipt) {
-	const parsedReceipt = ERC20TransferReceipt.safeParse(receipt)
-	if (!parsedReceipt.success) return
+	// receipt should have a recipient
+	if (!receipt.to) return
 
-	// check for ERC20 Transfer
-	for (const log of parsedReceipt.value.logs) {
-		const { address, data, topics: [_, from, to] } = log
-		// match `receipt.to` value with `log.address` value which should be the contract's address
-		if (address !== receipt.to) return
-		// match `receipt.from` value with `log.from` as the sender's address
-		if (from !== receipt.from) return
-		// ensure request is correctly formatted
-		return { contractAddress: address, from, to, quantity: data }
+	for (const log of receipt.logs) {
+		const parsedLog = parseERC20ReceiptLog(log)
+
+		// log is a "Transfer" method
+		if (parsedLog === null || parsedLog.name !== 'Transfer') return
+
+		// if an arg was not defined, fail the next conditions
+		const logFrom = parsedLog.args["from"]
+		const logTo = parsedLog.args["to"]
+		const logValue = parsedLog.args["value"]
+
+		// a transfer that originates from which the receipt was initiated
+		if (BigInt(logFrom) !== BigInt(receipt.from)) return
+
+		// recipient is the contract address
+		if (BigInt(receipt.to) !== BigInt(log.address)) return
+
+		return { contractAddress: log.address, from: receipt.from, to: logTo, quantity: toQuantity(logValue) }
 	}
 
 	return
 }
+

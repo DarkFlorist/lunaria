@@ -60,7 +60,6 @@ const TransferFrom = () => {
 const TransferTo = () => {
 	const { receipt } = useTransaction()
 
-
 	switch (receipt.value.state) {
 		case 'inactive':
 			return <></>
@@ -70,39 +69,38 @@ const TransferTo = () => {
 			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
 		case 'resolved':
 			const txReceipt = receipt.value.value
-
 			if (txReceipt === null) return <></>
 
-			const erc20Transfer = extractERC20TransferRequest(txReceipt)
-			if (erc20Transfer) return <TokenRecipient transfer={erc20Transfer} />
+			const extractedRequest = extractERC20TransferRequest(txReceipt)
+			if (extractedRequest) return <TokenRecipient transferRequest={extractedRequest} />
 
 			return <EthRecipient />
 	}
 }
 
-const TokenRecipient = ({ transfer }: { transfer: TransferRequest }) => {
-	const blockieIcon = () => <span class='text-4xl'><SVGBlockie address={transfer.to} /></span>
-	return <Info label='To' value={transfer.to} icon={blockieIcon} allowCopy />
+const TokenRecipient = ({ transferRequest }: { transferRequest: ReturnType<typeof extractERC20TransferRequest> }) => {
+	// loading states are handled by the parent component
+	const parsedERC20Request = TransferRequest.safeParse(transferRequest)
+	if (!parsedERC20Request.success) return <InfoError displayText='Failed to extract recipient address from transfer details.' message={parsedERC20Request.message} />
+
+	const Blockie = () => <span class='text-4xl'><SVGBlockie address={parsedERC20Request.value.to} /></span>
+	return <Info label='To' value={parsedERC20Request.value.to} icon={Blockie} allowCopy />
 }
 
 const EthRecipient = () => {
 	const { response } = useTransaction()
 
-	switch (response.value.state) {
-		case 'inactive':
-			return <></>
-		case 'pending':
-			return <InfoPending />
-		case 'rejected':
-			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
-		case 'resolved':
-			if (!response.value.value) return <></>
-			const parsedTo = EthereumAddress.safeParse(response.value.value.to)
-			if (!parsedTo.success) return <InfoError displayText='Failed to get valid recipient address' message={parsedTo.message} />
+	// loading states are handled by the parent component
+	if (response.value.state !== 'resolved') return <></>
 
-			const blockieIcon = () => <span class='text-4xl'><SVGBlockie address={parsedTo.value} /></span>
-			return <Info label='To' value={parsedTo.value} icon={blockieIcon} allowCopy />
-	}
+	const txResponse = response.value.value
+	if (!txResponse) return <></>
+
+	const parsedTo = EthereumAddress.safeParse(txResponse.to)
+	if (!parsedTo.success) return <InfoError displayText='Failed to extract recipient address' message={parsedTo.message} />
+
+	const blockieIcon = () => <span class='text-4xl'><SVGBlockie address={parsedTo.value} /></span>
+	return <Info label='To' value={parsedTo.value} icon={blockieIcon} allowCopy />
 }
 
 const TransferAmount = () => {
@@ -119,26 +117,25 @@ const TransferAmount = () => {
 			const txReceipt = receipt.value.value
 			if (txReceipt === null) return <></>
 
-			const erc20Transfer = extractERC20TransferRequest(txReceipt)
+			const extractedRequest = extractERC20TransferRequest(txReceipt)
+			if (extractedRequest) return <TokenAmount transferRequest={extractedRequest} />
 
-			// display token amount for token transfer
-			if (erc20Transfer) return <TokenAmount transfer={erc20Transfer} />
-
-			// else display eth amount
 			return <EthAmount />
 	}
 }
 
-const TokenAmount = ({ transfer }: { transfer: TransferRequest }) => {
+const TokenAmount = ({ transferRequest }: { transferRequest: ReturnType<typeof extractERC20TransferRequest> }) => {
 	const { cache } = useTokenManager()
-	const getCachedToken = (address: EthereumAddress) => cache.value.data.find(token => token.address === address)
 
-	if (!transfer) return <></>
+	const parsedERC20Request = TransferRequest.safeParse(transferRequest)
+	if (!parsedERC20Request.success) return <InfoError displayText='Failed to extract amount from transfer info' message={parsedERC20Request.message} />
 
-	const token = transfer.contractAddress ? getCachedToken(transfer.contractAddress) : undefined
-	if (!token) return <InfoError displayText='Unknown token contract' message={`Contract ${transfer.contractAddress} does not exist on your token list.`} />
+	const getTokenMetaFromCache = (address: EthereumAddress) => cache.value.data.find(token => token.address === address)
 
-	const displayAmount = `${formatUnits(transfer.quantity, token.decimals)} ${token.symbol}`
+	const token = parsedERC20Request.value.contractAddress ? getTokenMetaFromCache(parsedERC20Request.value.contractAddress) : undefined
+	if (!token) return <InfoError displayText='The token is not on your token list' message={`Contract ${parsedERC20Request.value.contractAddress} does not exist on your token list.`} />
+
+	const displayAmount = `${formatUnits(parsedERC20Request.value.quantity, token.decimals)} ${token.symbol}`
 	return <Info label='Amount' value={displayAmount} />
 }
 

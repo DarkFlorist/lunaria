@@ -1,6 +1,5 @@
-import { getAddress, isAddress, isHexString, parseUnits } from 'ethers'
+import { getAddress, isHexString, parseUnits } from 'ethers'
 import * as funtypes from 'funtypes'
-import { isTransferTopic } from './library/ethereum.js'
 
 export function createCacheParser<T>(funType: funtypes.Codec<T>) {
 	const config: funtypes.ParsedValue<funtypes.String, T>['config'] = {
@@ -51,12 +50,16 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		try {
-			// convert hex string to bigint to strip possible leading zeros
-			const maybeAddress = value && BigInt(value).toString(16).padStart(40, '0')
-			if (isAddress(maybeAddress)) return { success: true, value: getAddress(maybeAddress) }
-		} catch (error) { }
-		return { success: false, message: `${value} is not a valid address string.` }
+		if (!/^0x[0-9a-fA-F]+$/.test(value)) return { success: false, message: `${value} is not a hex string.` }
+		if (BigInt(value) > 2n**160n) return { success: false, message: `${value} is not within a valid address range.` }
+
+		// remove padded zeros for addresses like logs
+		const noPadAddress = `0x${BigInt(value).toString(16).padStart(40, '0')}`
+
+		// get checksummed address
+		const checksummedAddress = getAddress(noPadAddress.toLowerCase())
+
+		return { success: true, value: checksummedAddress }
 	},
 	serialize: funtypes.String.safeParse,
 }
@@ -158,23 +161,6 @@ export type ToWireType<T> = T extends funtypes.Intersect<infer U>
 	: T extends funtypes.Codec<infer U>
 	? U
 	: never
-
-export const TransferSignature = funtypes.String.withConstraint(isTransferTopic)
-export const TransferTopics = funtypes.Tuple(TransferSignature, EthereumAddress, EthereumAddress)
-
-export const TransferLog = funtypes.Object({
-	address: EthereumAddress,
-	data: BigIntHex,
-	topics: TransferTopics
-})
-export type TransferLog = funtypes.Static<typeof TransferLog>
-
-export const ERC20TransferReceipt = funtypes.Object({
-	to: EthereumAddress,
-	from: EthereumAddress,
-	logs: funtypes.Array(TransferLog)
-}).withConstraint(obj => obj.logs.length !== 0)
-export type ERC20TransferReceipt = funtypes.Static<typeof ERC20TransferReceipt>
 
 export const TransferRequest = funtypes.Object({
 	contractAddress: EthereumAddress.Or(funtypes.Undefined),

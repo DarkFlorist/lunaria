@@ -51,7 +51,7 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
 		if (!/^0x[0-9a-fA-F]+$/.test(value)) return { success: false, message: `${value} is not a hex string.` }
-		if (BigInt(value) > 2n**160n) return { success: false, message: `${value} is not within a valid address range.` }
+		if (BigInt(value) >= 2n**160n) return { success: false, message: `${value} is not within a valid address range.` }
 
 		// remove padded zeros for addresses like logs
 		const noPadAddress = `0x${BigInt(value).toString(16).padStart(40, '0')}`

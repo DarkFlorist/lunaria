@@ -19,8 +19,8 @@ export const SubpathHostWarning = () => {
 			<form method='dialog' class='px-6'>
 				<div class='text-lg font-bold text-center mb-4'>Warning! Insecure Host Detected.</div>
 				<div class='text-center'>
-					<p class='mb-4'>Hosting Lunaria from a subpath <pre class='inline px-2 py-[3px] bg-white/20 text-sm'>{window.location.pathname}</pre> highly discouraged as this site is uses browser storage. By doing so, your data may be accessed by the host domain.</p>
-					<p class='mb-4'>If hosting this through IPFS, consider access using subdomain resolution which is the <a class='outline-none underline underline-offset-2' href='https://docs.ipfs.tech/how-to/gateway-best-practices/#avoiding-centralization'>recommended approach</a>, according to it&apos;s documentation.</p>
+					<p class='mb-4'>Hosting Lunaria from a subpath <pre class='inline px-2 py-[3px] bg-white/20 text-sm'>{window.location.pathname}</pre> is highly discouraged as this site uses browser storage. By doing so, your data may be accessed by other servers on the same domain.</p>
+					<p class='mb-4'>If hosting this through IPFS, consider access using subdomain resolution instead which is the <a class='outline-none underline underline-offset-2' href='https://docs.ipfs.tech/how-to/gateway-best-practices/#avoiding-centralization'>recommended approach</a>.</p>
 				</div>
 				<div class='flex flex-col items-center'>
 					<label class='flex gap-2 mb-4'>

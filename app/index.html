@@ -8,9 +8,12 @@
 
 	<!-- support hosting from a subpath such as ipfs -->
 	<script>
-		const baseElement = document.createElement('base')
-		baseElement.setAttribute('href', window.location.href.replace(/\/+$/, '') + '/')
-		document.head.appendChild(baseElement)
+		const subPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))
+		if (subPath) {
+			const baseElement = document.createElement('base')
+			baseElement.setAttribute('href', `${subPath}/`)
+			document.head.appendChild(baseElement)
+		}
 	</script>
 
 	<link rel="icon" type="image/svg+xml" href="./img/icon-lunaria.svg" />

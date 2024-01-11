@@ -5,6 +5,7 @@ import { TransferPage } from './TransferPage/index.js'
 import { EthereumProvider } from '../context/Ethereum.js'
 import { WalletProvider } from '../context/Wallet.js'
 import { NotificationProvider } from '../context/Notification.js'
+import { SubpathHostWarning } from './SubpathHostWarning.js'
 
 export function App() {
 	return (
@@ -23,6 +24,7 @@ export function App() {
 					</WalletProvider>
 				</EthereumProvider>
 			</NotificationProvider>
+			<SubpathHostWarning />
 		</SplashScreen>
 	)
 }

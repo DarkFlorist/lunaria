@@ -1172,6 +1172,11 @@ input[type='password']:autofill {
 	padding-right: 1rem;
 }
 
+.px-6 {
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+
 .py-2 {
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
@@ -1190,6 +1195,11 @@ input[type='password']:autofill {
 .py-4 {
 	padding-top: 1rem;
 	padding-bottom: 1rem;
+}
+
+.py-\[3px\] {
+	padding-top: 3px;
+	padding-bottom: 3px;
 }
 
 .pl-4 {
@@ -1712,6 +1722,10 @@ input[type='password']:autofill {
 
 	.md\:max-w-fit {
 		max-width: fit-content;
+	}
+
+	.md\:max-w-lg {
+		max-width: 32rem;
 	}
 
 	.md\:grid-cols-2 {

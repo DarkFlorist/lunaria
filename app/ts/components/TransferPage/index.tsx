@@ -81,7 +81,7 @@ const LeftPanel = () => {
 
 			<div class='mb-4 p-4'>
 				<div class='flex items-center gap-2'>
-					<img class='w-10 h-10' src='/img/icon-lunaria.svg' />
+					<img class='w-10 h-10' src='./img/icon-lunaria.svg' />
 					<div>
 						<div class='text-3xl font-bold leading-none'>Lunaria</div>
 						<div class='text-white/50 leading-none'>Decentralized Wallet</div>
@@ -91,7 +91,7 @@ const LeftPanel = () => {
 
 			<div class='pl-4 mb-4'>
 				<div class='text-white/30 text-sm'>Actions</div>
-				<a href='/'>
+				<a href={window.location.href}>
 					<div class='grid grid-cols-[auto,1fr] items-center gap-4 mb-4'>
 						<div class='bg-white/30 w-10 h-10 rounded-full' />
 						<div class='py-2 leading-tight'>

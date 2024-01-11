@@ -17,6 +17,7 @@ const dependencyPaths: Dependency[] = [
 	{ packageName: '@preact/signals-core', subfolderToVendor: 'dist', mainEntrypointFile: 'signals-core.module.js', alternateEntrypoints: {} },
 	{ packageName: '@preact/signals', subfolderToVendor: 'dist', mainEntrypointFile: 'signals.module.js', alternateEntrypoints: {} },
 	{ packageName: 'funtypes', subfolderToVendor: 'lib', mainEntrypointFile: 'index.mjs', alternateEntrypoints: {} },
+	{ packageName: 'multiformats', subfolderToVendor: 'dist/src', mainEntrypointFile: 'index.js', alternateEntrypoints: {} },
 ]
 
 async function vendorDependencies() {

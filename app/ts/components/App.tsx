@@ -5,11 +5,14 @@ import { TransferPage } from './TransferPage/index.js'
 import { EthereumProvider } from '../context/Ethereum.js'
 import { WalletProvider } from '../context/Wallet.js'
 import { NotificationProvider } from '../context/Notification.js'
+import { IPFSSubpathRedirect } from './IPFSSubpathRedirect.js'
 import { TemplatesProvider } from '../context/TransferTemplates.js'
 
 export function App() {
+
 	return (
 		<SplashScreen>
+			<IPFSSubpathRedirect />
 			<NotificationProvider>
 				<EthereumProvider>
 					<WalletProvider>

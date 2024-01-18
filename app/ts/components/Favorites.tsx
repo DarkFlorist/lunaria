@@ -33,7 +33,7 @@ export const Favorites = () => {
 						<a class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} href={`#saved/${index}`}>
 							<MoveUpButton show={manage.value === true} favorite={favorite} index={index} />
 							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
-								{favorite.token ? <img class='w-8 h-8' src={`/img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
+								{favorite.token ? <img class='w-8 h-8' src={`./img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`./img/ethereum.svg`} />}
 								<div class='text-left'>
 									<div>{favorite.label}</div>
 									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>

@@ -102,7 +102,7 @@ const AssetCard = ({ token }: { token?: ERC20Token }) => {
 	const radioRef = useRef<HTMLInputElement>(null)
 	const { stage } = useTokenManager()
 	const { input } = useTransfer()
-	const iconPath = token ? `/img/${token.address.toLowerCase()}.svg` : `/img/ethereum.svg`
+	const iconPath = token ? `./img/${token.address.toLowerCase()}.svg` : `./img/ethereum.svg`
 
 	const setId = 'transfer_asset'
 	const uniqueId = token?.address || 'ether'

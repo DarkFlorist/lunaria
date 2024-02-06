@@ -1,0 +1,24 @@
+name: deploy-fleek
+on: [push]
+jobs:
+  fleek-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "v18.13.0"
+          registry-url: "https://registry.npmjs.org"
+      - name: Install and Build
+        run: |
+          npm install --ignore-scripts
+          npm run vendor
+          npm run build
+      - name: Deploy on fleek
+        id: deploy
+        uses: jubalm/action-deploy@v1.0.2
+        with:
+          apiKey: "8Lh0zOAlYvTIQ3s55OnoI6CNxEJI8j0TxUYFL8A2pts="
+      - name: Get the output url
+        run: echo "Deploy url is ${{ steps.deploy.outputs.deployUrl }}"

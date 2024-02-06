@@ -1,0 +1,14 @@
+{
+  "site": {
+    "id": "5abf3f5f-fb5a-4c60-813c-caa1f432b1c9",
+    "team": "e95623fb-a141-4209-9ee6-fffd9b358dfe",
+    "platform": "ipfs",
+    "source": "ipfs",
+    "name": "quiet-mode-4513"
+  },
+  "build": {
+    "baseDir": "",
+    "publicDir": "app",
+    "rootDir": ""
+  }
+}

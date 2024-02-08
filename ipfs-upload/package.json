@@ -1,0 +1,9 @@
+{
+  "name": "ipfs-upload",
+  "version": "0.0.0",
+  "main": "upload.ts",
+  "scripts": {
+    "upload": "npx tsx upload.ts"
+  },
+  "license": "Unlicense"
+}

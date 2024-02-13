@@ -23,16 +23,20 @@ RUN npm run build
 FROM ipfs/kubo:v0.25.0@sha256:0c17b91cab8ada485f253e204236b712d0965f3d463cb5b60639ddd2291e7c52 as ipfs-kubo
 
 # Create the base image
-FROM debian:12.2-slim@sha256:93ff361288a7c365614a5791efa3633ce4224542afb6b53a1790330a8e52fc7d
+FROM debian:12.2-slim@sha256:93ff361288a7c365614a5791efa3633ce4224542afb6b53a1790330a8e52fc7d as base
 
 # Install kubo and initialize ipfs
 COPY --from=ipfs-kubo /usr/local/bin/ipfs /usr/local/bin/ipfs
 
+# Initialize IPFS and copy lunaria build output
 RUN ipfs init
-
-# Copy lunaria build output
 COPY --from=builder /source/app /export
 
+# --------------------------------------------------------
+# Build Option 1: Self-host the app through a managed IPFS
+# --------------------------------------------------------
+
+FROM base as self-host
 # add the build output to IPFS and write the hash to a file
 RUN ipfs add --cid-version 1 --quieter --only-hash --recursive /export > ipfs_hash.txt
 
@@ -42,5 +46,23 @@ RUN cat ipfs_hash.txt
 # this entrypoint file will execute `ipfs add` of the build output to the docker host's IPFS API endpoint, so we can easily extract the IPFS build out of the docker image
 RUN printf '#!/bin/sh\nipfs --api /ip4/`getent ahostsv4 host.docker.internal | grep STREAM | head -n 1 | cut -d \  -f 1`/tcp/5001 add --cid-version 1 -r /export' >> entrypoint.sh
 RUN chmod u+x entrypoint.sh
+
+ENTRYPOINT [ "./entrypoint.sh" ]
+
+# -------------------------------------
+# Build Option 2: Host the app remotely
+# -------------------------------------
+
+FROM base as remote-host
+RUN apt-get update && apt-get install -y curl
+
+# add the build output to IPFS, write the hash to a file and print during build
+RUN ipfs add --cid-version 1 --quieter --recursive /export > ipfs_hash.txt && cat ipfs_hash.txt
+
+# nft.storage api key required, pass the key during runtime with -e flag
+ENV NFTSTORAGE_API_KEY=
+
+# generate the car file and upload to nft.storage through http endpoint
+RUN printf '#!/bin/sh\nif [ -z "$NFTSTORAGE_API_KEY" ] || [ "$NFTSTORAGE_API_KEY" = "" ]; then echo "Error: NFTSTORAGE_API_KEY is not set or is blank"; exit  1; fi\nipfs dag export $(cat ipfs_hash.txt) > output.car\ncurl -X POST -H "Authorization: Bearer $NFTSTORAGE_API_KEY" -H "Content-Type: application/car" --data-binary @output.car https://api.nft.storage/upload' >> entrypoint.sh && chmod u+x entrypoint.sh
 
 ENTRYPOINT [ "./entrypoint.sh" ]

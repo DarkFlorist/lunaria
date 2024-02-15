@@ -88,10 +88,11 @@ case $1 in
 
     # Upload the entire directory to nft.storage
 		UPLOAD_RESPONSE=$(curl \
-			-X POST -H "Authorization: Bearer $NFTSTORAGE_API_KEY" \
-			-H "Content-Type: application/car" \
+			---request POST \
+			--header "Authorization: Bearer $NFTSTORAGE_API_KEY" \
+			--header "Content-Type: application/car" \
 			--data-binary @output.car \
-			-s \
+			--silent \
 			https://api.nft.storage/upload)
 
 		# Show link to nft.storage (https://xxx.ipfs.nftstorage.link)

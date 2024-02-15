@@ -114,5 +114,5 @@ EOF
 
 RUN chmod u+x /entrypoint.sh
 
-ENTRYPOINT [ "./entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
 

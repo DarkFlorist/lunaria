@@ -49,6 +49,7 @@ RUN ipfs add --cid-version 1 --quieter --only-hash -r /export > ipfs_hash.txt
 # Publish Script: Option to host app locally or on nft.storage
 # --------------------------------------------------------
 
+WORKDIR ~
 COPY <<'EOF' /entrypoint.sh
 #!/bin/sh
 set -e

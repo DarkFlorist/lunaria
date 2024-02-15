@@ -89,7 +89,7 @@ case $1 in
 
 		# Upload the entire directory to nft.storage
 		UPLOAD_RESPONSE=$(curl \
-			---request POST \
+			--request POST \
 			--header "Authorization: Bearer $NFTSTORAGE_API_KEY" \
 			--header "Content-Type: application/car" \
 			--data-binary @output.car \
@@ -102,7 +102,7 @@ case $1 in
 		if [ "$UPLOAD_SUCCESS" = "true" ]; then
 			echo "Succesfully uploaded to https://"$(echo "$UPLOAD_RESPONSE" | jq -r ".value.cid")".ipfs.nftstorage.link"
 		else
-			echo "Upload Failed: " $(echo "$UPLOAD_RESPONSE" | jq -r ".error.message")
+			echo "Upload Failed: " $(echo "$UPLOAD_RESPONSE" | jq -r ".error | @json")
 		fi
 		;;
 

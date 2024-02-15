@@ -54,39 +54,39 @@ COPY <<'EOF' /entrypoint.sh
 set -e
 
 if [ $# -ne  1 ]; then
-  echo "Example usage: docker run --rm ghcr.io/darkflorist/lunaria:latest [docker-host|nft.storage]"
-  exit  1
+	echo "Example usage: docker run --rm ghcr.io/darkflorist/lunaria:latest [docker-host|nft.storage]"
+	exit  1
 fi
 
 case $1 in
 
-  docker-host)
-    # Show the IFPS build hash
-    echo "Build Hash: $(cat /ipfs_hash.txt)"
+	docker-host)
+		# Show the IFPS build hash
+		echo "Build Hash: $(cat /ipfs_hash.txt)"
 
-    # Determine the IPV4 address of the docker-hosted IPFS instance
-    IPFS_IP4_ADDRESS=$(getent ahostsv4 host.docker.internal | grep STREAM | head -n 1 | cut -d ' ' -f 1)
+		# Determine the IPV4 address of the docker-hosted IPFS instance
+		IPFS_IP4_ADDRESS=$(getent ahostsv4 host.docker.internal | grep STREAM | head -n 1 | cut -d ' ' -f 1)
 
-    echo "Adding files to docker running IPFS at $IPFS_IP4_ADDRESS"
+		echo "Adding files to docker running IPFS at $IPFS_IP4_ADDRESS"
 		IPFS_HASH=$(ipfs add --api /ip4/$IPFS_IP4_ADDRESS/tcp/5001 --cid-version 1 --quieter -r /export)
-    echo "Uploaded Hash: $IPFS_HASH"
-    ;;
+		echo "Uploaded Hash: $IPFS_HASH"
+		;;
 
-  nft.storage)
-    if [ -z $NFTSTORAGE_API_KEY ] || [ $NFTSTORAGE_API_KEY = "" ]; then
-      echo "NFTSTORAGE_API_KEY environment variable is not set";
-      exit  1;
-    fi
+	nft.storage)
+		if [ -z $NFTSTORAGE_API_KEY ] || [ $NFTSTORAGE_API_KEY = "" ]; then
+			echo "NFTSTORAGE_API_KEY environment variable is not set";
+			exit  1;
+		fi
 
-    # Show the IFPS build hash
-    echo "Build Hash: $(cat /ipfs_hash.txt)"
+		# Show the IFPS build hash
+		echo "Build Hash: $(cat /ipfs_hash.txt)"
 
-    # Create a CAR archive from build hash
-    echo "Uploading files to nft.storage..."
+		# Create a CAR archive from build hash
+		echo "Uploading files to nft.storage..."
 		IPFS_HASH=$(ipfs add --cid-version 1 --quieter -r /export)
-    ipfs dag export $IPFS_HASH > output.car
+		ipfs dag export $IPFS_HASH > output.car
 
-    # Upload the entire directory to nft.storage
+		# Upload the entire directory to nft.storage
 		UPLOAD_RESPONSE=$(curl \
 			---request POST \
 			--header "Authorization: Bearer $NFTSTORAGE_API_KEY" \
@@ -103,13 +103,13 @@ case $1 in
 		else
 			echo "Upload Failed: " $(echo "$UPLOAD_RESPONSE" | jq -r ".error.message")
 		fi
-    ;;
+		;;
 
-  *)
-    echo "Invalid option: $1"
-    echo "Example usage: docker run --rm ghcr.io/darkflorist/lunaria:latest [docker-host|nft.storage]"
-    exit  1
-    ;;
+	*)
+		echo "Invalid option: $1"
+		echo "Example usage: docker run --rm ghcr.io/darkflorist/lunaria:latest [docker-host|nft.storage]"
+		exit  1
+		;;
 esac
 EOF
 

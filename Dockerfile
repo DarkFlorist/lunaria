@@ -29,13 +29,13 @@ RUN npm run build
 
 # Cache the kubo image
 FROM ipfs/kubo:v0.25.0@sha256:0c17b91cab8ada485f253e204236b712d0965f3d463cb5b60639ddd2291e7c52 as ipfs-kubo
-FROM ubuntu:jammy as ubuntu
 
 # Create the base image
 FROM debian:12.2-slim@sha256:93ff361288a7c365614a5791efa3633ce4224542afb6b53a1790330a8e52fc7d as base
 
 # Add curl to the base image (7.88.1-10+deb12u5)
-RUN apt-get update && apt-get install -y curl=7.88.1-10+deb12u5
+# Add jq to the base image (1.6-2.1)
+RUN apt-get update && apt-get install -y curl=7.88.1-10+deb12u5 jq=1.6-2.1
 
 # Install kubo and initialize ipfs
 COPY --from=ipfs-kubo /usr/local/bin/ipfs /usr/local/bin/ipfs
@@ -87,11 +87,21 @@ case $1 in
     ipfs dag export $IPFS_HASH > output.car
 
     # Upload the entire directory to nft.storage
-    curl \
-      -X POST -H "Authorization: Bearer $NFTSTORAGE_API_KEY" \
-      -H "Content-Type: application/car" \
-      --data-binary @output.car \
-      https://api.nft.storage/upload
+		UPLOAD_RESPONSE=$(curl \
+			-X POST -H "Authorization: Bearer $NFTSTORAGE_API_KEY" \
+			-H "Content-Type: application/car" \
+			--data-binary @output.car \
+			-s \
+			https://api.nft.storage/upload)
+
+		# Show link to nft.storage (https://xxx.ipfs.nftstorage.link)
+		UPLOAD_SUCCESS=$(echo "$UPLOAD_RESPONSE" | jq -r ".ok")
+
+		if [ "$UPLOAD_SUCCESS" = "true" ]; then
+			echo "Succesfully uploaded to https://"$(echo "$UPLOAD_RESPONSE" | jq -r ".value.cid")".ipfs.nftstorage.link"
+		else
+			echo "Upload Failed: " $(echo "$UPLOAD_RESPONSE" | jq -r ".error.message")
+		fi
     ;;
 
   *)
@@ -105,3 +115,4 @@ EOF
 RUN chmod u+x /entrypoint.sh
 
 ENTRYPOINT [ "./entrypoint.sh" ]
+

@@ -1,4 +1,5 @@
 import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { toQuantity } from 'ethers'
 import { JSX } from 'preact/jsx-runtime'
 import { useTemplates } from '../context/TransferTemplates.js'
 import { extractERC20TransferRequest } from '../library/ethereum.js'
@@ -6,37 +7,46 @@ import { serialize, TransferRequest, TransferTemplate } from '../schema.js'
 import { useTransaction } from './TransactionProvider.js'
 
 export const TemplateRecorder = () => {
-	const { receipt } = useTransaction()
+	const { response, receipt } = useTransaction()
 	const { add } = useTemplates()
 	const isSaved = useSignal(false)
-	const draft = useSignal<TransferTemplate | undefined>(undefined)
+	const templateDraft = useSignal<TransferTemplate | undefined>(undefined)
 
-	const txReceipt = useComputed(() => (receipt.value.state === 'resolved' ? receipt.value.value : null))
-	if (txReceipt.value === null) return <></>
+	const erc20TransferTemplate = useComputed(() => {
+		if (receipt.value.state !== 'resolved' || receipt.value.value === null) return
+		const erc20TransferRequest = extractERC20TransferRequest(receipt.value.value)
+		if (erc20TransferRequest === undefined) return
+		const parsed = TransferRequest.safeParse(erc20TransferRequest)
+		const label = templateDraft.peek()?.label
+		return parsed.success ? { ...parsed.value, label } : undefined
+	})
+
+	const ethTransferTemplate = useComputed(() => {
+		if (response.value.state !== 'resolved' || response.value.value === null) return
+		const { to, from, value } = response.value.value
+		const parsed = TransferRequest.safeParse({ to, from, quantity: toQuantity(value) })
+		return parsed.success ? { label: templateDraft.peek()?.label, ...parsed.value } : undefined
+	})
 
 	useSignalEffect(() => {
-		if (txReceipt.value === null) return
-		const transferRequest = extractERC20TransferRequest(txReceipt.value)
-		if (transferRequest === undefined) return
-
-		// ensure correct template entries before drafing record
-		const erc20Transfer = TransferRequest.safeParse(transferRequest)
-		if (!erc20Transfer.success) return
-
-		draft.value = { label: draft.peek()?.label, ...erc20Transfer.value } satisfies TransferTemplate
+		// Update draft with values coming from transaction
+		templateDraft.value = erc20TransferTemplate.value || ethTransferTemplate.value
 	})
 
 	const saveTemplate = () => {
-		if (!draft.value) return
-		const serialized = serialize(TransferTemplate, draft.value)
+		if (!templateDraft.value) return
+		const serialized = serialize(TransferTemplate, templateDraft.value)
 		const template = TransferTemplate.parse(serialized)
 		add(template)
 		isSaved.value = true
 	}
 
+	// Activate form only after the transaction receipt is resolved
+	if (receipt.value.state !== 'resolved') return <></>
+
 	if (isSaved.value === true) return <TemplateAddConfirmation />
 
-	return <AddTemplateForm formData={draft} onSubmit={saveTemplate} />
+	return <AddTemplateForm formData={templateDraft} onSubmit={saveTemplate} />
 }
 
 type AddTemplateFormProps = {

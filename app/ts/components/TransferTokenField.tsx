@@ -24,7 +24,7 @@ export const TransferTokenSelectField = () => {
 		}
 	}
 
-	const selectedAsset = useComputed(() => input.value.token)
+	const selectedAsset = useComputed(() => input.value.token || { name: 'Ether', symbol: 'ETH' })
 
 	const focusButtonOnClearStage = () => {
 		if (!buttonRef.value) return
@@ -39,10 +39,10 @@ export const TransferTokenSelectField = () => {
 			<div class='grid grid-cols-[1fr,auto] gap-4 items-center px-4 h-16'>
 				<div class='grid text-left'>
 					<div class='text-sm text-white/50 leading-tight'>Asset</div>
-					<div class='appearance-none outline-none h-6 bg-transparent text-left'>{selectedAsset.value?.name || 'Ether'}</div>
+					<div class='appearance-none outline-none h-6 bg-transparent text-left'>{selectedAsset.value.name}</div>
 				</div>
 				<div class='grid grid-cols-[min-content,min-content] items-center gap-3'>
-					<div class='text-white/50'>{selectedAsset.value?.symbol || 'ETH'}</div>
+					<div class='text-white/50'>{selectedAsset.value.symbol}</div>
 					<SwitchIcon />
 				</div>
 			</div>

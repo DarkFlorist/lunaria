@@ -2,7 +2,7 @@ import { LAYOUT_SCROLL_OPTIONS } from '../../library/constants.js'
 import { Header, HeaderNav, Main, Navigation, Root, usePanels } from '../DefaultLayout/index.js'
 import { ConnectAccount } from '../ConnectAccount.js'
 import { DiscordInvite } from '../DiscordInvite.js'
-import { Favorites } from '../Favorites.js'
+import { Templates } from '../Templates.js'
 import { MainFooter } from '../MainFooter.js'
 import { TransferHistoryProvider } from '../../context/TransferHistory.js'
 import { TransferHistory } from '../TransferHistory.js'
@@ -10,6 +10,7 @@ import { TransactionDetails } from './TransactionDetails.js'
 import { AccountReconnect } from '../AccountReconnect.js'
 import * as Icon from '../Icon/index.js'
 import { TokenManagerProvider } from '../../context/TokenManager.js'
+import { TransactionProvider } from '../TransactionProvider.js'
 
 export const TransactionPage = () => {
 	return (
@@ -47,7 +48,9 @@ const MainPanel = () => {
 			</div>
 
 			<div class='px-4'>
-				<TransactionDetails />
+				<TransactionProvider>
+					<TransactionDetails />
+				</TransactionProvider>
 			</div>
 			<MainFooter />
 		</Main>
@@ -88,7 +91,7 @@ const LeftPanel = () => {
 
 			<TransferHistory />
 
-			<Favorites />
+			<Templates />
 
 			<DiscordInvite />
 		</Navigation>

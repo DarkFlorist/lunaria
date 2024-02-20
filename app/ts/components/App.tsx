@@ -5,6 +5,7 @@ import { TransferPage } from './TransferPage/index.js'
 import { EthereumProvider } from '../context/Ethereum.js'
 import { WalletProvider } from '../context/Wallet.js'
 import { NotificationProvider } from '../context/Notification.js'
+import { TemplatesProvider } from '../context/TransferTemplates.js'
 
 export function App() {
 	return (
@@ -12,14 +13,19 @@ export function App() {
 			<NotificationProvider>
 				<EthereumProvider>
 					<WalletProvider>
-						<Router>
-							<Route path=''>
-								<TransferPage />
-							</Route>
-							<Route path='#tx/:transaction_hash'>
-								<TransactionPage />
-							</Route>
-						</Router>
+						<TemplatesProvider>
+							<Router>
+								<Route path=''>
+									<TransferPage />
+								</Route>
+								<Route path='#saved/:template_id'>
+									<TransferPage />
+								</Route>
+								<Route path='#tx/:transaction_hash'>
+									<TransactionPage />
+								</Route>
+							</Router>
+						</TemplatesProvider>
 					</WalletProvider>
 				</EthereumProvider>
 			</NotificationProvider>

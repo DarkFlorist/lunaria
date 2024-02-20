@@ -1,4 +1,4 @@
-import { getAddress, isAddress, isHexString, parseUnits } from 'ethers'
+import { getAddress, isHexString, parseUnits } from 'ethers'
 import * as funtypes from 'funtypes'
 
 export function createCacheParser<T>(funType: funtypes.Codec<T>) {
@@ -50,8 +50,16 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		if (!isAddress(value)) return { success: false, message: `${value} is not a valid address string.` }
-		else return { success: true, value: getAddress(value) }
+		if (!/^0x[0-9a-fA-F]+$/.test(value)) return { success: false, message: `${value} is not a hex string.` }
+		if (BigInt(value) >= 2n**160n) return { success: false, message: `${value} is not within a valid address range.` }
+
+		// remove padded zeros for addresses like logs
+		const noPadAddress = `0x${BigInt(value).toString(16).padStart(40, '0')}`
+
+		// get checksummed address
+		const checksummedAddress = getAddress(noPadAddress.toLowerCase())
+
+		return { success: true, value: checksummedAddress }
 	},
 	serialize: funtypes.String.safeParse,
 }
@@ -134,12 +142,12 @@ export type ToWireType<T> = T extends funtypes.Intersect<infer U>
 	? Record<funtypes.Static<U>, ToWireType<V>>
 	: T extends funtypes.Partial<infer U, infer V>
 	? V extends true
-		? { readonly [K in keyof U]?: ToWireType<U[K]> }
-		: { [K in keyof U]?: ToWireType<U[K]> }
+	? { readonly [K in keyof U]?: ToWireType<U[K]> }
+	: { [K in keyof U]?: ToWireType<U[K]> }
 	: T extends funtypes.Object<infer U, infer V>
 	? V extends true
-		? { readonly [K in keyof U]: ToWireType<U[K]> }
-		: { [K in keyof U]: ToWireType<U[K]> }
+	? { readonly [K in keyof U]: ToWireType<U[K]> }
+	: { [K in keyof U]: ToWireType<U[K]> }
 	: T extends funtypes.Readonly<funtypes.Tuple<infer U>>
 	? { readonly [P in keyof U]: ToWireType<U[P]> }
 	: T extends funtypes.Tuple<infer U>
@@ -153,3 +161,24 @@ export type ToWireType<T> = T extends funtypes.Intersect<infer U>
 	: T extends funtypes.Codec<infer U>
 	? U
 	: never
+
+export const TransferRequest = funtypes.Object({
+	contractAddress: EthereumAddress.Or(funtypes.Undefined),
+	from: EthereumAddress,
+	to: EthereumAddress,
+	quantity: BigIntHex
+})
+
+export type TransferRequest = funtypes.Static<typeof TransferRequest>
+
+export const TransferTemplate = funtypes.Intersect(TransferRequest, funtypes.Object({ label: funtypes.String.Or(funtypes.Undefined) }))
+export type TransferTemplate = funtypes.Static<typeof TransferTemplate>
+
+export const TemplatesCacheSchema = funtypes.Union(
+	funtypes.Object({
+		data: funtypes.Array(TransferTemplate),
+		version: funtypes.Literal('1.0.0'),
+	})
+)
+
+export type TemplatesCache = funtypes.Static<typeof TemplatesCacheSchema>

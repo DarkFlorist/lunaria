@@ -1,77 +1,166 @@
-import { Signal, useComputed, useSignal } from '@preact/signals'
-import { useRouter } from '../HashRouter.js'
-import { formatEther, formatUnits, TransactionReceipt, TransactionResponse } from 'ethers'
-import { AsyncProperty } from '../../library/preact-utilities.js'
-import { Info, InfoError, InfoPending } from './Info.js'
-import { useTransaction } from '../../store/transaction.js'
-import { calculateGasFee, extractArgValue, extractTransferLogFromSender } from '../../library/ethereum.js'
-import { SaveTransfer } from './SaveTransfer.js'
-import { FavoriteModel } from '../../store/favorites.js'
+import { useSignalEffect } from '@preact/signals'
+import { formatEther, formatUnits } from 'ethers'
 import SVGBlockie from '../SVGBlockie.js'
+import { useRouter } from '../HashRouter.js'
+import { TemplateRecorder } from '../TemplateRecorder.js'
+import { Info, InfoError, InfoPending } from './Info.js'
+import { useTransaction } from '../TransactionProvider.js'
+import { EthereumAddress, TransferRequest } from '../../schema.js'
+import { extractERC20TransferRequest } from '../../library/ethereum.js'
 import { useTokenManager } from '../../context/TokenManager.js'
 
 export const TransactionDetails = () => {
-	const favorite = useSignal<Partial<FavoriteModel> | undefined>(undefined)
 	const router = useRouter<{ transaction_hash: string }>()
-	const { transactionResponse, transactionReceipt } = useTransaction(router.value.params.transaction_hash)
+	const { transactionHash } = useTransaction()
 
-	const isDoneFetching = useComputed(() => transactionResponse.value.state === 'resolved' && transactionReceipt.value.state === 'resolved')
+	useSignalEffect(() => {
+		transactionHash.value = router.value.params.transaction_hash
+	})
 
 	return (
 		<div class='grid gap-2'>
-			<DataFromResponse response={transactionResponse} addFavoriteStore={favorite} />
-			<DataFromReceipt receipt={transactionReceipt} addFavoriteStore={favorite} />
-			<SaveTransfer show={isDoneFetching.value} addFavoriteStore={favorite} />
+			<TransactionHash />
+			<TransferFrom />
+			<TransferTo />
+			<TransferAmount />
+			<TransferFee />
+			<TemplateRecorder />
 		</div>
 	)
 }
 
-type DataFromResponseProps = {
-	response: Signal<AsyncProperty<TransactionResponse>>
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
+const TransactionHash = () => {
+	const { transactionHash } = useTransaction()
+	if (!transactionHash.value) return <></>
+	return <Info label='Hash' value={transactionHash.value} allowCopy />
 }
 
-const DataFromResponse = ({ response, addFavoriteStore }: DataFromResponseProps) => {
+const TransferFrom = () => {
+	const { response } = useTransaction()
+
 	switch (response.value.state) {
 		case 'inactive':
 			return <></>
 		case 'pending':
-			return (
-				<>
-					<InfoPending />
-					<InfoPending />
-					<InfoPending />
-					<InfoPending />
-				</>
-			)
+			return <InfoPending />
 		case 'rejected':
 			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
 		case 'resolved':
-			const source = response.value.value.from
-			addFavoriteStore.value = { ...addFavoriteStore.peek(), source }
-
+			const from = response.value.value?.from
+			if (from === undefined) return <></>
 			const blockieIcon = () => (
 				<span class='text-4xl'>
-					<SVGBlockie address={source} />
+					<SVGBlockie address={from} />
 				</span>
 			)
-			return (
-				<>
-					<Info label='Hash' value={response.value.value.hash} allowCopy />
-					<Info label='From' value={response.value.value.from} icon={blockieIcon} allowCopy />
-					<EthRecipient response={response.value.value} addFavoriteStore={addFavoriteStore} />
-					<EthAmount response={response.value.value} addFavoriteStore={addFavoriteStore} />
-				</>
-			)
+			return <Info label='From' value={from} icon={blockieIcon} allowCopy />
 	}
 }
 
-type DataFromReceiptProps = {
-	receipt: Signal<AsyncProperty<TransactionReceipt | null>>
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
+const TransferTo = () => {
+	const { receipt } = useTransaction()
+
+	switch (receipt.value.state) {
+		case 'inactive':
+			return <></>
+		case 'pending':
+			return <InfoPending />
+		case 'rejected':
+			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
+		case 'resolved':
+			const txReceipt = receipt.value.value
+			if (txReceipt === null) return <></>
+
+			const extractedRequest = extractERC20TransferRequest(txReceipt)
+			if (extractedRequest) return <TokenRecipient transferRequest={extractedRequest} />
+
+			return <EthRecipient />
+	}
 }
 
-const DataFromReceipt = ({ receipt, addFavoriteStore }: DataFromReceiptProps) => {
+const TokenRecipient = ({ transferRequest }: { transferRequest: ReturnType<typeof extractERC20TransferRequest> }) => {
+	// loading states are handled by the parent component
+	const parsedERC20Request = TransferRequest.safeParse(transferRequest)
+	if (!parsedERC20Request.success) return <InfoError displayText='Failed to extract recipient address from transfer details.' message={parsedERC20Request.message} />
+
+	const Blockie = () => <span class='text-4xl'><SVGBlockie address={parsedERC20Request.value.to} /></span>
+	return <Info label='To' value={parsedERC20Request.value.to} icon={Blockie} allowCopy />
+}
+
+const EthRecipient = () => {
+	const { response } = useTransaction()
+
+	// loading states are handled by the parent component
+	if (response.value.state !== 'resolved') return <></>
+
+	const txResponse = response.value.value
+	if (!txResponse) return <></>
+
+	const parsedTo = EthereumAddress.safeParse(txResponse.to)
+	if (!parsedTo.success) return <InfoError displayText='Failed to extract recipient address' message={parsedTo.message} />
+
+	const blockieIcon = () => <span class='text-4xl'><SVGBlockie address={parsedTo.value} /></span>
+	return <Info label='To' value={parsedTo.value} icon={blockieIcon} allowCopy />
+}
+
+const TransferAmount = () => {
+	const { receipt } = useTransaction()
+
+	switch (receipt.value.state) {
+		case 'inactive':
+			return <></>
+		case 'pending':
+			return <InfoPending />
+		case 'rejected':
+			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
+		case 'resolved':
+			const txReceipt = receipt.value.value
+			if (txReceipt === null) return <></>
+
+			const extractedRequest = extractERC20TransferRequest(txReceipt)
+			if (extractedRequest) return <TokenAmount transferRequest={extractedRequest} />
+
+			return <EthAmount />
+	}
+}
+
+const TokenAmount = ({ transferRequest }: { transferRequest: ReturnType<typeof extractERC20TransferRequest> }) => {
+	const { cache } = useTokenManager()
+
+	const parsedERC20Request = TransferRequest.safeParse(transferRequest)
+	if (!parsedERC20Request.success) return <InfoError displayText='Failed to extract amount from transfer info' message={parsedERC20Request.message} />
+
+	const getTokenMetaFromCache = (address: EthereumAddress) => cache.value.data.find(token => token.address === address)
+
+	const token = parsedERC20Request.value.contractAddress ? getTokenMetaFromCache(parsedERC20Request.value.contractAddress) : undefined
+	if (!token) return <InfoError displayText='The token is not on your token list' message={`Contract ${parsedERC20Request.value.contractAddress} does not exist on your token list.`} />
+
+	const displayAmount = `${formatUnits(parsedERC20Request.value.quantity, token.decimals)} ${token.symbol}`
+	return <Info label='Amount' value={displayAmount} />
+}
+
+const EthAmount = () => {
+	const { response } = useTransaction()
+
+	switch (response.value.state) {
+		case 'inactive':
+			return <></>
+		case 'pending':
+			return <InfoPending />
+		case 'rejected':
+			return <InfoError displayText='Failed to load information' message={response.value.error.message} />
+		case 'resolved':
+			const txResponse = response.value.value
+			if (txResponse === null) return <></>
+			const displayValue = `${formatEther(txResponse.value)} ETH`
+			return <Info label='Amount' value={displayValue} />
+	}
+}
+
+
+const TransferFee = () => {
+	const { receipt } = useTransaction()
+
 	switch (receipt.value.state) {
 		case 'inactive':
 			return <></>
@@ -81,95 +170,7 @@ const DataFromReceipt = ({ receipt, addFavoriteStore }: DataFromReceiptProps) =>
 			return <InfoError displayText='Failed to load information' message={receipt.value.error.message} />
 		case 'resolved':
 			if (receipt.value.value === null) return <></>
-
-			const transactionFee = calculateGasFee(receipt.value.value.gasPrice, receipt.value.value.gasUsed)
-			return (
-				<>
-					<TokenRecipient receipt={receipt.value.value} addFavoriteStore={addFavoriteStore} />
-					<TokenAmount receipt={receipt.value.value} addFavoriteStore={addFavoriteStore} />
-					<Info label='Transaction Fee' value={`${transactionFee} ETH`} />
-				</>
-			)
+			const transactionFee = `${formatEther(receipt.value.value.fee)} ETH`
+			return <Info label='Transaction Fee' value={transactionFee} />
 	}
-}
-
-type EthAmountProps = {
-	response: TransactionResponse
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
-}
-
-const EthAmount = ({ response, addFavoriteStore }: EthAmountProps) => {
-	if (response.value === 0n) return <></>
-	const ethAmount = formatEther(response.value)
-
-	addFavoriteStore.value = { ...addFavoriteStore.peek(), amount: ethAmount }
-
-	return <Info label='Amount' value={ethAmount} suffix=' ETH' />
-}
-
-type EthRecipientProps = {
-	response: TransactionResponse
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
-}
-const EthRecipient = ({ response, addFavoriteStore }: EthRecipientProps) => {
-	if (response.value === 0n || response.to === null) return <></>
-
-	const recipientAddress = response.to
-	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
-
-	const blockieIcon = () => (
-		<span class='text-4xl'>
-			<SVGBlockie address={recipientAddress} />
-		</span>
-	)
-
-	return <Info label='Recipient' value={recipientAddress} icon={blockieIcon} allowCopy />
-}
-
-type TokenRecipientProps = {
-	receipt: TransactionReceipt
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
-}
-
-const TokenRecipient = ({ receipt, addFavoriteStore }: TokenRecipientProps) => {
-	const txLog = extractTransferLogFromSender(receipt)
-	if (txLog === null) return <></>
-
-	const recipientAddress = extractArgValue<string>(txLog, 'to')
-	if (recipientAddress === null) return <></>
-
-	addFavoriteStore.value = { ...addFavoriteStore.peek(), recipientAddress }
-
-	const blockieIcon = () => (
-		<span class='text-4xl'>
-			<SVGBlockie address={recipientAddress} />
-		</span>
-	)
-
-	return <Info label='Recipient' value={recipientAddress} icon={blockieIcon} allowCopy />
-}
-
-type TokenAmountProps = {
-	receipt: TransactionReceipt
-	addFavoriteStore: Signal<Partial<FavoriteModel> | undefined>
-}
-
-const TokenAmount = ({ receipt }: TokenAmountProps) => {
-	const { cache:tokensCache } = useTokenManager()
-
-	if (receipt.to === null) return <></>
-
-	const txLog = extractTransferLogFromSender(receipt)
-	if (txLog === null) return <></>
-
-	const transferredTokenValue = extractArgValue<bigint>(txLog, 'value')
-	if (transferredTokenValue === null) return <></>
-
-	const token = useComputed(() => tokensCache.value.data.find(token => token.address === receipt.to))
-
-	if (!token.value) return <></>
-
-	const amount = formatUnits(transferredTokenValue, token.value.decimals)
-
-	return <Info label='Amount' value={`${amount} ${token.value.symbol}`} />
 }

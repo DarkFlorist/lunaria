@@ -1,13 +1,20 @@
-import { useSignal } from '@preact/signals'
+import { useComputed, useSignal } from '@preact/signals'
+import { formatEther, formatUnits } from 'ethers'
+import { useTokenManager } from '../context/TokenManager.js'
+import { useTemplates } from '../context/TransferTemplates.js'
 import { removeNonStringsAndTrim } from '../library/utilities.js'
-import { FavoriteModel, useFavorites } from '../store/favorites.js'
+import { TransferTemplate } from '../schema.js'
 import * as Icon from './Icon/index.js'
 
-export const Favorites = () => {
+export const Templates = () => {
 	const manage = useSignal(false)
-	const { favorites } = useFavorites()
+	const { cache: templatesCache } = useTemplates()
+	const { cache: tokensCache } = useTokenManager()
 
-	if (favorites.value.length < 1)
+	const templates = useComputed(() => templatesCache.value.data)
+	const getCachedToken = (contractAddress: string) => tokensCache.value.data.find(token => token.address === contractAddress)
+
+	if (templates.value.length < 1)
 		return (
 			<div class='pl-4 mb-4'>
 				<div class='flex justify-between'>
@@ -28,16 +35,19 @@ export const Favorites = () => {
 				</button>
 			</div>
 			<div class='grid gap-2'>
-				{favorites.value.map((favorite, index) => {
+				{templates.value.map((template, index) => {
+					const token = template.contractAddress && getCachedToken(template.contractAddress)
+					const amount = token ? formatUnits(template.quantity, token.decimals) : formatEther(template.quantity)
+
 					return (
 						<a class={removeNonStringsAndTrim('grid gap-2 items-center bg-white/10 px-4 py-3', manage.value ? 'grid-cols-[min-content,minmax(0,1fr),min-content]' : 'grid-cols-1 hover:bg-white/30')} href={`#saved/${index}`}>
-							<MoveUpButton show={manage.value === true} favorite={favorite} index={index} />
+							<MoveUpButton show={manage.value === true} template={template} index={index} />
 							<div class='grid gap-2 grid-cols-[auto,minmax(0,1fr)] items-center'>
-								{favorite.token ? <img class='w-8 h-8' src={`./img/${favorite.token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`./img/ethereum.svg`} />}
+								{token ? <img class='w-8 h-8' src={`/img/${token.address.toLowerCase()}.svg`} /> : <img class='w-8 h-8' src={`/img/ethereum.svg`} />}
 								<div class='text-left'>
-									<div>{favorite.label}</div>
+									<div>{template.label}</div>
 									<div class='overflow-hidden text-ellipsis whitespace-nowrap text-sm text-white/50'>
-										{favorite.amount} {favorite.token ? favorite.token.symbol : 'ETH'} to {favorite.recipientAddress}
+										{amount} {token ? token.symbol : 'ETH'} to {template.to}
 									</div>
 								</div>
 							</div>
@@ -52,12 +62,26 @@ export const Favorites = () => {
 
 type PromoteButtonProps = {
 	show: boolean
-	favorite: FavoriteModel
+	template: TransferTemplate
 	index: number
 }
 
 const MoveUpButton = (props: PromoteButtonProps) => {
-	const { swapIndex } = useFavorites()
+	const { cache } = useTemplates()
+	const templates = useComputed(() => cache.value.data)
+
+	const swapIndex = (indexA: number, indexB: number) => {
+		// ignore same indices swap
+		if (indexA === indexB) return
+
+		const orderedTemplates = [...templates.value]
+
+		const tempA = orderedTemplates[indexA]
+		orderedTemplates[indexA] = orderedTemplates[indexB]
+		orderedTemplates[indexB] = tempA
+
+		cache.value = { ...cache.peek(), data: orderedTemplates }
+	}
 
 	if (!props.show) return <></>
 	if (props.index === 0) return <div></div>
@@ -75,7 +99,12 @@ type RemoveButtonProps = {
 }
 
 const RemoveButton = (props: RemoveButtonProps) => {
-	const { remove } = useFavorites()
+	const { cache } = useTemplates()
+
+	const remove = (index: number) => {
+		const newData = [...cache.value.data.slice(0, index), ...cache.value.data.slice(index + 1)]
+		cache.value = { ...cache.peek(), data: newData }
+	}
 
 	if (!props.show) return <></>
 

@@ -45,7 +45,7 @@ export const Router = ({ children }: { children: unknown | unknown[] }) => {
 	return <>{router.value.activeRoute}</>
 }
 
-export function useRouter<T extends { [key: string]: string }>() {
+export function useRouter<T extends Partial<{ [key: string]: string }>>() {
 	return useComputed(() => ({ activeRoute: router.value.activeRoute, params: router.value.params as T }))
 }
 

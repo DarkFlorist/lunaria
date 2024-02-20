@@ -14,6 +14,7 @@ import { useNotice } from '../store/notice.js'
 import { TokenPicker } from './TokenPicker.js'
 import { TokenAdd } from './TokenAdd.js'
 import { TransferResult } from './TransferResult.js'
+import { TemplateFeeder } from './TemplateFeeder.js'
 
 export function SetupTransfer() {
 	return (
@@ -29,6 +30,7 @@ export function SetupTransfer() {
 				<TransferRecorder />
 				<TokenPicker />
 				<TokenAdd />
+				<TemplateFeeder />
 			</div>
 		</TransferForm>
 	)
@@ -82,6 +84,5 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 
 	useSignalEffect(listenForWalletsChainChange)
 	useSignalEffect(listenForQueryChanges)
-
 	return <form onSubmit={sendTransferRequest}>{children}</form>
 }

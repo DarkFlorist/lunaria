@@ -73,6 +73,9 @@ const MainPanel = () => {
 const LeftPanel = () => {
 	const { nav, main } = usePanels()
 
+	// full url without the hash route
+	const [baseUrl] = window.location.href.split('#')
+
 	return (
 		<Navigation>
 			<Header>
@@ -91,7 +94,7 @@ const LeftPanel = () => {
 
 			<div class='pl-4 mb-4'>
 				<div class='text-white/30 text-sm'>Actions</div>
-				<a href={window.location.href}>
+				<a href={baseUrl}>
 					<div class='grid grid-cols-[auto,1fr] items-center gap-4 mb-4'>
 						<div class='bg-white/30 w-10 h-10 rounded-full' />
 						<div class='py-2 leading-tight'>

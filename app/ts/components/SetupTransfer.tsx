@@ -77,7 +77,7 @@ const TransferForm = ({ children }: { children: ComponentChildren }) => {
 	}
 
 	const listenForWalletsChainChange = () => {
-		if (network.value.state !== 'resolved') return
+		if (network.value.state === 'resolved') return
 		// reset token input as it may not exist on the active network
 		input.value = { ...input.peek(), token: undefined }
 	}

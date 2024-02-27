@@ -66,6 +66,11 @@ jobs:
         run: |
           docker run -e NFTSTORAGE_API_KEY=${{ secrets.NFTSTORAGE_API_KEY }} $IMAGE_RELEASE_ID nft.storage
 
+      - name: Make a reference to built IPFS hash
+        if: github.ref_type == 'tag'
+        run: |
+          echo "IPFS_HASH=$(docker run --entrypoint /bin/sh $IMAGE_RELEASE_ID -c 'cat /ipfs_hash.txt')" >> $GITHUB_ENV
+
       - name: Create a release
         if: github.ref_type == 'tag'
         env:

@@ -1,9 +1,9 @@
 import { useComputed } from '@preact/signals'
-import { formatUnits } from 'ethers'
 import { useWallet } from '../context/Wallet.js'
 import { useTransferHistory } from '../context/TransferHistory.js'
 import { Transfer } from '../schema.js'
 import { TimeAgo } from './TimeAgo.js'
+import { AbbreviatedValue } from './AbbreviatedValue.js'
 
 export const TransferHistory = () => {
 	const history = useTransferHistory()
@@ -38,11 +38,10 @@ const HistoryList = ({ transfers }: { transfers: Transfer[] }) => {
 		<div>
 			{transfers.map(transfer => {
 				const timeStamp = new Date(transfer.date).getTime()
-				const amount = formatUnits(transfer.amount, transfer.token?.decimals)
 				return (
 					<a class='block bg-white/10 px-4 py-3 mb-1 hover:bg-white/20' href={`#tx/${transfer.hash}`}>
 						<div class='overflow-hidden text-ellipsis whitespace-nowrap'>
-							Sent {amount} {transfer.token?.name || 'ETH'} to {transfer.to}
+							Sent <AbbreviatedValue amount={transfer.amount} decimals={transfer.token?.decimals} /> {transfer.token?.name || 'ETH'} to {transfer.to}
 						</div>
 						<div class='text-sm text-white/50'>
 							<TimeAgo since={timeStamp} />

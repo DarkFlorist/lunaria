@@ -1,24 +1,40 @@
 import { ethers } from "ethers"
 
-export function bigintToRoundedPrettyDecimalString(value: bigint, power: bigint, significantNumbers = 4): string {
-	const numberParts = bigintToNumberFormatParts(value, power, significantNumbers)
-	let decimalString = ''
+export const bigintToNumberFormatParts = (amount: bigint, decimals = 18n, maximumSignificantDigits = 4) => {
+	const floatValue = Number(ethers.formatUnits(amount, decimals))
 
-	for (const { type, value } of numberParts) {
-		// convert American to Metric suffix
-		if (type === 'compact') {
-			if (value === 'K') decimalString += 'k'
-			if (value === 'B') decimalString += 'G'
-		}
-		decimalString += value
+	let formatterOptions: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 3 }
+
+	// maintain accuracy if value is a fraction of 1 ex 0.00001
+	if (floatValue % 1 === floatValue) formatterOptions.maximumSignificantDigits = maximumSignificantDigits
+
+	// apply only compacting with prefixes for values >= 10k or values <= -10k
+	if (Math.abs(floatValue) >= 1e4) {
+		formatterOptions = { minimumFractionDigits: 0, notation: 'compact' }
 	}
 
-	return decimalString
+	const formatter = new Intl.NumberFormat('en-US', formatterOptions)
+	const parts = formatter.formatToParts(floatValue)
+	const partsMap = new Map<Intl.NumberFormatPartTypes, string>()
+
+	for (const part of parts) {
+		if (part.type === 'compact') {
+			// replace American format with Metric prefixes https://www.ibiblio.org/units/prefixes.html
+			const prefix = part.value.replace('K', 'k').replace('B', 'G')
+			partsMap.set(part.type, prefix)
+			continue
+		}
+		partsMap.set(part.type, part.value)
+	}
+
+	return partsMap
 }
 
-export const bigintToNumberFormatParts = (amount: bigint, decimals = 18n, maximumSignificantDigits = 4) => {
-	const formatter = new Intl.NumberFormat('en-US', { maximumSignificantDigits, notation: 'compact' })
-	const floatValue = Number(ethers.formatUnits(amount, decimals))
-	// Typescript only accepts numbers as parameters for `formatToParts`, generally a string is also accepted
-	return formatter.formatToParts(Number(floatValue))
+export const bigintToRoundedPrettyDecimalString = (amount: bigint, decimals?: bigint, maximumSignificantDigits = 4) => {
+	const numberParts = bigintToNumberFormatParts(amount, decimals, maximumSignificantDigits)
+	let numberString = ''
+
+	for (const [_type, value] of numberParts) numberString += value
+
+	return numberString
 }

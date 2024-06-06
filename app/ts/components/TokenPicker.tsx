@@ -1,5 +1,5 @@
 import { batch, Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
-import { Contract, formatEther, formatUnits } from 'ethers'
+import { Contract } from 'ethers'
 import { useRef } from 'preact/hooks'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
@@ -180,12 +180,7 @@ const AssetBalance = ({ token }: { token?: ERC20Token }) => {
 		case 'rejected':
 			return <div>error</div>
 		case 'resolved':
-			const stringValue = token ? formatUnits(query.value.value, token.decimals) : formatEther(query.value.value)
-			const symbol = token ? token.symbol : 'ETH'
-			const numericValue = parseFloat(stringValue)
-			return (
-				<><AbbreviatedValue floatValue={numericValue} /> {symbol}</>
-			)
+			return <><AbbreviatedValue amount={query.value.value} decimals={token?.decimals} /> {token ? token.symbol : 'ETH'}</>
 	}
 }
 

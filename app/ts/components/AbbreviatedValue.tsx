@@ -1,28 +1,21 @@
-export const AbbreviatedValue = ({ floatValue }: { floatValue: number }) => {
-	const prefixes = [
-		{ value: 1e9, symbol: 'G' },
-		{ value: 1e6, symbol: 'M' },
-		{ value: 1e3, symbol: 'k' },
-	];
+import type { ComponentChild } from 'preact'
+import { bigintToNumberFormatParts } from '../library/bigint.utils.js'
 
-	for (const prefix of prefixes) {
-		if (floatValue >= prefix.value) {
-			return <>{toFixedLengthDigits(floatValue / prefix.value) + prefix.symbol}</>
+export const AbbreviatedValue = ({ amount, decimals = 18n }: { amount: bigint, decimals?: bigint }) => {
+	const numberParts = bigintToNumberFormatParts(amount, decimals)
+	const domElement: ComponentChild[] = []
+
+	for (const [type, value] of numberParts) {
+		if (type === 'fraction') {
+			const significantDigits = `${ Number(value) }`
+			const zeroPad = value.replace(significantDigits, '')
+			if (zeroPad.length) {
+				domElement.push(<><small>{ zeroPad }</small>{ significantDigits }</>)
+				continue
+			}
 		}
+		domElement.push([value])
 	}
 
-	// if value is a fraction of 1
-	if (floatValue && floatValue % 1 === floatValue) {
-		const [coefficient, exponent] = floatValue.toExponential().split('e')
-		const leadingZerosCount = Math.abs(parseInt(exponent)) - 1
-		const significantDigits = coefficient.replace('.', '')
-		return <>0.<small>{'0'.repeat(leadingZerosCount)}</small>{significantDigits}</>
-	}
-
-	return <>{toFixedLengthDigits(floatValue)}</>
-}
-
-function toFixedLengthDigits(num: number, max: number = 5) {
-	const formatter = new Intl.NumberFormat('en-US', { maximumSignificantDigits: max, useGrouping: false })
-	return formatter.format(num)
+	return <>{ domElement }</>
 }

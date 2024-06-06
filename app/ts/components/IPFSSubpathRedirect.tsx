@@ -12,12 +12,8 @@ export const IPFSSubpathRedirect = () => {
 
 	function generateIPFSRedirectUrl() {
 		const cidFromPath = extractHashFromBasePath()
-		console.log(cidFromPath)
 
-		if (!cidFromPath) {
-			console.log('No IPFS subpath detected')
-			return
-		}
+		if (!cidFromPath) return
 
 		const v1CidString = CID.parse(cidFromPath).toV1().toString()
 		if (!v1CidString) return

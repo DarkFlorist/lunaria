@@ -22,7 +22,7 @@ export const TransferResult = () => {
 	const recipientAddressIsChecksummed = useComputed(() => {
 		if (input.value.to === '') return true
 		try {
-			return Boolean(getAddress(input.value.to))
+			return input.value.to === getAddress(input.value.to)
 		} catch (error) {
 			if (isEthersError(error) && error.message.includes('bad address checksum')) return false
 			return true

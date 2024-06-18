@@ -1,19 +1,12 @@
-import { batch, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { useComputed } from '@preact/signals'
 import { useTransfer } from '../context/Transfer.js'
 import { useSignalRef } from '../library/preact-utilities.js'
+import { EthereumAddress } from '../schema.js'
 import * as Icon from './Icon/index.js'
 
 export const TransferAddressField = () => {
 	const transfer = useTransfer()
-	const isPristine = useSignal<true | undefined>(true)
 	const { ref, signal: inputRef } = useSignalRef<HTMLInputElement | null>(null)
-
-	const normalizeAndUpdateValue = (newValue: string) => {
-		batch(() => {
-			isPristine.value = undefined
-			transfer.input.value = { ...transfer.input.value, to: newValue.trim() }
-		})
-	}
 
 	const clearValue = () => {
 		if (inputRef.value) {
@@ -24,28 +17,28 @@ export const TransferAddressField = () => {
 		}
 	}
 
-	const validationMessage = useComputed(() => {
-		const safeParsedInput = transfer.safeParse.value
-		if (safeParsedInput.success || safeParsedInput.key !== 'to') return undefined
-		return 'Requires a valid address'
-	})
+	const isPristine = useComputed(() => transfer.input.value.to === '')
 
-	const validateField = () => {
-		if (inputRef.value === null) return
-		if (validationMessage.value === undefined) {
-			inputRef.value.setCustomValidity('')
+	const validateInput = (event: Event) => {
+		if (!(event.target instanceof HTMLInputElement)) return
+		const inputField = event.target
+		const fieldValue = inputField.value.trim()
+
+		transfer.input.value = { ...transfer.input.value, to: fieldValue }
+		const parsedAddress = EthereumAddress.safeParse(fieldValue)
+
+		if (parsedAddress.success) {
+			event.target.setCustomValidity('')
 			return
 		}
 
-		inputRef.value.setCustomValidity(validationMessage.value)
+		inputField.setCustomValidity(parsedAddress.message)
 	}
-
-	useSignalEffect(validateField)
 
 	return (
 		<fieldset data-pristine={isPristine.value} class='px-4 py-3 relative grid gap-2 grid-cols-1 grid-flow-col-dense items-center border border-white/50 focus-within:border-white disabled:bg-white/10 disabled:border-white/30 modified:enabled:invalid:border-red-400 group'>
 			<label class='absolute top-2 left-4 text-sm text-white/50 capitalize'>to</label>
-			<input ref={ref} type='text' value={transfer.input.value.to} onInput={e => normalizeAndUpdateValue(e.currentTarget.value)} required placeholder='0x0123...' class='peer outline-none pt-4 bg-transparent text-ellipsis disabled:text-white/30 placeholder:text-white/20 group-modified:enabled:invalid:text-red-400' />
+			<input ref={ref} type='text' value={transfer.input.value.to} onInput={validateInput} required placeholder='0x0123...' class='peer outline-none pt-4 bg-transparent text-ellipsis disabled:text-white/30 placeholder:text-white/20 group-modified:enabled:invalid:text-red-400' />
 			<ClearButton onClick={clearValue} />
 		</fieldset>
 	)

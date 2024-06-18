@@ -50,15 +50,8 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		if (!/^0x[0-9a-fA-F]+$/.test(value)) return { success: false, message: `${value} is not a hex string.` }
-		if (BigInt(value) >= 2n**160n) return { success: false, message: `${value} is not within a valid address range.` }
-
-		// remove padded zeros for addresses like logs
-		const noPadAddress = `0x${BigInt(value).toString(16).padStart(40, '0')}`
-
-		// get checksummed address
-		const checksummedAddress = getAddress(noPadAddress.toLowerCase())
-
+		if (!/^(0x)?[0-9a-fA-F]{40}$/.test(value)) return { success: false, message: `${value} is not a valid address.` }
+		const checksummedAddress = getAddress(value.toLowerCase())
 		return { success: true, value: checksummedAddress }
 	},
 	serialize: funtypes.String.safeParse,
@@ -89,7 +82,7 @@ export const TransferSchema = funtypes.Object({
 export type Transfer = funtypes.Static<typeof TransferSchema>
 
 export const TransferRequestInput = funtypes.Object({
-	to: EthereumAddress,
+	to: funtypes.String,
 	amount: BigIntHex,
 	token: ERC20Token.Or(funtypes.Undefined),
 })

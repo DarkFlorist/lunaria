@@ -180,7 +180,7 @@ const QueryAddressField = () => {
 }
 
 const QueryStatus = () => {
-	const { tokenQuery } = useTokenQuery()
+	const { address, tokenQuery } = useTokenQuery()
 
 	switch (tokenQuery.value.state) {
 		case 'inactive':
@@ -206,13 +206,27 @@ const QueryStatus = () => {
 			)
 		case 'resolved':
 			const token = serialize(ERC20Token, tokenQuery.value.value)
+
 			return (
-				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1'>
-					<div><span class='text-white/50 text-sm'>Found a matching address</span></div>
-					<div>{ token.name } <span class='text-white/50'>({ token.symbol })</span></div>
-				</div>
+				<>
+					<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1'>
+						<div><span class='text-white/50 text-sm'>Found a matching address</span></div>
+						<div>{ token.name } <span class='text-white/50'>({ token.symbol })</span></div>
+						<AddressChecksumWarning show={token.address !== address.value} />
+					</div>
+				</>
 			)
 	}
+}
+
+const AddressChecksumWarning = ({ show }: { show?: boolean }) => {
+	if (!show) return <></>
+	return (
+		<div class='flex flex-col gap-y-1 py-2'>
+			<p class='text-amber-500 text-sm'>You entered an address that does not have the correct checksum and Lunaria tried to fetch the address without it.</p>
+			<label class='flex items-center gap-x-2 text-sm'><input type='checkbox' required /> I've verified the result is indeed the token contract I want to add.</label>
+		</div>
+	)
 }
 
 const TokenDataToFields = () => {

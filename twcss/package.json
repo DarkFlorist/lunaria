@@ -1,11 +1,11 @@
 {
 	"name": "lunaria-styles",
 	"scripts": {
-		"styles": "npx tailwindcss@3.3.3 -c tailwind.config.js -i tailwind.globals.css -o ../app/css/index.css --postcss ./postcss.config.js"
+		"styles": "npx tailwindcss@3.4.4 -c tailwind.config.js -i tailwind.globals.css -o ../app/css/index.css --postcss ./postcss.config.js"
 	},
 	"dependencies": {
 		"autoprefixer": "10.4.15",
 		"prettifycss": "file:prettifycss",
-		"tailwindcss": "3.3.3"
+		"tailwindcss": "3.4.4"
 	}
 }

@@ -16,7 +16,7 @@
 		"noImplicitThis": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
-		"lib": ["ES2021"],
+		"lib": ["ES2021", "dom.iterable"],
 		"typeRoots": ["./node_modules/@types"],
 		"types": []
 	},

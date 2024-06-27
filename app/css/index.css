@@ -1269,6 +1269,11 @@ input[type='password']:autofill {
 	line-height: 1.25;
 }
 
+.text-amber-500 {
+	--tw-text-opacity: 1;
+	color: rgb(245 158 11 / var(--tw-text-opacity));
+}
+
 .text-gray-900 {
 	--tw-text-opacity: 1;
 	color: rgb(17 24 39 / var(--tw-text-opacity));

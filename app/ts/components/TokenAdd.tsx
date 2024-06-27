@@ -153,12 +153,12 @@ const QueryAddressField = () => {
 		if (!(event.target instanceof HTMLInputElement)) return
 		const inputField = event.target
 
+		address.value = inputField.value
+
 		if (inputField.value === '') {
 			inputField.setCustomValidity('')
 			return
 		}
-
-		address.value = inputField.value
 
 		const parsedAddress = EthereumAddress.safeParse(inputField.value)
 		if (!parsedAddress.success) {
@@ -208,13 +208,14 @@ const QueryStatus = () => {
 			const token = serialize(ERC20Token, tokenQuery.value.value)
 
 			return (
-				<>
-					<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1'>
-						<div><span class='text-white/50 text-sm'>Found a matching address</span></div>
-						<div>{ token.name } <span class='text-white/50'>({ token.symbol })</span></div>
-						<AddressChecksumWarning show={token.address !== address.value} />
+				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1 gap-y-2'>
+					<div class='text-white/50 text-sm'>Found a matching address</div>
+					<div class='grid grid-cols-1 gap-y-1'>
+						<div><span class='font-bold'>{ token.name }</span> <span class='text-white/50'>({ token.symbol })</span></div>
+						<pre class='px-3 py-2 border border-white/10 font-mono bg-white/10 text-white/80 text-sm'>{ token.address }</pre>
 					</div>
-				</>
+					<AddressChecksumWarning show={ token.address !== address.value } />
+				</div>
 			)
 	}
 }
@@ -222,10 +223,10 @@ const QueryStatus = () => {
 const AddressChecksumWarning = ({ show }: { show?: boolean }) => {
 	if (!show) return <></>
 	return (
-		<div class='flex flex-col gap-y-1 py-2'>
+		<>
 			<p class='text-amber-500 text-sm'>You entered an address that does not have the correct checksum and Lunaria tried to fetch the address without it.</p>
 			<label class='flex items-center gap-x-2 text-sm'><input type='checkbox' required /> I've verified the result is indeed the token contract I want to add.</label>
-		</div>
+		</>
 	)
 }
 

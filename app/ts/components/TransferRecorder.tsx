@@ -20,7 +20,7 @@ export const TransferRecorder = () => {
 
 		return {
 			from: EthereumAddress.parse(currentTransaction.from),
-			to: inputs.to,
+			to: EthereumAddress.parse(inputs.to),
 			amount: inputs.amount,
 			date: Date.now(),
 			hash: currentTransaction.hash,

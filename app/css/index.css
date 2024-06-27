@@ -558,10 +558,6 @@ input[type='password']:autofill {
 	z-index: 50;
 }
 
-.col-span-2 {
-	grid-column: span 2 / span 2;
-}
-
 .col-span-full {
 	grid-column: 1 / -1;
 }
@@ -596,6 +592,16 @@ input[type='password']:autofill {
 .my-\[10\%\] {
 	margin-top: 10%;
 	margin-bottom: 10%;
+}
+
+.my-2 {
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.my-3 {
+	margin-top: 0.75rem;
+	margin-bottom: 0.75rem;
 }
 
 .mb-1 {
@@ -994,6 +1000,10 @@ input[type='password']:autofill {
 	white-space: pre-wrap;
 }
 
+.break-words {
+	overflow-wrap: break-word;
+}
+
 .rounded {
 	border-radius: 0.25rem;
 }
@@ -1192,6 +1202,11 @@ input[type='password']:autofill {
 	padding-bottom: 1rem;
 }
 
+.py-1 {
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
+}
+
 .pl-4 {
 	padding-left: 1rem;
 }
@@ -1210,6 +1225,10 @@ input[type='password']:autofill {
 
 .text-center {
 	text-align: center;
+}
+
+.font-mono {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
 .text-2xl {
@@ -1271,6 +1290,11 @@ input[type='password']:autofill {
 	line-height: 1.25;
 }
 
+.text-amber-500 {
+	--tw-text-opacity: 1;
+	color: rgb(245 158 11 / var(--tw-text-opacity));
+}
+
 .text-gray-900 {
 	--tw-text-opacity: 1;
 	color: rgb(17 24 39 / var(--tw-text-opacity));
@@ -1289,20 +1313,8 @@ input[type='password']:autofill {
 	color: rgb(255 255 255 / 0.5);
 }
 
-.text-white\/75 {
-	color: rgb(255 255 255 / 0.75);
-}
-
 .text-white\/80 {
 	color: rgb(255 255 255 / 0.8);
-}
-
-.underline {
-	text-decoration-line: underline;
-}
-
-.underline-offset-2 {
-	text-underline-offset: 2px;
 }
 
 .opacity-0 {
@@ -1469,6 +1481,11 @@ input[type='password']:autofill {
 	backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 
+.before\:content-\[\"Show\"\]::before {
+	--tw-content: 'Show';
+	content: var(--tw-content);
+}
+
 .focus-within\:border-red-400:focus-within {
 	--tw-border-opacity: 1;
 	border-color: rgb(248 113 113 / var(--tw-border-opacity));
@@ -1588,6 +1605,11 @@ input[type='password']:autofill {
 	display: block;
 }
 
+.group:is([open]) .group-\[\:is\(\[open\]\)\]\:before\:content-\[\"Hide\"\]::before {
+	--tw-content: 'Hide';
+	content: var(--tw-content);
+}
+
 .peer:checked ~ .peer-checked\:hidden {
 	display: none;
 }
@@ -1627,18 +1649,9 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
-.focus\|hover\:border-white:focus {
-	--tw-border-opacity: 1;
-	border-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-
 .focus\|hover\:bg-neutral-800:focus {
 	--tw-bg-opacity: 1;
 	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
-}
-
-.focus\|hover\:bg-white\/10:focus {
-	background-color: rgb(255 255 255 / 0.1);
 }
 
 .focus\|hover\:text-white:focus {
@@ -1659,18 +1672,9 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
-.focus\|hover\:border-white:hover {
-	--tw-border-opacity: 1;
-	border-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-
 .focus\|hover\:bg-neutral-800:hover {
 	--tw-bg-opacity: 1;
 	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
-}
-
-.focus\|hover\:bg-white\/10:hover {
-	background-color: rgb(255 255 255 / 0.1);
 }
 
 .focus\|hover\:text-white:hover {
@@ -1766,4 +1770,9 @@ input[type='password']:autofill {
 	.xl\:grid-cols-5 {
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 	}
+}
+
+.\[\&\:not\(\:placeholder-shown\)\]\:invalid\:text-red-400:invalid:not(:placeholder-shown) {
+	--tw-text-opacity: 1;
+	color: rgb(248 113 113 / var(--tw-text-opacity));
 }

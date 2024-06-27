@@ -1,12 +1,12 @@
-import { useComputed, useSignal } from '@preact/signals'
+import { useComputed } from '@preact/signals'
 import { useWallet } from '../context/Wallet.js'
 import { useNotification } from '../context/Notification.js'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
 import { humanReadableEthersError, isEthersError } from '../library/errors.js'
 import { areEqualStrings } from '../library/utilities.js'
-import { EthereumAddress } from '../schema.js'
 import { CopyButton } from './CopyButton.js'
+import { getAddress } from 'ethers'
 
 export const TransferResult = () => {
 	const { account } = useWallet()
@@ -19,7 +19,15 @@ export const TransferResult = () => {
 		return account.value.value === input.value.to
 	})
 
-	EthereumAddress.safeParse('')
+	const recipientChecksumValid = useComputed(() => {
+		const inputAddress = input.value.to
+
+		if (inputAddress.match(/^(0x)?[0-9a-fA-F]{40}$/)) {
+			if (getAddress(inputAddress.toLowerCase()) !== inputAddress && inputAddress.toLowerCase() !== inputAddress) return false
+		}
+
+		return true
+	})
 
 	const recipientIsAKnownToken = useComputed(() => tokensCache.value.data.some(token => areEqualStrings(token.address, input.value.to)))
 
@@ -30,6 +38,9 @@ export const TransferResult = () => {
 			}
 			if (recipientIsAKnownToken.value) {
 				return <ConfirmField title='Warning: Recipient is a token address' description='The recipient address provided is a token contract address and will probably result in a loss of funds.' label='I understand that this will probably result in a loss of funds.' />
+			}
+			if (!recipientChecksumValid.value) {
+				return <ConfirmField title='Warning: Invalid Address Checksum' description='The recipient address does not pass the checksum validation. Please check the address entered has the correct letter-casing.' label='I understand the risk and want to continue anyway.' />
 			}
 			return <></>
 		case 'rejected':
@@ -47,7 +58,7 @@ export const TransferResult = () => {
 				errorMessage = message
 			}
 
-			return <ErrorDetails summary={errorMessage} message={txError.message} />
+			return <ErrorDetails summary={ errorMessage } message={ txError.message } />
 		case 'resolved':
 		case 'pending':
 			return <></>
@@ -55,32 +66,23 @@ export const TransferResult = () => {
 }
 
 const ErrorDetails = ({ message, summary }: { message: string, summary: string }) => {
-	const displayMessage = useSignal(false)
-	const toggleMessageDisplay = () => displayMessage.value = !displayMessage.peek()
-
 	return (
-		<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] gap-x-3 items-center'>
+		<div class='border border-red-400/50 bg-red-400/10 px-4 py-3 grid grid-cols-[min-content,1fr] gap-x-3 items-center min-w-0'>
 			<div>
 				<ExclamationIcon />
 			</div>
-			<div>
+			<div class='min-w-0'>
 				<div class='font-semibold'>Transaction failed!</div>
-				<p>
-					<span class='text-sm text-white/50'>{summary}.</span>&nbsp;
-					<button type='button' class='appearance-none outline-none underline text-sm text-white/75 underline-offset-2 focus|hover:text-white' onClick={toggleMessageDisplay}>{displayMessage.value ? 'Hide' : 'Show'} details</button>
-				</p>
-			</div>
-			<div class='col-span-2'>
-				{
-					displayMessage.value ? (
-						<div class='border border-white/10 bg-white/5 px-3 py-2 mt-2 group relative'>
-							<pre class='whitespace-pre-wrap text-sm text-white/30 mb-2'>{message}</pre>
-							<div class='absolute right-2 bottom-2 hidden group-hover:block'>
-								<CopyButton value={message} withLabel />
-							</div>
+				<div class='text-sm text-white/50 break-words'>{ summary }</div>
+				<details class='group'>
+					<summary class='cursor-pointer before:content-["Show"] group-[:is([open])]:before:content-["Hide"]'> details</summary>
+					<div class='border border-white/10 bg-white/5 px-3 py-2 mt-2 group relative'>
+						<pre class='whitespace-pre-wrap text-sm text-white/30'>{ message }</pre>
+						<div class='absolute right-2 bottom-2 hidden group-hover:block'>
+							<CopyButton value={ message } withLabel />
 						</div>
-					) : <></>
-				}
+					</div>
+				</details>
 			</div>
 		</div>
 	)
@@ -99,12 +101,12 @@ const ConfirmField = ({ title, description, label }: ConfirmFieldProps) => {
 				<ExclamationIcon />
 			</div>
 			<div>
-				<div class='font-semibold leading-tight'>{title}</div>
-				<div class='text-sm text-white/50 mb-2 leading-tight'>{description}</div>
+				<div class='font-semibold leading-tight'>{ title }</div>
+				<div class='text-sm text-white/50 mb-2 leading-tight'>{ description }</div>
 			</div>
 			<label class='grid grid-cols-[min-content,1fr] gap-x-3 items-start'>
 				<input class='h-5' type='checkbox' required />
-				<span class='leading-tight'>{label}</span>
+				<span class='leading-tight'>{ label }</span>
 			</label>
 		</div>
 	)

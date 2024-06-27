@@ -1609,6 +1609,11 @@ input[type='password']:autofill {
 	display: none;
 }
 
+.has-\[\:not\(\:placeholder-shown\)\:invalid\]\:border-red-400:has(:not(:placeholder-shown):invalid) {
+	--tw-border-opacity: 1;
+	border-color: rgb(248 113 113 / var(--tw-border-opacity));
+}
+
 .modified\:enabled\:invalid\:border-red-400:invalid:not(:disabled):not([data-pristine]) {
 	--tw-border-opacity: 1;
 	border-color: rgb(248 113 113 / var(--tw-border-opacity));
@@ -1623,18 +1628,9 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
-.focus\|hover\:border-white:focus {
-	--tw-border-opacity: 1;
-	border-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-
 .focus\|hover\:bg-neutral-800:focus {
 	--tw-bg-opacity: 1;
 	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
-}
-
-.focus\|hover\:bg-white\/10:focus {
-	background-color: rgb(255 255 255 / 0.1);
 }
 
 .focus\|hover\:text-white:focus {
@@ -1655,18 +1651,9 @@ input[type='password']:autofill {
 	border-width: 1px;
 }
 
-.focus\|hover\:border-white:hover {
-	--tw-border-opacity: 1;
-	border-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-
 .focus\|hover\:bg-neutral-800:hover {
 	--tw-bg-opacity: 1;
 	background-color: rgb(38 38 38 / var(--tw-bg-opacity));
-}
-
-.focus\|hover\:bg-white\/10:hover {
-	background-color: rgb(255 255 255 / 0.1);
 }
 
 .focus\|hover\:text-white:hover {
@@ -1762,4 +1749,9 @@ input[type='password']:autofill {
 	.xl\:grid-cols-5 {
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 	}
+}
+
+.\[\&\:not\(\:placeholder-shown\)\]\:invalid\:text-red-400:invalid:not(:placeholder-shown) {
+	--tw-text-opacity: 1;
+	color: rgb(248 113 113 / var(--tw-text-opacity));
 }

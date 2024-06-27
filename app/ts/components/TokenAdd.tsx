@@ -1,19 +1,17 @@
-import { batch, Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { Signal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { Contract } from 'ethers'
-import { Result } from 'funtypes'
-import { ComponentChildren } from 'preact'
+import { ComponentChildren, createContext } from 'preact'
 import { useTokenManager } from '../context/TokenManager.js'
 import { useTransfer } from '../context/Transfer.js'
 import { useEthereumProvider } from '../context/Ethereum.js'
 import { ERC20ABI } from '../library/ERC20ABI.js'
-import { useAsyncState, useSignalRef } from '../library/preact-utilities.js'
+import { AsyncProperty, useAsyncState, useSignalRef } from '../library/preact-utilities.js'
 import { ERC20Token, EthereumAddress, serialize } from '../schema.js'
 import { useNotice } from '../store/notice.js'
 import * as Icon from './Icon/index.js'
+import { useContext, useRef } from 'preact/hooks'
 
 export const TokenAdd = () => {
-	const queryResult = useSignal<Result<EthereumAddress> | undefined>(undefined)
-
 	return (
 		<AddTokenDialog>
 			<div class='lg:w-[32rem] mx-auto'>
@@ -21,8 +19,11 @@ export const TokenAdd = () => {
 				<div class='px-4 mb-3 text-white/50'>Enter the token's contract address to retrieve details</div>
 				<form method='dialog'>
 					<div class='px-4 grid gap-y-3'>
-						<QueryAddressField result={queryResult} />
-						<QueryResult result={queryResult} />
+						<TokenQueryProvider>
+							<QueryAddressField />
+							<QueryStatus />
+							<TokenDataToFields />
+						</TokenQueryProvider>
 					</div>
 				</form>
 			</div>
@@ -30,9 +31,70 @@ export const TokenAdd = () => {
 	)
 }
 
+type TokenQueryContext = {
+	address: Signal<string>
+	tokenQuery: Signal<AsyncProperty<ERC20Token>>
+}
+
+const TokenQueryContext = createContext<TokenQueryContext | undefined>(undefined)
+
+const TokenQueryProvider = ({ children }: { children: ComponentChildren }) => {
+	const { browserProvider, network } = useEthereumProvider()
+	const { notify } = useNotice()
+	const { value: tokenQuery, waitFor, reset } = useAsyncState<ERC20Token>()
+	const address = useSignal('')
+
+	const addressChecksum = useComputed(() => EthereumAddress.safeParse(address.value))
+
+	const queryAddress = (tokenAddress: EthereumAddress) => {
+		if (!browserProvider.value) {
+			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
+			return
+		}
+
+		if (network.value.state !== 'resolved') {
+			notify({ message: 'Your wallet may not connected to the chain.', title: 'Network unavailable' })
+			return
+		}
+
+		const activeChainId = network.value.value.chainId
+		const provider = browserProvider.value
+
+		waitFor(async () => {
+			const contract = new Contract(tokenAddress, ERC20ABI, provider)
+			const namePromise = contract.name()
+			const symbolPromise = contract.symbol()
+			const decimalsPromise = contract.decimals()
+			const name = await namePromise
+			const symbol = await symbolPromise
+			const decimals = await decimalsPromise
+			const chainId = activeChainId
+			return { chainId, name, symbol, decimals, address: tokenAddress }
+		})
+	}
+
+	useSignalEffect(() => {
+		if (!addressChecksum.value.success) {
+			reset()
+			return
+		}
+		queryAddress(addressChecksum.value.value)
+	})
+
+	return <TokenQueryContext.Provider value={ { address, tokenQuery } }>{ children }</TokenQueryContext.Provider>
+}
+
+const useTokenQuery = () => {
+	const context = useContext(TokenQueryContext)
+	if (context === undefined) throw new Error('useTokenQuery can only be used within children of TokenQueryProvider')
+	return context
+}
+
+
 const AddTokenDialog = ({ children }: { children: ComponentChildren }) => {
 	const { ref, signal: dialogRef } = useSignalRef<HTMLDialogElement | null>(null)
-	const { stage } = useTokenManager()
+	const { cache, stage } = useTokenManager()
+	const { input } = useTransfer()
 
 	const closeDialogOnBackdropClick = (e: Event) => {
 		const isClickWithinDialog = e.type === 'click' && e.target !== dialogRef?.value
@@ -58,110 +120,69 @@ const AddTokenDialog = ({ children }: { children: ComponentChildren }) => {
 		return () => document.removeEventListener('click', closeDialogOnBackdropClick)
 	}
 
+	const handleDialogSubmit = (event: Event) => {
+		if (!(event.target instanceof HTMLFormElement)) return
+		const formData = new FormData(event.target)
+		const parsedToken = ERC20Token.safeParse(Object.fromEntries(formData.entries()))
+		if (parsedToken.success) {
+			cache.value = Object.assign({}, cache.peek(), { data: cache.peek().data.concat([parsedToken.value]) })
+			input.value = Object.assign({}, input.peek(), { token: parsedToken.value })
+		}
+	}
+
 	useSignalEffect(showOrHideDialog)
 	useSignalEffect(setClickListenerForDialog)
 
 	return (
-		<dialog ref={ref} class='w-full text-white backdrop:bg-black/80 backdrop:backdrop-blur-[2px] max-w-full max-h-full md:max-w-fit md:max-h-[calc(100vh-3rem)] md:max-w-fit bg-transparent'>
-			{children}
+		<dialog ref={ ref } class='w-full text-white backdrop:bg-black/80 backdrop:backdrop-blur-[2px] max-w-full max-h-full md:max-w-fit md:max-h-[calc(100vh-3rem)] md:max-w-fit bg-transparent' onSubmit={ handleDialogSubmit }>
+			{ children }
 		</dialog>
 	)
 }
 
-const QueryAddressField = ({ result }: { result: Signal<Result<EthereumAddress> | undefined> }) => {
-	const query = useSignal('')
-	const isPristine = useSignal<true | undefined>(true)
-	const { ref, signal: inputRef } = useSignalRef<HTMLInputElement | null>(null)
-
-	const parsedAddress = useComputed(() => EthereumAddress.safeParse(query.value))
-
-	const normalizeAndUpdateValue = (newValue: string) => {
-		batch(() => {
-			isPristine.value = undefined
-			query.value = newValue.trim()
-		})
-	}
+const QueryAddressField = () => {
+	const inputRef = useRef<HTMLInputElement>(null)
+	const { address } = useTokenQuery()
 
 	const clearValue = () => {
-		if (inputRef.value) {
-			inputRef.value.value = ''
-			const inputEvent = new InputEvent('input')
-			inputRef.value.dispatchEvent(inputEvent)
-			inputRef.value.focus()
-		}
+		if (!inputRef.current) return
+		inputRef.current.value = ''
 	}
 
-	const validationMessage = useComputed(() => {
-		if (parsedAddress.value.success) return undefined
-		return 'Invalid ERC20 contract address.'
-	})
+	const validateInputAndUpdateContext = (event: Event) => {
+		if (!(event.target instanceof HTMLInputElement)) return
+		const inputField = event.target
 
-	const validateField = () => {
-		if (inputRef.value === null) return
-		if (validationMessage.value === undefined) {
-			inputRef.value.setCustomValidity('')
+		if (inputField.value === '') {
+			inputField.setCustomValidity('')
 			return
 		}
 
-		inputRef.value.setCustomValidity(validationMessage.value)
-		inputRef.value.reportValidity()
+		address.value = inputField.value
+
+		const parsedAddress = EthereumAddress.safeParse(inputField.value)
+		if (!parsedAddress.success) {
+			event.target.setCustomValidity('Requires a valid ERC20 contract address')
+			event.target.reportValidity()
+			return
+		}
+
+		event.target.setCustomValidity('')
 	}
 
-	useSignalEffect(() => {
-		result.value = parsedAddress.value
-	})
-	useSignalEffect(validateField)
-
 	return (
-		<fieldset data-pristine={isPristine.value} class='px-4 py-3 relative grid gap-2 grid-cols-1 grid-flow-col-dense items-center border border-white/50 focus-within:border-white disabled:bg-white/10 disabled:border-white/30 modified:enabled:invalid:border-red-400 group'>
+		<fieldset class='px-4 py-3 relative grid gap-2 grid-cols-1 grid-flow-col-dense items-center border border-white/50 focus-within:border-white disabled:bg-white/10 disabled:border-white/30 has-[:not(:placeholder-shown):invalid]:border-red-400'>
 			<label class='absolute top-2 left-4 text-sm text-white/50 capitalize'>contract address</label>
-			<input ref={ref} type='text' value={query.value} onInput={e => normalizeAndUpdateValue(e.currentTarget.value)} required placeholder='0x0123...' class='peer outline-none pt-4 bg-transparent text-ellipsis disabled:text-white/30 placeholder:text-white/20 group-modified:enabled:invalid:text-red-400' />
-			<ClearButton onClick={clearValue} />
+			<input ref={ inputRef } type='text' onInput={ validateInputAndUpdateContext } required placeholder='0x0123...' class='peer outline-none pt-4 bg-transparent text-ellipsis disabled:text-white/30 placeholder:text-white/20 [&:not(:placeholder-shown)]:invalid:text-red-400' />
+			<ClearButton onClick={ clearValue } />
 		</fieldset>
 	)
 }
 
-const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | undefined> }) => {
-	const { notify } = useNotice()
-	const { value: query, waitFor, reset } = useAsyncState<ERC20Token>()
-	const { browserProvider, network } = useEthereumProvider()
+const QueryStatus = () => {
+	const { tokenQuery } = useTokenQuery()
 
-	const getTokenMetadata = () => {
-		if (!result.value?.success) {
-			reset()
-			return
-		}
-
-		if (!browserProvider.value) {
-			notify({ message: 'No compatible web3 wallet detected.', title: 'Failed to connect' })
-			return
-		}
-
-		if (network.value.state !== 'resolved') {
-			notify({ message: 'Your wallet may not connected to the chain.', title: 'Network unavailable' })
-			return
-		}
-
-		const tokenAddress = result.value.value
-		const activeChainId = network.value.value.chainId
-		const provider = browserProvider.value
-
-		waitFor(async () => {
-			const contract = new Contract(tokenAddress, ERC20ABI, provider)
-			const namePromise = contract.name()
-			const symbolPromise = contract.symbol()
-			const decimalsPromise = contract.decimals()
-			const name = await namePromise
-			const symbol = await symbolPromise
-			const decimals = await decimalsPromise
-			const chainId = activeChainId
-			return { chainId, name, symbol, decimals, address: tokenAddress }
-		})
-	}
-
-	useSignalEffect(getTokenMetadata)
-
-	switch (query.value.state) {
+	switch (tokenQuery.value.state) {
 		case 'inactive':
 			return <></>
 		case 'pending':
@@ -184,49 +205,36 @@ const QueryResult = ({ result }: { result: Signal<Result<EthereumAddress> | unde
 				</div>
 			)
 		case 'resolved':
-			const token = serialize(ERC20Token, query.value.value)
-			const parsedToken = ERC20Token.parse(token)
-
+			const token = serialize(ERC20Token, tokenQuery.value.value)
 			return (
-				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-[1fr,min-content] gap-x-2 items-center'>
-					<div>
-						{token.name} <span class='text-white/50'>({token.symbol})</span>
-					</div>
-					<UseTokenButton token={parsedToken} />
+				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1'>
+					<div><span class='text-white/50 text-sm'>Found a matching address</span></div>
+					<div>{ token.name } <span class='text-white/50'>({ token.symbol })</span></div>
 				</div>
 			)
 	}
 }
 
-const UseTokenButton = ({ token }: { token: ERC20Token }) => {
-	const { cache, stage } = useTokenManager()
-	const { input } = useTransfer()
+const TokenDataToFields = () => {
+	const { cache } = useTokenManager()
+	const { tokenQuery } = useTokenQuery()
 
+	if (tokenQuery.value.state !== 'resolved') return <></>
+
+	const token = serialize(ERC20Token, tokenQuery.value.value)
 	const tokenExistsInCache = useComputed(() => cache.value.data.some(t => t.address === token.address))
 
-	const saveNewToken = () => {
-		cache.value = Object.assign({}, cache.peek(), { data: cache.peek().data.concat([token]) })
-	}
-
-	const useToken = () => {
-		batch(() => {
-			if (!tokenExistsInCache.value) saveNewToken()
-			input.value = Object.assign({}, input.peek(), { token })
-			stage.value = undefined
-		})
-	}
-
 	return (
-		<button type='button' class='outline-none border border-white/50 focus|hover:border-white focus|hover:bg-white/10 px-4 h-10 whitespace-nowrap grid grid-cols-[min-content,1fr] gap-x-1 items-center font-semibold' onClick={useToken}>
-			<PlusIcon />
-			<span>{!tokenExistsInCache.value ? 'Save and ' : ''}Use</span>
-		</button>
+		<>
+			{ Object.keys(token).map(key => <input type='hidden' name={ key } value={ token[key as keyof typeof token] } />) }
+			<button type='submit' class='px-4 py-3 border border-white/50 hover:bg-white/10 hover:border-white text-center outline-none flex gap-x-1 items-center justify-center'><PlusIcon />{ tokenExistsInCache.value ? '' : 'Save and ' }Use</button>
+		</>
 	)
 }
 
 const ClearButton = ({ onClick }: { onClick: () => void }) => {
 	return (
-		<button type='button' onClick={onClick} class='outline-none w-8 h-8 flex items-center justify-center border border-white/50 text-white/50 peer-placeholder-shown:hidden peer-disabled:hidden focus:text-white focus:border-white hover:text-white hover:border-white text-xs'>
+		<button type='button' onClick={ onClick } class='outline-none w-8 h-8 flex items-center justify-center border border-white/50 text-white/50 peer-placeholder-shown:hidden peer-disabled:hidden focus:text-white focus:border-white hover:text-white hover:border-white text-xs'>
 			<Icon.Xmark />
 		</button>
 	)

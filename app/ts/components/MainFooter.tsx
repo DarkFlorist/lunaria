@@ -1,3 +1,5 @@
+import { gitCommitSha, version } from "../version.js"
+
 export const MainFooter = () => {
 	return (
 		<div class='p-4'>
@@ -21,7 +23,7 @@ export const MainFooter = () => {
 
 			<div class='text-white/50 text-center'>
 				<div class='mt-8'>
-					Lunaria by{' '}
+					Lunaria <span title={gitCommitSha} class='inline-block text-xs bg-white/50 text-black px-1 rounded-sm'>{version}</span> by{' '}
 					<a class='text-white hover:underline' href='https://dark.florist'>
 						Dark Florist
 					</a>

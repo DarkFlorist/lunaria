@@ -4,6 +4,11 @@
 
 FROM node:20-alpine3.19@sha256:e96618520c7db4c3e082648678ab72a49b73367b9a1e7884cf75ac30a198e454 as builder
 
+ARG GIT_TAG
+ENV GIT_TAG=$GIT_TAG
+ARG GIT_COMMIT_SHA
+ENV GIT_COMMIT_SHA=$GIT_COMMIT_SHA
+
 # Install app dependencies
 COPY ./package.json /source/package.json
 COPY ./package-lock.json /source/package-lock.json
@@ -21,6 +26,13 @@ COPY ./tsconfig.json /source/tsconfig.json
 COPY ./app/css/ /source/app/css/
 COPY ./app/img/ /source/app/img/
 COPY ./app/ts/ /source/app/ts/
+RUN if [ -n "$GIT_COMMIT_SHA" ] && [ -n "$GIT_TAG" ]; then \
+		echo "export const gitCommitSha = '$GIT_COMMIT_SHA'" > /source/app/ts/version.ts && \
+		echo "export const version = '$GIT_TAG'" >> /source/app/ts/version.ts; \
+	else \
+		echo "GIT_COMMIT_SHA or GIT_TAG is not set. Skipping copy and build."; \
+	fi
+RUN cat /source/app/ts/version.ts
 RUN npm run build
 
 # --------------------------------------------------------

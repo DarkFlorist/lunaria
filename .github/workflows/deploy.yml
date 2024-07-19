@@ -15,6 +15,11 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Install and Build
         run: |
+          VERSION_FILE=app/ts/version.ts
+          GIT_COMMIT_SHA="${{ github.sha }}"
+          GIT_TAG=$(basename "${{ github.ref }}")
+          echo export const gitCommitSha = \"$GIT_COMMIT_SHA\" > $VERSION_FILE
+          echo export const version = \"$VERSION\" >> $VERSION_FILE
           npm install --ignore-scripts
           npm run vendor
           npm run build

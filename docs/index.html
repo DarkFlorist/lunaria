@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+	<title>Lunaria</title>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width, initial-scale=1.0' />
+
+	<!-- support hosting from a subpath such as ipfs -->
+	<script>
+		const subPath = window.location.pathname.replace('index.html', '').replace(/\/$/, '')
+		if (subPath) {
+			const baseElement = document.createElement('base')
+			baseElement.setAttribute('href', `${subPath}/`)
+			document.head.appendChild(baseElement)
+		}
+	</script>
+
+	<link rel="icon" type="image/svg+xml" href="./img/icon-lunaria.svg" />
+	<link rel='stylesheet' href='./css/index.css' />
+	<style>
+		.splash-screen {
+			position: fixed;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background-color: black;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			visibility: visible;
+			opacity: 1;
+			transform: scale(1);
+			transition: all 400ms 400ms;
+			background: radial-gradient(145.6% 145.6% at 50% 0%, #33003c 0%, #10001f 55.73%, #000000 100%);
+		}
+
+		.splash-screen h1 {
+			margin-bottom: 0.5rem;
+			font-size: 1.5rem;
+			font-weight: bold;
+		}
+
+		.splash-screen--off {
+			visibility: hidden;
+			opacity: 0;
+			pointer-events: none;
+			transform: scale(1.5);
+		}
+
+		.splash-screen circle {
+			animation: fade-dots 0.8s linear infinite;
+		}
+
+		.splash-screen circle:nth-child(1) {
+			animation-delay: -0.8s;
+		}
+
+		.splash-screen circle:nth-child(2) {
+			animation-delay: -0.65s;
+		}
+
+		.splash-screen circle:nth-child(3) {
+			animation-delay: -0.5s;
+		}
+
+		@keyframes fade-dots {
+
+			93.75%,
+			100% {
+				opacity: 0.2;
+			}
+		}
+
+	</style>
+</head>
+
+<body>
+	<script type='importmap'>
+		{
+			"imports": {
+				"preact": "./vendor/preact/preact.module.js",
+				"preact/jsx-runtime": "./vendor/preact/jsx-runtime/jsxRuntime.module.js",
+				"preact/hooks": "./vendor/preact/hooks/hooks.module.js",
+				"ethers": "./vendor/ethers/ethers.js",
+				"@preact/signals-core": "./vendor/@preact/signals-core/signals-core.module.js",
+				"@preact/signals": "./vendor/@preact/signals/signals.module.js",
+				"funtypes": "./vendor/funtypes/index.mjs",
+				"multiformats": "./vendor/multiformats/index.js"
+			}
+		}
+	</script>
+
+	<main></main>
+
+	<section class='splash-screen'>
+		<img class='w-10 h-10' src='./img/icon-lunaria.svg' />
+		<h1>Lunaria</h1>
+		<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='currentColor'>
+			<circle cx='4' cy='12' r='3' />
+			<circle cx='12' cy='12' r='3' />
+			<circle cx='20' cy='12' r='3' />
+		</svg>
+	</section>
+
+	<!-- a workaround for bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1803984 -->
+	<script async type='module'>import './js/index.js'</script>
+</body>
+
+</html>

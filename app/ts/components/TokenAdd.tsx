@@ -206,6 +206,7 @@ const QueryStatus = () => {
 			)
 		case 'resolved':
 			const token = serialize(ERC20Token, tokenQuery.value.value)
+			const addressMatched = token.address.toLowerCase() === address.value.toLowerCase()
 
 			return (
 				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1 gap-y-2'>
@@ -214,7 +215,7 @@ const QueryStatus = () => {
 						<div><span class='font-bold'>{ token.name }</span> <span class='text-white/50'>({ token.symbol })</span></div>
 						<pre class='px-3 py-2 border border-white/10 font-mono bg-white/10 text-white/80 text-sm'>{ token.address }</pre>
 					</div>
-					<AddressChecksumWarning show={ token.address !== address.value } />
+					<AddressChecksumWarning show={ !addressMatched } />
 				</div>
 			)
 	}
@@ -241,7 +242,7 @@ const TokenDataToFields = () => {
 
 	return (
 		<>
-			{ Object.keys(token).map(key => <input type='hidden' name={ key } value={ token[key as keyof typeof token] } />) }
+			{ Object.entries(token).map(([key, value]) => <input type='hidden' name={ key } value={ value } />)}
 			<button type='submit' class='px-4 py-3 border border-white/50 hover:bg-white/10 hover:border-white text-center outline-none flex gap-x-1 items-center justify-center'><PlusIcon />{ tokenExistsInCache.value ? '' : 'Save and ' }Use</button>
 		</>
 	)

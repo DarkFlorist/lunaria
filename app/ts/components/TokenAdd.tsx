@@ -182,6 +182,8 @@ const QueryAddressField = () => {
 const QueryStatus = () => {
 	const { address, tokenQuery } = useTokenQuery()
 
+	const noHexPrefix = (hexAddress: string) => hexAddress.replace(/^0x/, '')
+
 	switch (tokenQuery.value.state) {
 		case 'inactive':
 			return <></>
@@ -205,17 +207,24 @@ const QueryStatus = () => {
 				</div>
 			)
 		case 'resolved':
-			const token = serialize(ERC20Token, tokenQuery.value.value)
-			const addressMatched = token.address.toLowerCase() === address.value.toLowerCase()
+			// queried token will have included a checksum address
+			const fetchedToken = tokenQuery.value.value
+			const showChecksumWarning = useComputed(() => {
+				const userInputAddress = noHexPrefix(address.value)
+				// skip checksum warning if user input address is all lower or upper case
+				if (userInputAddress.toLowerCase() === userInputAddress) return false
+				if (userInputAddress.toUpperCase() === userInputAddress) return false
+				return fetchedToken.address !== address.value
+			})
 
 			return (
 				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1 gap-y-2'>
 					<div class='text-white/50 text-sm'>Found a matching address</div>
 					<div class='grid grid-cols-1 gap-y-1'>
-						<div><span class='font-bold'>{ token.name }</span> <span class='text-white/50'>({ token.symbol })</span></div>
-						<pre class='px-3 py-2 border border-white/10 font-mono bg-white/10 text-white/80 text-sm'>{ token.address }</pre>
+						<div><span class='font-bold'>{ fetchedToken.name }</span> <span class='text-white/50'>({ fetchedToken.symbol })</span></div>
+						<pre class='px-3 py-2 border border-white/10 font-mono bg-white/10 text-white/80 text-sm'>{ fetchedToken.address }</pre>
 					</div>
-					<AddressChecksumWarning show={ !addressMatched } />
+					<AddressChecksumWarning show = {showChecksumWarning.value} />
 				</div>
 			)
 	}

@@ -1,4 +1,4 @@
-import { getAddress, isHexString, parseUnits } from 'ethers'
+import { getAddress, isError, isHexString, parseUnits } from 'ethers'
 import * as funtypes from 'funtypes'
 
 export function createCacheParser<T>(funType: funtypes.Codec<T>) {
@@ -50,9 +50,14 @@ export function createUnitParser(decimals?: bigint): funtypes.ParsedValue<funtyp
 
 export const AddressParser: funtypes.ParsedValue<funtypes.String, string>['config'] = {
 	parse: value => {
-		if (!/^(0x)?[0-9a-fA-F]{40}$/.test(value)) return { success: false, message: `${value} is not a valid address.` }
-		const checksummedAddress = getAddress(value.toLowerCase())
-		return { success: true, value: checksummedAddress }
+		try {
+			const checksummedAddress = getAddress(value)
+			return { success: true, value: checksummedAddress }
+		} catch(error) {
+			let errorMessage =`${value} is not a valid address.`
+			if (isError(error, 'INVALID_ARGUMENT') && error.message.includes('bad address checksum')) { errorMessage = 'Invalid address checksum.' }
+			return { success: false, message: errorMessage }
+		}
 	},
 	serialize: funtypes.String.safeParse,
 }

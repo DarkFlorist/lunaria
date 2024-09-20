@@ -134,7 +134,7 @@ const AddTokenDialog = ({ children }: { children: ComponentChildren }) => {
 	useSignalEffect(setClickListenerForDialog)
 
 	return (
-		<dialog ref={ ref } class='w-full text-white backdrop:bg-black/80 backdrop:backdrop-blur-[2px] max-w-full max-h-full md:max-w-fit md:max-h-[calc(100vh-3rem)] md:max-w-fit bg-transparent' onSubmit={ handleDialogSubmit }>
+		<dialog ref={ ref } class='w-full text-white backdrop:bg-black/80 backdrop:backdrop-blur-[2px] max-w-full max-h-full md:max-h-[calc(100vh-3rem)] md:max-w-fit bg-transparent' onSubmit={ handleDialogSubmit }>
 			{ children }
 		</dialog>
 	)
@@ -162,7 +162,9 @@ const QueryAddressField = () => {
 
 		const parsedAddress = EthereumAddress.safeParse(inputField.value)
 		if (!parsedAddress.success) {
-			event.target.setCustomValidity('Requires a valid ERC20 contract address')
+			let errorMessage = 'Requires a valid ERC20 contract address'
+			if (parsedAddress.message === 'Invalid address checksum.') { errorMessage = parsedAddress.message }
+			event.target.setCustomValidity(errorMessage)
 			event.target.reportValidity()
 			return
 		}
@@ -180,9 +182,7 @@ const QueryAddressField = () => {
 }
 
 const QueryStatus = () => {
-	const { address, tokenQuery } = useTokenQuery()
-
-	const noHexPrefix = (hexAddress: string) => hexAddress.replace(/^0x/, '')
+	const { tokenQuery } = useTokenQuery()
 
 	switch (tokenQuery.value.state) {
 		case 'inactive':
@@ -209,13 +209,6 @@ const QueryStatus = () => {
 		case 'resolved':
 			// queried token will have included a checksum address
 			const fetchedToken = tokenQuery.value.value
-			const showChecksumWarning = useComputed(() => {
-				const userInputAddress = noHexPrefix(address.value)
-				// skip checksum warning if user input address is all lower or upper case
-				if (userInputAddress.toLowerCase() === userInputAddress) return false
-				if (userInputAddress.toUpperCase() === userInputAddress) return false
-				return fetchedToken.address !== address.value
-			})
 
 			return (
 				<div class='px-4 py-3 border border-dashed border-white/30 grid grid-cols-1 gap-y-2'>
@@ -224,20 +217,9 @@ const QueryStatus = () => {
 						<div><span class='font-bold'>{ fetchedToken.name }</span> <span class='text-white/50'>({ fetchedToken.symbol })</span></div>
 						<pre class='px-3 py-2 border border-white/10 font-mono bg-white/10 text-white/80 text-sm'>{ fetchedToken.address }</pre>
 					</div>
-					<AddressChecksumWarning show = {showChecksumWarning.value} />
 				</div>
 			)
 	}
-}
-
-const AddressChecksumWarning = ({ show }: { show?: boolean }) => {
-	if (!show) return <></>
-	return (
-		<>
-			<p class='text-amber-500 text-sm'>You entered an address that does not have the correct checksum and Lunaria tried to fetch the address without it.</p>
-			<label class='flex items-center gap-x-2 text-sm'><input type='checkbox' required /> I've verified the result is indeed the token contract I want to add.</label>
-		</>
-	)
 }
 
 const TokenDataToFields = () => {

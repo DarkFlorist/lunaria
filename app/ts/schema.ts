@@ -82,7 +82,7 @@ export const TransferSchema = funtypes.Object({
 export type Transfer = funtypes.Static<typeof TransferSchema>
 
 export const TransferRequestInput = funtypes.Object({
-	to: funtypes.String,
+	to: EthereumAddress,
 	amount: BigIntHex,
 	token: ERC20Token.Or(funtypes.Undefined),
 })

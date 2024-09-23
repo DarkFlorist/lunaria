@@ -6,7 +6,6 @@ import { useTransfer } from '../context/Transfer.js'
 import { humanReadableEthersError, isEthersError } from '../library/errors.js'
 import { areEqualStrings } from '../library/utilities.js'
 import { CopyButton } from './CopyButton.js'
-import { getAddress } from 'ethers'
 
 export const TransferResult = () => {
 	const { account } = useWallet()
@@ -19,16 +18,6 @@ export const TransferResult = () => {
 		return account.value.value === input.value.to
 	})
 
-	const recipientChecksumValid = useComputed(() => {
-		const inputAddress = input.value.to
-
-		if (inputAddress.match(/^(0x)?[0-9a-fA-F]{40}$/)) {
-			if (getAddress(inputAddress.toLowerCase()) !== inputAddress && inputAddress.toLowerCase() !== inputAddress) return false
-		}
-
-		return true
-	})
-
 	const recipientIsAKnownToken = useComputed(() => tokensCache.value.data.some(token => areEqualStrings(token.address, input.value.to)))
 
 	switch (transaction.value.state) {
@@ -38,9 +27,6 @@ export const TransferResult = () => {
 			}
 			if (recipientIsAKnownToken.value) {
 				return <ConfirmField title='Warning: Recipient is a token address' description='The recipient address provided is a token contract address and will probably result in a loss of funds.' label='I understand that this will probably result in a loss of funds.' />
-			}
-			if (!recipientChecksumValid.value) {
-				return <ConfirmField title='Warning: Invalid Address Checksum' description='The recipient address does not pass the checksum validation. Please check the address entered has the correct letter-casing.' label='I understand the risk and want to continue anyway.' />
 			}
 			return <></>
 		case 'rejected':

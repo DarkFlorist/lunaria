@@ -1,0 +1,1 @@
+{"version":3,"file":"TextSkeleton.d.ts","sourceRoot":"","sources":["../../ts/components/TextSkeleton.tsx"],"names":[],"mappings":"AAEA,KAAK,iBAAiB,GAAG;IACxB,MAAM,CAAC,EAAE,MAAM,CAAA;IACf,QAAQ,CAAC,EAAE,IAAI,GAAG,IAAI,GAAG,IAAI,CAAA;CAC7B,CAAA;AAED,eAAO,MAAM,YAAY,yBAAsC,iBAAiB,iCAW/E,CAAA"}

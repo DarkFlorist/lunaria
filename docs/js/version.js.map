@@ -1,0 +1,1 @@
+{"version":3,"file":"version.js","sourceRoot":"","sources":["../ts/version.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,MAAM,YAAY,GAAG,0CAA0C,CAAA;AACtE,MAAM,CAAC,MAAM,OAAO,GAAG,MAAM,CAAA","sourcesContent":["export const gitCommitSha = \"257296313e78165c3a91fb6c7cb630ef73dfed6d\"\nexport const version = \"v102\"\n"]}
